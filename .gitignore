@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+# C4 diagrams
+./docs/**/*.svg
+./docs/**/*.png

@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+
+AddRelTag("invisible", $textColor="transparent", $lineColor="transparent", $lineStyle = DashedLine())
+
+title C4 System Context Diagram for an Asyncronous Communication System
+
+'----------------------------------------------------------------
+'Actors
+'----------------------------------------------------------------
+Person(sender, "Sender", "A user that sends messages and receives responses")
+Person(receiver, "Receiver", "A user that receives messages and send responses")
+
+'----------------------------------------------------------------
+'Components
+'----------------------------------------------------------------
+System(comms_sys, "Communication System", "Will forward data between the sender and the receiver")
+
+'----------------------------------------------------------------
+'Relations
+'----------------------------------------------------------------
+Rel_R(sender, comms_sys, "Sends messages and receives responses using", "")
+Rel_L(receiver, comms_sys, "Receives messages and sends responses using", "")
+
+SHOW_LEGEND()
+
+@enduml
