@@ -1,0 +1,32 @@
+@startuml
+!include <C4/C4_Component>
+
+AddRelTag("invisible", $textColor="transparent", $lineColor="transparent", $lineStyle = DashedLine())
+
+title C4 Container Diagram for an Asyncronous Communications System
+
+'----------------------------------------------------------------
+'Actors
+'----------------------------------------------------------------
+Person(sender, "Sender", "A user that sends messages and receives responses")
+Person(receiver, "Receiver", "A user that receives messages and send responses")
+
+'----------------------------------------------------------------
+'Components
+'----------------------------------------------------------------
+System_Boundary(comms_sys, "Communcations System") {
+    Container(comms_snd, "Communications Sender", "container:c++", "Sends messages and receives responses. Will use a message protocol i.e. slip encapsulado en un prococolo de comunicaciones i.e: socket-tcp")
+    Container(comms_rcv, "Communications Receiver", "container:c++", "Receives messages and sends responses. Will use a message protocol i.e. slip encapsulado en un prococolo de comunicaciones i.e: socket-tcp")
+}
+
+'----------------------------------------------------------------
+'Relations
+'----------------------------------------------------------------
+Rel_R(sender, comms_snd, "Sends messages and receives responses using", "")
+Rel_R(comms_snd, comms_rcv, "Sends message to", "tcp")
+Rel_L(comms_rcv, comms_snd, "Sends response to", "tcp")
+Rel_L(receiver, comms_rcv, "Receives messages and sends responses using", "")
+
+SHOW_LEGEND()
+
+@enduml
