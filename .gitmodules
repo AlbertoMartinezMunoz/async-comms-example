@@ -1,3 +1,6 @@
 [submodule "vendor/gtest"]
 	path = vendor/gtest
 	url = https://github.com/google/googletest.git
+[submodule "vendor/fff"]
+	path = vendor/fff
+	url = https://github.com/meekrosoft/fff.git
