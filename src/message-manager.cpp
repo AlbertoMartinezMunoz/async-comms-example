@@ -13,13 +13,13 @@ class message_manager {
 
         int send_fast_command(){
             printf("command_manager: send_fast_command\r\n");
-            this->application_layer->send_message((uint8_t*)"fast_command");
+            this->application_layer->send_message((uint8_t*)"fast_command", sizeof(this->fast_command));
             return 0;
         }
 
         int send_slow_command(){
             printf("command_manager: send_slow_command\r\n");
-            this->application_layer->send_message((uint8_t*)"slow_command");
+            this->application_layer->send_message((uint8_t*)"slow_command", sizeof(this->slow_command));
             return 0;
         }
 
@@ -31,6 +31,9 @@ class message_manager {
     private:
         communications_layer *application_layer;
         communications_layer *transport_layer;
+
+        uint8_t fast_command[13] = "fast_command";
+        uint8_t slow_command[13] = "slow_command";
 };
 
 int main() {

@@ -1,6 +1,7 @@
 #ifndef IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYERS_INCLUDE_COMMUNICATIONS_LAYERS_COMMUNICATION_LAYER_H_
 #define IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYERS_INCLUDE_COMMUNICATIONS_LAYERS_COMMUNICATION_LAYER_H_
 #include <cstdint>
+#include <cstddef>
 #include <cstdio>
 
 /**
@@ -10,7 +11,7 @@
 class communications_layer_interface {
     public:
         virtual communications_layer_interface *set_next_layer(communications_layer_interface *handler) = 0;
-        virtual int send_message(uint8_t *message) = 0;
+        virtual int send_message(uint8_t *message, size_t size) = 0;
         virtual ~communications_layer_interface(){}
 };
 
@@ -32,10 +33,9 @@ class communications_layer : public communications_layer_interface {
             return layer;
         }
 
-        int send_message(uint8_t *message) override {
-            printf("communications_layer: send_message\r\n");
+        int send_message(uint8_t *message, size_t size) override {
             if (this->next_layer_) {
-                return this->next_layer_->send_message(message);
+                return this->next_layer_->send_message(message, size);
             }
 
             return {};
