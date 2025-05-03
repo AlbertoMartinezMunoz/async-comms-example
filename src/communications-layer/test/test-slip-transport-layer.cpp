@@ -36,7 +36,7 @@ class mock_application_layer : public communications_layer {
         int send_message_return = 0;
 };
 
-class test_slip_transport_layer: public ::testing::Test {
+class TestSlipTransportLayer: public ::testing::Test {
 public:
     slip_transport_layer *layer = nullptr;
     mock_application_layer *mock_layer = nullptr;
@@ -54,7 +54,7 @@ public:
 	}
 };
 
-TEST_F(test_slip_transport_layer, when_sending_a_datagram_if_ok_it_should_add_slip_end) {
+TEST_F(TestSlipTransportLayer, WhenSendingADatagramIfOkItShouldAddSlipEnd) {
 	uint8_t message[] = {0x01, 0x05, 0x06, 0x10};
     uint8_t expected_message[] = {0x01, 0x05, 0x06, 0x10, slip_transport_layer::END};
 
@@ -62,7 +62,7 @@ TEST_F(test_slip_transport_layer, when_sending_a_datagram_if_ok_it_should_add_sl
     ASSERT_THAT(expected_message, ElementsAreArray(mock_layer->message,sizeof(expected_message)));
 }
 
-TEST_F(test_slip_transport_layer, when_sending_two_datagram_if_ok_it_should_add_slip_end) {
+TEST_F(TestSlipTransportLayer, WhenSendingTwoDatagramIfOkItShouldAddSlipEnd) {
 	uint8_t first_message[] = {0x01, 0x05, 0x06, 0x10};
     uint8_t second_message[] = {0x01, 0x05, 0x06, 0x10, 0x50};
     uint8_t expected_first_message[] = {0x01, 0x05, 0x06, 0x10, slip_transport_layer::END};
@@ -74,7 +74,7 @@ TEST_F(test_slip_transport_layer, when_sending_two_datagram_if_ok_it_should_add_
     ASSERT_THAT(expected_second_message, ElementsAreArray(mock_layer->message,sizeof(expected_second_message)));
 }
 
-TEST_F(test_slip_transport_layer, when_sending_a_datagram_if_0xc0_present_it_should_change_to_0xdb_0xdc) {
+TEST_F(TestSlipTransportLayer, WhenSendingADatagramIf0xc0PresentItShouldChangeTo0xdb0xdc) {
 	uint8_t message[] = {0x01, 0x05, slip_transport_layer::END, 0x10};
     uint8_t expected_message[] = {0x01, 0x05, slip_transport_layer::ESC, slip_transport_layer::ESC_END, 0x10, slip_transport_layer::END};
 
@@ -82,7 +82,7 @@ TEST_F(test_slip_transport_layer, when_sending_a_datagram_if_0xc0_present_it_sho
     ASSERT_THAT(expected_message, ElementsAreArray(mock_layer->message,sizeof(expected_message)));
 }
 
-TEST_F(test_slip_transport_layer, when_sending_a_datagram_if_0xdb_present_it_should_change_to_0xdb_0xdd) {
+TEST_F(TestSlipTransportLayer, WhenSendingADatagramIf0xdbPresentItShouldChangeTo0xdb0xdd) {
 	uint8_t message[] = {0x01, 0x05, slip_transport_layer::ESC, 0x10};
     uint8_t expected_message[] = {0x01, 0x05, slip_transport_layer::ESC, slip_transport_layer::ESC_ESC, 0x10, slip_transport_layer::END};
 
@@ -90,7 +90,7 @@ TEST_F(test_slip_transport_layer, when_sending_a_datagram_if_0xdb_present_it_sho
     ASSERT_THAT(expected_message, ElementsAreArray(mock_layer->message,sizeof(expected_message)));
 }
 
-TEST_F(test_slip_transport_layer, when_sending_a_datagram_if_next_return_error_it_should_return_error) {
+TEST_F(TestSlipTransportLayer, WhenSendingADatagramIfNextReturnErrorItShouldReturnError) {
 	uint8_t message[] = {0x01, 0x05, slip_transport_layer::ESC, 0x10};
     uint8_t expected_message[] = {0x01, 0x05, slip_transport_layer::ESC, slip_transport_layer::ESC_ESC, 0x10, slip_transport_layer::END};
     int expected_return = -1;
