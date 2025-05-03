@@ -7,7 +7,7 @@ class socket_application_layer : public communications_layer {
     public:
         socket_application_layer(){}
 
-        int send_message(uint8_t *message) override;
+        int send_message(uint8_t *message, size_t size) override;
 };
 
 #endif  // IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYER_INCLUDE_COMMUNICATIONS_LAYER_SOCKET_APPLICATION_LAYER_H_

@@ -5,9 +5,19 @@
 
 class slip_transport_layer : public communications_layer {
     public:
+        static const uint8_t END;
+        static const uint8_t ESC;
+        static const uint8_t ESC_END;
+        static const uint8_t ESC_ESC;
+
         slip_transport_layer(){}
 
-        int send_message(uint8_t *message) override;
+        ~slip_transport_layer();
+
+        int send_message(uint8_t *message, size_t size) override;
+
+    private:
+        uint8_t *message = nullptr;
 };
 
 #endif  // IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYER_INCLUDE_COMMUNICATIONS_LAYER_SLIP_TRANSPORT_LAYER_H_
