@@ -40,6 +40,7 @@ if(UTEST)
 	include(CTest)
 	enable_testing()
 	add_subdirectory("${PROJECT_SOURCE_DIR}/vendor/gtest")
+	add_subdirectory("${PROJECT_SOURCE_DIR}/vendor/fff")
 endif()
 
 add_subdirectory("${PROJECT_SOURCE_DIR}/src")
