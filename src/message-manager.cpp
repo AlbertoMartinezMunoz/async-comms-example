@@ -1,8 +1,8 @@
 #include <stdio.h>
 
 #include <communications-layer/communications-layer.hpp>
-#include <communications-layer/socket-application-layer.hpp>
-#include <communications-layer/slip-transport-layer.hpp>
+#include <communications-layer/socket-transport-layer.hpp>
+#include <communications-layer/slip-application-layer.hpp>
 
 class message_manager {
     public:
@@ -39,8 +39,8 @@ class message_manager {
 int main() {
     printf("-------------------- Message Manager v2025.05.01 --------------------\r\n");
 
-    slip_transport_layer *application_layer = new slip_transport_layer();
-    socket_application_layer *transport_layer = new socket_application_layer();
+    slip_application_layer *application_layer = new slip_application_layer();
+    socket_transport_layer *transport_layer = new socket_transport_layer();
     message_manager *msg_manager = new message_manager(application_layer, transport_layer);
 
     msg_manager->send_fast_command();

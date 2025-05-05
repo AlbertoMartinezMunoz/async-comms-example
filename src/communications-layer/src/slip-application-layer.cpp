@@ -1,14 +1,14 @@
-#include <communications-layer/slip-transport-layer.hpp>
+#include <communications-layer/slip-application-layer.hpp>
 
 #include <cstdlib>
 #include <cstring>
 
-const uint8_t slip_transport_layer::END = 0xC0;
-const uint8_t slip_transport_layer::ESC = 0xDB;
-const uint8_t slip_transport_layer::ESC_END = 0xDC;
-const uint8_t slip_transport_layer::ESC_ESC = 0xDD;
+const uint8_t slip_application_layer::END = 0xC0;
+const uint8_t slip_application_layer::ESC = 0xDB;
+const uint8_t slip_application_layer::ESC_END = 0xDC;
+const uint8_t slip_application_layer::ESC_ESC = 0xDD;
 
-int slip_transport_layer::send_message(uint8_t *message, size_t size) {
+int slip_application_layer::send_message(uint8_t *message, size_t size) {
     size_t slip_size = size + 1;
     for(size_t i = 0; i < size; ++i)
     {
@@ -41,7 +41,7 @@ int slip_transport_layer::send_message(uint8_t *message, size_t size) {
     return communications_layer::send_message(this->message, slip_size);
 }
 
-slip_transport_layer::~slip_transport_layer(){
+slip_application_layer::~slip_application_layer(){
     free(this->message);
     this->message = nullptr;
 }
