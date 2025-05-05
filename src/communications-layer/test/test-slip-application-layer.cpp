@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <communications-layer/slip-transport-layer.hpp>
+#include <communications-layer/slip-application-layer.hpp>
 #include <cstdlib>
 #include <cstring>
 #include <vector>
@@ -69,21 +69,21 @@ public:
 };
 
 uint8_t simple_msg[4] = {0x01, 0x05, 0x06, 0x10};
-uint8_t expected_simple_msg[5] = {0x01, 0x05, 0x06, 0x10, slip_transport_layer::END};
-uint8_t escape_end_msg[4] = {0x01, 0x05, slip_transport_layer::END, 0x10};
-uint8_t expected_escape_end_msg[6] = {0x01, 0x05, slip_transport_layer::ESC, slip_transport_layer::ESC_END, 0x10, slip_transport_layer::END};
-uint8_t escape_esc_msg[4] = {0x01, 0x05, slip_transport_layer::ESC, 0x10};
-uint8_t expected_escape_esc_msg[6] = {0x01, 0x05, slip_transport_layer::ESC, slip_transport_layer::ESC_ESC, 0x10, slip_transport_layer::END};
+uint8_t expected_simple_msg[5] = {0x01, 0x05, 0x06, 0x10, slip_application_layer::END};
+uint8_t escape_end_msg[4] = {0x01, 0x05, slip_application_layer::END, 0x10};
+uint8_t expected_escape_end_msg[6] = {0x01, 0x05, slip_application_layer::ESC, slip_application_layer::ESC_END, 0x10, slip_application_layer::END};
+uint8_t escape_esc_msg[4] = {0x01, 0x05, slip_application_layer::ESC, 0x10};
+uint8_t expected_escape_esc_msg[6] = {0x01, 0x05, slip_application_layer::ESC, slip_application_layer::ESC_ESC, 0x10, slip_application_layer::END};
 
 class TestSlipTransportLayer : public testing::TestWithParam<TestSlipTransportLayerParams>
 {
 public:
-    slip_transport_layer *layer = nullptr;
+    slip_application_layer *layer = nullptr;
     mock_application_layer *mock_layer = nullptr;
 
     virtual void SetUp()
     {
-        layer = new slip_transport_layer();
+        layer = new slip_application_layer();
         mock_layer = new mock_application_layer();
         mock_layer->set_send_message_return(0);
         layer->set_next_layer(mock_layer);
@@ -123,8 +123,8 @@ TEST_F(TestSlipTransportLayer, WhenSendingTwoDatagramIfOkItShouldAddSlipEnd)
 {
     uint8_t first_message[] = {0x01, 0x05, 0x06, 0x10};
     uint8_t second_message[] = {0x01, 0x05, 0x06, 0x11, 0x50};
-    uint8_t expected_first_message[] = {0x01, 0x05, 0x06, 0x10, slip_transport_layer::END};
-    uint8_t expected_second_message[] = {0x01, 0x05, 0x06, 0x11, 0x50, slip_transport_layer::END};
+    uint8_t expected_first_message[] = {0x01, 0x05, 0x06, 0x10, slip_application_layer::END};
+    uint8_t expected_second_message[] = {0x01, 0x05, 0x06, 0x11, 0x50, slip_application_layer::END};
 
     ASSERT_EQ(0, layer->send_message(first_message, sizeof(first_message)));
     ASSERT_THAT(expected_first_message, ElementsAreArray(mock_layer->message, sizeof(expected_first_message)));

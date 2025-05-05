@@ -2,8 +2,8 @@ project(communications-layer CXX)
 
 set(SOURCES
     ${PROJECT_SOURCE_DIR}/include/communications-layer/communications-layer.hpp
-    ${PROJECT_SOURCE_DIR}/src/slip-transport-layer.cpp
-    ${PROJECT_SOURCE_DIR}/src/socket-application-layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/slip-application-layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/socket-transport-layer.cpp
 )
 
 add_library(communications-layer-lib ${SOURCES})
