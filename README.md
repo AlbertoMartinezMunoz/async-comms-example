@@ -23,6 +23,20 @@ Also if we are using C++20 in our project, we have to ensure that C++20 is used 
 set(CMAKE_CXX_STANDARD 20)
 ```
 
+### Fake Function Framework (FFF)
+
+Fake Function Framework can be added to your git repo as a git submodule.
+
+```console
+$ git submodule add https://github.com/meekrosoft/fff.git ./vendor/fff
+```
+
+and then adding it to the CMakeList
+
+```cmake
+add_subdirectory("${PROJECT_SOURCE_DIR}/vendor/fff")
+```
+
 ### Valgrind
 
 To install valgrind we can use hte package manager
