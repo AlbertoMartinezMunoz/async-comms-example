@@ -5,6 +5,10 @@
 socket_transport_layer::socket_transport_layer(int socket)
     : data_socket(socket) {}
 
+void socket_transport_layer::close_connection() {
+    close(data_socket);
+}
+
 int socket_transport_layer::send(const void *buf, size_t size)
 {
     int ret = write(data_socket, buf, size);

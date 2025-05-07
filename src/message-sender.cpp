@@ -83,9 +83,8 @@ int main(int argc, char *argv[])
     printf("Result = %s\n", buffer);
 
     /* Close socket. */
-
+    socket_layer->close_connection();
     delete socket_layer;
-    close(data_socket);
 
     exit(EXIT_SUCCESS);
 }
