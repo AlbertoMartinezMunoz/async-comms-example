@@ -9,6 +9,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 #include "message-connection.h"
+#include <socket-comms/socket-comms.hpp>
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 {
@@ -19,6 +20,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     int data_socket;
     int result;
     char buffer[BUFFER_SIZE];
+    socket_transport_layer *socket_layer;
 
     /* Create local socket. */
 
@@ -28,6 +30,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
         perror("socket");
         exit(EXIT_FAILURE);
     }
+
+    socket_layer = new socket_transport_layer();
 
     /*
      * For portability clear the whole structure, since some
@@ -115,10 +119,9 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
         /* Send result. */
 
         sprintf(buffer, "%d", result);
-        ret = write(data_socket, buffer, sizeof(buffer));
+        ret = socket_layer->send(data_socket, buffer, sizeof(buffer));
         if (ret == -1)
         {
-            perror("write");
             exit(EXIT_FAILURE);
         }
 
@@ -134,6 +137,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
         }
     }
 
+    delete socket_layer;
     close(connection_socket);
 
     /* Unlink the socket. */
