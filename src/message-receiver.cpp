@@ -31,8 +31,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    socket_layer = new socket_transport_layer();
-
     /*
      * For portability clear the whole structure, since some
      * implementations have additional (nonstandard) fields in
@@ -81,13 +79,15 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
             exit(EXIT_FAILURE);
         }
 
+        socket_layer = new socket_transport_layer(data_socket);
+
         result = 0;
         for (;;)
         {
 
             /* Wait for next data packet. */
 
-            ret = socket_layer->receive(data_socket, buffer, sizeof(buffer));
+            ret = socket_layer->receive(buffer, sizeof(buffer));
             if (ret == -1)
             {
                 exit(EXIT_FAILURE);
@@ -118,14 +118,14 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
         /* Send result. */
 
         sprintf(buffer, "%d", result);
-        ret = socket_layer->send(data_socket, buffer, sizeof(buffer));
+        ret = socket_layer->send(buffer, sizeof(buffer));
         if (ret == -1)
         {
             exit(EXIT_FAILURE);
         }
 
         /* Close socket. */
-
+        delete socket_layer;
         close(data_socket);
 
         /* Quit on DOWN command. */
@@ -136,7 +136,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
         }
     }
 
-    delete socket_layer;
     close(connection_socket);
 
     /* Unlink the socket. */

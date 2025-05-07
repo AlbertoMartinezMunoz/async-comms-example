@@ -6,13 +6,15 @@
 class socket_transport_layer
 {
 public:
-    socket_transport_layer() {};
+    socket_transport_layer(int socket);
 
     ~socket_transport_layer() {};
 
-    int send(int socket, const void *buf, size_t size);
+    int send(const void *buf, size_t size);
 
-    int receive(int socket, void *buf, size_t size);
+    int receive(void *buf, size_t size);
+private:
+    int data_socket;
 };
 
 #endif // IOT_MICRO_FIRMWARE_SRC_SOCKET_COMMS_INCLUDE_SOCKET_COMMS_SOCKET_COMMS_H_

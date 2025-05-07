@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    socket_layer = new socket_transport_layer();
+    socket_layer = new socket_transport_layer(data_socket);
 
     /*
      * For portability clear the whole structure, since some
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
     for (int i = 1; i < argc; ++i)
     {
-        ret = socket_layer->send(data_socket, argv[i], strlen(argv[i]) + 1);
+        ret = socket_layer->send(argv[i], strlen(argv[i]) + 1);
         if (ret == -1)
         {
             break;
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     /* Request result. */
 
     strcpy(buffer, "END");
-    ret = socket_layer->send(data_socket, buffer, strlen(buffer) + 1);
+    ret = socket_layer->send(buffer, strlen(buffer) + 1);
     if (ret == -1)
     {
         exit(EXIT_FAILURE);
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 
     /* Receive result. */
 
-    ret = socket_layer->receive(data_socket, buffer, sizeof(buffer));
+    ret = socket_layer->receive(buffer, sizeof(buffer));
     if (ret == -1)
     {
         exit(EXIT_FAILURE);

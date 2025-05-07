@@ -2,9 +2,12 @@
 #include <unistd.h>
 #include <stdio.h>
 
-int socket_transport_layer::send(int socket, const void *buf, size_t size)
+socket_transport_layer::socket_transport_layer(int socket)
+    : data_socket(socket) {}
+
+int socket_transport_layer::send(const void *buf, size_t size)
 {
-    int ret = write(socket, buf, size);
+    int ret = write(data_socket, buf, size);
     if (ret == -1)
     {
         perror("write");
@@ -13,9 +16,9 @@ int socket_transport_layer::send(int socket, const void *buf, size_t size)
     return 0;
 }
 
-int socket_transport_layer::receive(int socket, void *buf, size_t size)
+int socket_transport_layer::receive(void *buf, size_t size)
 {
-    int ret = read(socket, buf, size);
+    int ret = read(data_socket, buf, size);
     if (ret == -1)
     {
         perror("read");
