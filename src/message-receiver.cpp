@@ -87,10 +87,9 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 
             /* Wait for next data packet. */
 
-            ret = read(data_socket, buffer, sizeof(buffer));
+            ret = socket_layer->receive(data_socket, buffer, sizeof(buffer));
             if (ret == -1)
             {
-                perror("read");
                 exit(EXIT_FAILURE);
             }
 

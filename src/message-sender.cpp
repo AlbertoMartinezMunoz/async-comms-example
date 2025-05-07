@@ -70,10 +70,9 @@ int main(int argc, char *argv[])
 
     /* Receive result. */
 
-    ret = read(data_socket, buffer, sizeof(buffer));
+    ret = socket_layer->receive(data_socket, buffer, sizeof(buffer));
     if (ret == -1)
     {
-        perror("read");
         exit(EXIT_FAILURE);
     }
 
