@@ -10,41 +10,16 @@
 
 int main(int argc, char *argv[])
 {
-    struct sockaddr_un addr;
     int ret;
-    int data_socket;
+    int data_socket = 0;
     char buffer[BUFFER_SIZE];
     socket_transport_layer *socket_layer;
 
-    /* Create local socket. */
-
-    data_socket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
-    if (data_socket == -1)
-    {
-        perror("socket");
-        exit(EXIT_FAILURE);
-    }
-
     socket_layer = new socket_transport_layer(data_socket);
 
-    /*
-     * For portability clear the whole structure, since some
-     * implementations have additional (nonstandard) fields in
-     * the structure.
-     */
-
-    memset(&addr, 0, sizeof(addr));
-
-    /* Connect socket to socket address. */
-
-    addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, SOCKET_NAME, sizeof(addr.sun_path) - 1);
-
-    ret = connect(data_socket, (const struct sockaddr *)&addr,
-                  sizeof(addr));
+    ret = socket_layer->connect_remote(SOCKET_NAME);
     if (ret == -1)
     {
-        fprintf(stderr, "The server is down.\n");
         exit(EXIT_FAILURE);
     }
 
