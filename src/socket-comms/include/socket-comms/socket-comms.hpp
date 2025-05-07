@@ -13,6 +13,8 @@ public:
     int send(const void *buf, size_t size);
 
     int receive(void *buf, size_t size);
+
+    void close_connection();
 private:
     int data_socket;
 };
