@@ -4,3 +4,6 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/communications-layer")
 
 add_executable(message-manager message-manager.cpp)
 target_link_libraries(message-manager communications-layer-lib)
+
+add_executable(message-sender message-sender.cpp)
+add_executable(message-receiver message-receiver.cpp)
