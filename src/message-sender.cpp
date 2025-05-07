@@ -6,6 +6,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 #include "message-connection.h"
+#include <socket-comms/socket-comms.hpp>
 
 int main(int argc, char *argv[])
 {
@@ -13,6 +14,7 @@ int main(int argc, char *argv[])
     int ret;
     int data_socket;
     char buffer[BUFFER_SIZE];
+    socket_transport_layer *socket_layer;
 
     /* Create local socket. */
 
@@ -22,6 +24,8 @@ int main(int argc, char *argv[])
         perror("socket");
         exit(EXIT_FAILURE);
     }
+
+    socket_layer = new socket_transport_layer();
 
     /*
      * For portability clear the whole structure, since some
@@ -48,10 +52,9 @@ int main(int argc, char *argv[])
 
     for (int i = 1; i < argc; ++i)
     {
-        ret = write(data_socket, argv[i], strlen(argv[i]) + 1);
+        ret = socket_layer->send(data_socket, argv[i], strlen(argv[i]) + 1);
         if (ret == -1)
         {
-            perror("write");
             break;
         }
     }
@@ -59,10 +62,9 @@ int main(int argc, char *argv[])
     /* Request result. */
 
     strcpy(buffer, "END");
-    ret = write(data_socket, buffer, strlen(buffer) + 1);
+    ret = socket_layer->send(data_socket, buffer, strlen(buffer) + 1);
     if (ret == -1)
     {
-        perror("write");
         exit(EXIT_FAILURE);
     }
 
@@ -83,6 +85,7 @@ int main(int argc, char *argv[])
 
     /* Close socket. */
 
+    delete socket_layer;
     close(data_socket);
 
     exit(EXIT_SUCCESS);
