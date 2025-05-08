@@ -14,7 +14,7 @@ public:
 
     mock_application_layer() {}
 
-    int send_message(uint8_t *message, size_t size) override
+    int send_message(const void *message, size_t size) override
     {
         this->message = (uint8_t *)realloc(this->message, size);
         if (this->message == nullptr)
