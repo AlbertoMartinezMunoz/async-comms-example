@@ -33,6 +33,17 @@ int socket_transport_layer::connect_remote(const char *server)
     return 0;
 }
 
+int socket_transport_layer::listen_connections(int connection_socket, __attribute__((unused)) const char *server)
+{
+    data_socket = accept(connection_socket, NULL, NULL);
+    if (data_socket == -1)
+    {
+        perror("accept");
+        return -1;
+    }
+    return 0;
+}
+
 void socket_transport_layer::close_connection()
 {
     close(data_socket);

@@ -17,7 +17,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     int down_flag = 0;
     int ret;
     int connection_socket;
-    int data_socket;
     int result;
     char buffer[BUFFER_SIZE];
     socket_transport_layer *socket_layer;
@@ -69,17 +68,11 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 
     for (;;)
     {
-
-        /* Wait for incoming connection. */
-
-        data_socket = accept(connection_socket, NULL, NULL);
-        if (data_socket == -1)
+        socket_layer = new socket_transport_layer(0);
+        if (socket_layer->listen_connections(connection_socket, SOCKET_NAME) == -1)
         {
-            perror("accept");
             exit(EXIT_FAILURE);
         }
-
-        socket_layer = new socket_transport_layer(data_socket);
 
         result = 0;
         for (;;)
@@ -125,8 +118,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
         }
 
         /* Close socket. */
+        socket_layer->close_connection();
         delete socket_layer;
-        close(data_socket);
 
         /* Quit on DOWN command. */
 
