@@ -14,10 +14,8 @@
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 {
     struct sockaddr_un name;
-    int down_flag = 0;
     int ret;
     int connection_socket;
-    int result;
     char buffer[BUFFER_SIZE];
     socket_transport_layer *socket_layer;
 
@@ -65,69 +63,33 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     }
 
     /* This is the main loop for handling connections. */
-
-    for (;;)
+    socket_layer = new socket_transport_layer(0);
+    if (socket_layer->listen_connections(connection_socket, SOCKET_NAME) == -1)
     {
-        socket_layer = new socket_transport_layer(0);
-        if (socket_layer->listen_connections(connection_socket, SOCKET_NAME) == -1)
-        {
-            exit(EXIT_FAILURE);
-        }
-
-        result = 0;
-        for (;;)
-        {
-
-            /* Wait for next data packet. */
-
-            ret = socket_layer->receive(buffer, sizeof(buffer));
-            if (ret == -1)
-            {
-                exit(EXIT_FAILURE);
-            }
-
-            /* Ensure buffer is 0-terminated. */
-
-            buffer[sizeof(buffer) - 1] = 0;
-
-            /* Handle commands. */
-
-            if (!strncmp(buffer, "DOWN", sizeof(buffer)))
-            {
-                down_flag = 1;
-                break;
-            }
-
-            if (!strncmp(buffer, "END", sizeof(buffer)))
-            {
-                break;
-            }
-
-            /* Add received summand. */
-
-            result += atoi(buffer);
-        }
-
-        /* Send result. */
-
-        sprintf(buffer, "%d", result);
-        ret = socket_layer->send(buffer, sizeof(buffer));
-        if (ret == -1)
-        {
-            exit(EXIT_FAILURE);
-        }
-
-        /* Close socket. */
-        socket_layer->close_connection();
-        delete socket_layer;
-
-        /* Quit on DOWN command. */
-
-        if (down_flag)
-        {
-            break;
-        }
+        exit(EXIT_FAILURE);
     }
+
+    /* Wait for next data packet. */
+    ret = socket_layer->receive(buffer, sizeof(buffer));
+    if (ret == -1)
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    buffer[sizeof(buffer) - 1] = 0;
+    printf("Receiver: %s", buffer);
+
+    sprintf(buffer, "ACK");
+    ret = socket_layer->send(buffer, sizeof(buffer));
+    if (ret == -1)
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    sleep(1);
+    /* Close socket. */
+    socket_layer->close_connection();
+    delete socket_layer;
 
     close(connection_socket);
 
