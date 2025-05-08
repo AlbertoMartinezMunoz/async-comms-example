@@ -8,38 +8,44 @@
  * The communications_layer_interface interface declares a method for building the chain of handlers.
  * It also declares a method for executing a request.
  */
-class communications_layer_interface {
-    public:
-        virtual communications_layer_interface *set_next_layer(communications_layer_interface *handler) = 0;
-        virtual int send_message(uint8_t *message, size_t size) = 0;
-        virtual ~communications_layer_interface(){}
+class communications_layer_interface
+{
+public:
+    virtual communications_layer_interface *set_next_layer(communications_layer_interface *handler) = 0;
+    virtual int send_message(const void *message, size_t size) = 0;
+    virtual ~communications_layer_interface() {}
 };
 
 /**
-* The default chaining behavior can be implemented inside a base handler class.
-*/
-class communications_layer : public communications_layer_interface {
+ * The default chaining behavior can be implemented inside a base handler class.
+ */
+class communications_layer : public communications_layer_interface
+{
     /**
      * @var communications_layer_interface
      */
-    private:
-        communications_layer_interface *next_layer_;
+private:
+    communications_layer_interface *next_layer_;
 
-    public:
-        communications_layer() : next_layer_(nullptr) {
-        }
-        communications_layer_interface *set_next_layer(communications_layer_interface *layer) override {
-            this->next_layer_ = layer;
-            return layer;
+public:
+    communications_layer() : next_layer_(nullptr)
+    {
+    }
+    communications_layer_interface *set_next_layer(communications_layer_interface *layer) override
+    {
+        this->next_layer_ = layer;
+        return layer;
+    }
+
+    int send_message(const void *message, size_t size) override
+    {
+        if (this->next_layer_)
+        {
+            return this->next_layer_->send_message(message, size);
         }
 
-        int send_message(uint8_t *message, size_t size) override {
-            if (this->next_layer_) {
-                return this->next_layer_->send_message(message, size);
-            }
-
-            return {};
-        }
+        return {};
+    }
 };
 
-#endif  // IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYERS_INCLUDE_COMMUNICATIONS_LAYERS_COMMUNICATION_LAYER_H_
+#endif // IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYERS_INCLUDE_COMMUNICATIONS_LAYERS_COMMUNICATION_LAYER_H_

@@ -12,7 +12,7 @@ public:
 
     int disconnect_socket();
 
-    int send_message(uint8_t *message, size_t size) override;
+    int send_message(const void *message, size_t size) override;
 
 private:
     int sending_socket;
