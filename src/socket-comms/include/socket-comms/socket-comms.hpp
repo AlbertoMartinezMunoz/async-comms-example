@@ -12,6 +12,8 @@ public:
 
     int connect_remote(const char *server);
 
+    int listen_connections(int connection_socket, const char *server);
+
     void close_connection();
 
     int send(const void *buf, size_t size);
