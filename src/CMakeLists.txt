@@ -1,6 +1,7 @@
 project(message-manager CXX)
 
 add_subdirectory("${PROJECT_SOURCE_DIR}/communications-layer")
+add_subdirectory("${PROJECT_SOURCE_DIR}/command-manager")
 add_subdirectory("${PROJECT_SOURCE_DIR}/socket-comms")
 
 add_executable(message-manager message-manager.cpp)

@@ -14,6 +14,12 @@ public:
 
     int send_message(const void *message, size_t size) override;
 
+    int send_command(__attribute__((unused)) const void *command, __attribute__((unused)) size_t command_size,
+                     __attribute__((unused)) void *response, __attribute__((unused)) size_t reponse_size) override
+    {
+        return 0;
+    }
+
 private:
     int sending_socket;
 };
