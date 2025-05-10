@@ -26,8 +26,8 @@ public:
         return send_message_return;
     }
 
-    int send_command(__attribute__((unused)) const void *command, __attribute__((unused)) size_t command_size,
-                     __attribute__((unused)) void *response, __attribute__((unused)) size_t reponse_size) override
+    ssize_t send_command(__attribute__((unused)) const char *command, __attribute__((unused)) size_t command_size,
+                     __attribute__((unused)) char *response, __attribute__((unused)) size_t reponse_size) override
     {
         return 0;
     }
