@@ -13,7 +13,10 @@ class communications_layer_interface
 public:
     virtual communications_layer_interface *set_next_layer(communications_layer_interface *handler) = 0;
     virtual int send_message(const void *message, size_t size) = 0;
+    virtual ssize_t send(const char *buffer, size_t buffer_size) = 0;
+    virtual ssize_t recv(char *buffer, size_t buffer_size) = 0;
     virtual ssize_t send_command(const char *command, size_t command_size, char *response, size_t reponse_size) = 0;
+    virtual ssize_t recv_command(const char *command, size_t command_size, char *response, size_t reponse_size) = 0;
     virtual ~communications_layer_interface() {}
 };
 

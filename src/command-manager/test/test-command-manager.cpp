@@ -16,6 +16,7 @@ public:
     MOCK_METHOD(communications_layer_interface *, set_next_layer, (communications_layer_interface * handler), (override));
     MOCK_METHOD(int, send_message, (const void *message, size_t size), (override));
     MOCK_METHOD(ssize_t, send_command, (const char *command, size_t command_size, char *response, size_t reponse_size), (override));
+    MOCK_METHOD(ssize_t, recv_command, (const char *command, size_t command_size, char *response, size_t reponse_size), (override));
 };
 
 class TestCommandManager : public ::testing::Test
