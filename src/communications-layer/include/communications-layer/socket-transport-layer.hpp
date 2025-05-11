@@ -15,7 +15,23 @@ public:
     int send_message(const void *message, size_t size) override;
 
     ssize_t send_command(__attribute__((unused)) const char *command, __attribute__((unused)) size_t command_size,
-                     __attribute__((unused)) char *response, __attribute__((unused)) size_t reponse_size) override
+                         __attribute__((unused)) char *response, __attribute__((unused)) size_t reponse_size) override
+    {
+        return 0;
+    }
+
+    ssize_t send(__attribute__((unused)) const char *buffer, __attribute__((unused)) size_t buffer_size) override
+    {
+        return 0;
+    }
+
+       ssize_t recv(__attribute__((unused)) char *buffer, __attribute__((unused)) size_t buffer_size) override
+    {
+        return 0;
+    }
+
+    ssize_t recv_command(__attribute__((unused)) const char *command, __attribute__((unused)) size_t command_size,
+                         __attribute__((unused)) char *response, __attribute__((unused)) size_t reponse_size) override
     {
         return 0;
     }
