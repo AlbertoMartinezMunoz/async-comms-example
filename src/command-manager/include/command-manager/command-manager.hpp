@@ -17,18 +17,19 @@ public:
 
     int send_slow_cmd(char *response_buffer, size_t response_buffer_size);
 
-    int subscribe_fast_cmd(fast_command_observer *observer);
+    int incoming_cmd();
 
-    int subscribe_slow_cmd(slow_command_observer *observer);
+    void subscribe_fast_cmd(fast_command_observer *observer);
 
-    // protected??? create in an interface? this method will be provided to the sending data method (AKA) transport layer.
-    int incoming_command(const void *command, size_t command_size, void *response, size_t reponse_size);
+    void subscribe_slow_cmd(slow_command_observer *observer);
 
     static constexpr char ack[4] = "ACK";
     static constexpr char nack[5] = "NACK";
 
 private:
     communications_layer_interface *communications;
+    fast_command_observer *fast_cmd_observer;
+    slow_command_observer *slow_cmd_observer;
 };
 
-#endif  // IOT_MICRO_FIRMWARE_SRC_COMMAND_MANAGER_INCLUDE_COMMAND_MANAGER_COMMAND_MANAGER_H_
+#endif // IOT_MICRO_FIRMWARE_SRC_COMMAND_MANAGER_INCLUDE_COMMAND_MANAGER_COMMAND_MANAGER_H_

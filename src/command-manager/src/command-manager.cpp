@@ -1,7 +1,8 @@
 #include <command-manager/command-manager.hpp>
 #include <cstring>
 
-command_manager::command_manager(communications_layer_interface *comms) : communications(comms) {}
+command_manager::command_manager(communications_layer_interface *comms)
+    : communications(comms), fast_cmd_observer(nullptr), slow_cmd_observer(nullptr) {}
 
 int command_manager::send_fast_cmd()
 {
@@ -49,6 +50,27 @@ int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer
         return -1;
 }
 
-int command_manager::subscribe_fast_cmd(__attribute__((unused)) fast_command_observer *observer) { return 0; }
+int command_manager::incoming_cmd()
+{
+    char command[16];
 
-int command_manager::subscribe_slow_cmd(__attribute__((unused)) slow_command_observer *observer) { return 0; }
+    int ret = communications->recv(command, sizeof(command));
+    if (ret < 0)
+        return ret;
+    command[sizeof(command) - 1] = '\0';
+    if (strcmp("FAST COMMAND", command) == 0)
+        ret = fast_cmd_observer->process_command();
+    else if (strcmp("SLOW COMMAND", command) == 0)
+        ret = slow_cmd_observer->process_command();
+
+    if (ret == 0)
+        communications->send(ack, sizeof(ack));
+    else
+        communications->send(nack, sizeof(nack));
+
+    return 0;
+}
+
+void command_manager::subscribe_fast_cmd(fast_command_observer *observer) { fast_cmd_observer = observer; }
+
+void command_manager::subscribe_slow_cmd(slow_command_observer *observer) { slow_cmd_observer = observer; }
