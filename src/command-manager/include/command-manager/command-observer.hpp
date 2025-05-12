@@ -5,6 +5,7 @@
 class fast_command_observer
 {
     virtual int process_command(int ack) = 0;
+    // virtual ~fast_command_observer() {}
 };
 
 class slow_command_observer

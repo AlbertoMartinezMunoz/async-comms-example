@@ -8,7 +8,11 @@ int command_manager::send_fast_cmd()
     char command[] = "FAST COMMAND";
     char response[16];
 
-    int ret = communications->send_command(command, sizeof(command), response, sizeof(response));
+    int ret = communications->send(command, sizeof(command));
+    if (ret != sizeof(command))
+        return -1;
+
+    ret = communications->recv(response, sizeof(response));
     if (ret < 0)
         return ret;
     else if (strncmp(nack, response, strlen(nack)) == 0)
@@ -24,7 +28,11 @@ int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer
     char command[] = "SLOW COMMAND";
     char response[16];
 
-    int ret = communications->send_command(command, sizeof(command), response, sizeof(response));
+    int ret = communications->send(command, sizeof(command));
+    if (ret != sizeof(command))
+        return -1;
+
+    ret = communications->recv(response, sizeof(response));
     if (ret < 0)
         return ret;
     else if (strncmp(nack, response, strlen(nack)) == 0)
