@@ -15,6 +15,8 @@ set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY TRUE)
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_CXX_STANDARD 20)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
@@ -32,11 +34,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR})
 # If you set any CMAKE_ variables, that can go here.
 # We use this to get code coverage
 if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a -fstack-protector-all -Wall -Wno-psabi -Wextra -Wpedantic -Werror -s")
+	message("-- GNU compiler")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a -fstack-protector-all -Wall -Wno-psabi -Wextra -Wpedantic -Werror")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
 endif()
 
 if(UTEST)
+	set(CMAKE_BUILD_TYPE Debug)
 	include(CTest)
 	enable_testing()
 	add_subdirectory("${PROJECT_SOURCE_DIR}/vendor/gtest")
