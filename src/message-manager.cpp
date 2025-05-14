@@ -19,14 +19,14 @@ public:
     int send_fast_command()
     {
         printf("command_manager: send_fast_command\r\n");
-        this->application_layer->send_message((uint8_t *)"fast_command", sizeof(this->fast_command));
+        this->application_layer->send("fast_command", sizeof(this->fast_command));
         return 0;
     }
 
     int send_slow_command()
     {
         printf("command_manager: send_slow_command\r\n");
-        this->application_layer->send_message((uint8_t *)"slow_command", sizeof(this->slow_command));
+        this->application_layer->send("slow_command", sizeof(this->slow_command));
         return 0;
     }
 

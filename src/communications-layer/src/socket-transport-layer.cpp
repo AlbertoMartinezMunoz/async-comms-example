@@ -38,14 +38,14 @@ int socket_transport_layer::disconnect_socket()
     return 0;
 }
 
-int socket_transport_layer::send_message(const void *message, size_t size)
-{
-    printf("socket_transport_layer: send_message '%s'\r\n", (char *)message);
-    int ret = write(sending_socket, message, size);
-    if (ret == -1)
-    {
-        perror("write");
-        return (-1);
-    }
-    return communications_layer::send_message(message, size);
-}
+// int socket_transport_layer::send_message(const void *message, size_t size)
+// {
+//     printf("socket_transport_layer: send_message '%s'\r\n", (char *)message);
+//     int ret = write(sending_socket, message, size);
+//     if (ret == -1)
+//     {
+//         perror("write");
+//         return (-1);
+//     }
+//     return communications_layer::send_message(message, size);
+// }

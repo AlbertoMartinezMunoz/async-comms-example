@@ -12,8 +12,6 @@ public:
 
     int disconnect_socket();
 
-    int send_message(const void *message, size_t size) override;
-
     ssize_t send(__attribute__((unused)) const char *buffer, __attribute__((unused)) size_t buffer_size) override
     {
         return 0;

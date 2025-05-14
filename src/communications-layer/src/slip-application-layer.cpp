@@ -8,11 +8,11 @@ const uint8_t slip_application_layer::ESC = 0xDB;
 const uint8_t slip_application_layer::ESC_END = 0xDC;
 const uint8_t slip_application_layer::ESC_ESC = 0xDD;
 
-int slip_application_layer::send_message(const void *message, size_t size)
+ssize_t slip_application_layer::send(const char *buffer, size_t buffer_size)
 {
-    size_t slip_size = size + 1;
-    uint8_t *message_iterator = (uint8_t *)message;
-    for (size_t i = 0; i < size; ++i)
+    size_t slip_size = buffer_size + 1;
+    uint8_t *message_iterator = (uint8_t *)buffer;
+    for (size_t i = 0; i < buffer_size; ++i)
     {
         if ((message_iterator[i] == 0xC0) || (message_iterator[i] == 0xDB))
             ++slip_size;
@@ -26,7 +26,7 @@ int slip_application_layer::send_message(const void *message, size_t size)
     }
 
     size_t slip_index = 0;
-    for (size_t i = 0; i < size; ++i)
+    for (size_t i = 0; i < buffer_size; ++i)
     {
         if (message_iterator[i] == END)
         {
@@ -43,7 +43,7 @@ int slip_application_layer::send_message(const void *message, size_t size)
     }
     this->message[slip_size - 1] = END;
 
-    return communications_layer::send_message(this->message, slip_size);
+    return communications_layer::send((char *)(this->message), slip_size);
 }
 
 slip_application_layer::~slip_application_layer()
