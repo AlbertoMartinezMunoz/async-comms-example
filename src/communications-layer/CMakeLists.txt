@@ -1,4 +1,4 @@
-project(communications-layer CXX)
+project(communications-layer-lib CXX)
 
 set(SOURCES
     ${PROJECT_SOURCE_DIR}/include/communications-layer/communications-layer.hpp
