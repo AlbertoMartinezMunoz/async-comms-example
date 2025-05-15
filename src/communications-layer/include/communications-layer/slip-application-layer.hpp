@@ -17,13 +17,10 @@ public:
 
     ssize_t send(const char *buffer, size_t buffer_size) override;
 
-    ssize_t recv(__attribute__((unused)) char *buffer, __attribute__((unused)) size_t buffer_size) override
-    {
-        return 0;
-    }
+    ssize_t recv(char *buffer, size_t buffer_size) override;
 
 private:
-    uint8_t *message = nullptr;
+    char *message = nullptr;
 };
 
 #endif // IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYER_INCLUDE_COMMUNICATIONS_LAYER_SLIP_APPLICATION_LAYER_H_

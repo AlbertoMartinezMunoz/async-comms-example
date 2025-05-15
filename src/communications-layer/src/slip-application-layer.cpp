@@ -14,11 +14,13 @@ ssize_t slip_application_layer::send(const char *buffer, size_t buffer_size)
     uint8_t *message_iterator = (uint8_t *)buffer;
     for (size_t i = 0; i < buffer_size; ++i)
     {
-        if ((message_iterator[i] == 0xC0) || (message_iterator[i] == 0xDB))
+        if ((message_iterator[i] == END) || (message_iterator[i] == ESC))
+        {
             ++slip_size;
+        }
     }
 
-    this->message = (uint8_t *)realloc(this->message, slip_size);
+    this->message = (char *)realloc(this->message, slip_size);
     if (this->message == nullptr)
     {
         perror("malloc");
@@ -43,7 +45,40 @@ ssize_t slip_application_layer::send(const char *buffer, size_t buffer_size)
     }
     this->message[slip_size - 1] = END;
 
-    return communications_layer::send((char *)(this->message), slip_size);
+    return communications_layer::send(this->message, slip_size);
+}
+
+ssize_t slip_application_layer::recv(char *buffer, size_t buffer_size)
+{
+    uint8_t *message_iterator = (uint8_t *)buffer;
+    size_t slip_size = buffer_size;
+    for (size_t i = 0; i < buffer_size; ++i)
+    {
+        if ((message_iterator[i] == END) || (message_iterator[i] == ESC))
+        {
+            --slip_size;
+        }
+    }
+    this->message = (char *)realloc(this->message, slip_size);
+    size_t j = 0;
+    for (size_t i = 0; i < buffer_size; i++)
+    {
+        if (message_iterator[i] == END)
+            return communications_layer::recv(this->message, slip_size);
+        else if (message_iterator[i] == ESC)
+        {
+            i = i + 1;
+            if (message_iterator[i] == ESC_ESC)
+                this->message[j++] = ESC;
+            else if (message_iterator[i] == ESC_END)
+                this->message[j++] = END;
+            else
+                return -1;
+        }
+        else
+            this->message[j++] = message_iterator[i];
+    }
+    return -1;
 }
 
 slip_application_layer::~slip_application_layer()
