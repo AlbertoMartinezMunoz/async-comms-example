@@ -108,7 +108,6 @@ TEST_F(TestSendSlipTransportLayer, WhenSendingTwoDatagramIfOkItShouldAddSlipEnd)
     ASSERT_EQ(sizeof(expected_second_message), layer->send(second_message, sizeof(second_message)));
 }
 
-
 class TestRecvSlipTransportLayer : public testing::TestWithParam<TestSlipTransportLayerParams>
 {
 public:
@@ -169,7 +168,6 @@ TEST_F(TestRecvSlipTransportLayer, WhenReceivingIfMessageNoEndItShouldReturnErro
     char message[] = {0x01, 0x05, 0x06, 0x10};
     ASSERT_EQ(-1, layer->recv(message, sizeof(message)));
 }
-
 
 int main(int argc, char **argv)
 {
