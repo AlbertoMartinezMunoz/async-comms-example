@@ -12,10 +12,7 @@ public:
 
     int disconnect_socket();
 
-    ssize_t send(__attribute__((unused)) const char *buffer, __attribute__((unused)) size_t buffer_size) override
-    {
-        return 0;
-    }
+    ssize_t send(const char *buffer, size_t buffer_size) override;
 
     ssize_t recv(__attribute__((unused)) char *buffer, __attribute__((unused)) size_t buffer_size) override
     {
