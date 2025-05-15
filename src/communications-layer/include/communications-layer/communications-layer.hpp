@@ -47,6 +47,16 @@ public:
 
         return {};
     }
+
+    ssize_t recv(char *buffer, size_t size) override
+    {
+        if (this->next_layer_)
+        {
+            return this->next_layer_->recv(buffer, size);
+        }
+
+        return {};
+    }
 };
 
 #endif // IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYERS_INCLUDE_COMMUNICATIONS_LAYERS_COMMUNICATION_LAYER_H_
