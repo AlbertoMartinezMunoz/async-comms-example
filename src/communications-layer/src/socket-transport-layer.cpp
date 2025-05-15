@@ -47,5 +47,17 @@ ssize_t socket_transport_layer::send(const char *buffer, size_t buffer_size)
         perror("write");
         return (-1);
     }
-    return communications_layer::send(buffer, buffer_size);
+    return communications_layer::send(buffer, ret);
+}
+
+ssize_t socket_transport_layer::recv(char *buffer, size_t buffer_size)
+{
+    int ret = read(sending_socket, buffer, buffer_size);
+    if (ret == -1)
+    {
+        perror("read");
+        return (-1);
+    }
+    printf("socket_transport_layer: recv_message '%s'\r\n", buffer);
+    return communications_layer::recv(buffer, ret);
 }
