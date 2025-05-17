@@ -45,7 +45,7 @@ public:
             return this->next_layer_->send(buffer, size);
         }
 
-        return {};
+        return size;
     }
 
     ssize_t recv(char *buffer, size_t size) override

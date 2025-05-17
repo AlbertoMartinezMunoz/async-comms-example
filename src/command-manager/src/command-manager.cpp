@@ -30,7 +30,7 @@ int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer
     char response[16];
 
     int ret = communications->send(command, sizeof(command));
-    if (ret != sizeof(command))
+    if (ret < 0)
         return -1;
 
     ret = communications->recv(response, sizeof(response));
@@ -47,7 +47,10 @@ int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer
         return 0;
     }
     else
+    {
+        printf("send_slow_cmd: unknown error");
         return -1;
+    }
 }
 
 int command_manager::incoming_cmd()
