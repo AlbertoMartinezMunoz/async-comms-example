@@ -46,6 +46,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     if (ret == -1)
     {
         perror("bind");
+        close(connection_socket);
+        unlink(SOCKET_NAME);
         exit(EXIT_FAILURE);
     }
 
@@ -59,6 +61,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     if (ret == -1)
     {
         perror("listen");
+        close(connection_socket);
+        unlink(SOCKET_NAME);
         exit(EXIT_FAILURE);
     }
 
@@ -66,6 +70,9 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     socket_layer = new socket_transport_layer(0);
     if (socket_layer->listen_connections(connection_socket, SOCKET_NAME) == -1)
     {
+        socket_layer->close_connection();
+        close(connection_socket);
+        unlink(SOCKET_NAME);
         exit(EXIT_FAILURE);
     }
 
@@ -73,16 +80,22 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     ret = socket_layer->receive(buffer, sizeof(buffer));
     if (ret == -1)
     {
+        socket_layer->close_connection();
+        close(connection_socket);
+        unlink(SOCKET_NAME);
         exit(EXIT_FAILURE);
     }
 
     buffer[sizeof(buffer) - 1] = 0;
-    printf("Receiver: %s", buffer);
+    printf("Receiver: %s\r\n", buffer);
 
     sprintf(buffer, "ACK");
     ret = socket_layer->send(buffer, sizeof(buffer));
     if (ret == -1)
     {
+        socket_layer->close_connection();
+        close(connection_socket);
+        unlink(SOCKET_NAME);
         exit(EXIT_FAILURE);
     }
 

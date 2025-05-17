@@ -10,5 +10,8 @@ target_link_libraries(message-manager communications-layer-lib)
 add_executable(message-sender message-sender.cpp)
 target_link_libraries(message-sender socket-comms-lib)
 
+add_executable(command-sender command-sender.cpp)
+target_link_libraries(command-sender command-manager-lib communications-layer-lib)
+
 add_executable(message-receiver message-receiver.cpp)
 target_link_libraries(message-receiver socket-comms-lib)

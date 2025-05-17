@@ -6,6 +6,6 @@
  */
 
 #define SOCKET_NAME "/tmp/9Lq7BNBnBycd6nxy.socket"
-#define BUFFER_SIZE 12
+#define BUFFER_SIZE 16
 
 #endif // IOT_MICRO_FIRMWARE_SRC_MESSAGE_H_
