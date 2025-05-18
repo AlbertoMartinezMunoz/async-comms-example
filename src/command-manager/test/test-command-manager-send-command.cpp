@@ -24,20 +24,22 @@ class TestCommandManager : public ::testing::Test
 public:
     virtual void SetUp()
     {
-        comms_layer_mock = new CommunicationsLayerMock();
-        command_mng = new command_manager(comms_layer_mock);
+        application_layer_mock = new CommunicationsLayerMock();
+        transport_layer_mock = new CommunicationsLayerMock();
+        command_mng = new command_manager(application_layer_mock, transport_layer_mock);
         memset(slow_response_buffer, 0, sizeof(slow_response_buffer));
     }
 
     virtual void TearDown()
     {
         delete command_mng;
-        delete comms_layer_mock;
+        delete application_layer_mock;
+        delete transport_layer_mock;
     }
 
 protected:
     command_manager *command_mng;
-    CommunicationsLayerMock *comms_layer_mock;
+    CommunicationsLayerMock *application_layer_mock, *transport_layer_mock;
     const char expected_fast_command[13] = "FAST COMMAND";
     const char expected_slow_command[13] = "SLOW COMMAND";
     const char expected_slow_command_ack_response[13] = "ACK-RESPONSE";
@@ -46,10 +48,10 @@ protected:
 
 TEST_F(TestCommandManager, WhenSendingFastCommandIfAckThenSendAndReturnAck)
 {
-    EXPECT_CALL(*comms_layer_mock, send(StrEq(expected_fast_command), sizeof(expected_fast_command)))
+    EXPECT_CALL(*application_layer_mock, send(StrEq(expected_fast_command), sizeof(expected_fast_command)))
         .Times(1)
         .WillOnce(Return(sizeof(expected_fast_command)));
-    EXPECT_CALL(*comms_layer_mock, recv(_, _))
+    EXPECT_CALL(*transport_layer_mock, recv(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArrayArgument<0>(command_manager::ack, command_manager::ack + sizeof(command_manager::ack)), Return(sizeof(command_manager::ack))));
 
@@ -58,10 +60,10 @@ TEST_F(TestCommandManager, WhenSendingFastCommandIfAckThenSendAndReturnAck)
 
 TEST_F(TestCommandManager, WhenSendingFastCommandIfNackThenSendAndReturnNack)
 {
-    EXPECT_CALL(*comms_layer_mock, send(StrEq(expected_fast_command), sizeof(expected_fast_command)))
+    EXPECT_CALL(*application_layer_mock, send(StrEq(expected_fast_command), sizeof(expected_fast_command)))
         .Times(1)
         .WillOnce(Return(sizeof(expected_fast_command)));
-    EXPECT_CALL(*comms_layer_mock, recv(_, _))
+    EXPECT_CALL(*transport_layer_mock, recv(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArrayArgument<0>(command_manager::nack, command_manager::nack + sizeof(command_manager::nack)), Return(sizeof(command_manager::nack))));
 
@@ -71,7 +73,7 @@ TEST_F(TestCommandManager, WhenSendingFastCommandIfNackThenSendAndReturnNack)
 TEST_F(TestCommandManager, WhenSendingFastCommandIfSendInternalErrorThenReturnError)
 {
     int expected_error = -3;
-    EXPECT_CALL(*comms_layer_mock, send(StrEq(expected_fast_command), sizeof(expected_fast_command)))
+    EXPECT_CALL(*application_layer_mock, send(StrEq(expected_fast_command), sizeof(expected_fast_command)))
         .Times(1)
         .WillOnce(Return(expected_error));
 
@@ -81,10 +83,10 @@ TEST_F(TestCommandManager, WhenSendingFastCommandIfSendInternalErrorThenReturnEr
 TEST_F(TestCommandManager, WhenSendingFastCommandIfRecvInternalErrorThenReturnError)
 {
     int expected_error = -3;
-    EXPECT_CALL(*comms_layer_mock, send(StrEq(expected_fast_command), sizeof(expected_fast_command)))
+    EXPECT_CALL(*application_layer_mock, send(StrEq(expected_fast_command), sizeof(expected_fast_command)))
         .Times(1)
         .WillOnce(Return(sizeof(expected_fast_command)));
-    EXPECT_CALL(*comms_layer_mock, recv(_, _))
+    EXPECT_CALL(*transport_layer_mock, recv(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArrayArgument<0>(command_manager::ack, command_manager::ack + sizeof(command_manager::nack)), Return(expected_error)));
 
@@ -95,10 +97,10 @@ TEST_F(TestCommandManager, WhenSendingFastCommandIfResponseErrorThenReturnError)
 {
     int expected_error = -1;
     char bad_response[] = "BAD";
-    EXPECT_CALL(*comms_layer_mock, send(StrEq(expected_fast_command), sizeof(expected_fast_command)))
+    EXPECT_CALL(*application_layer_mock, send(StrEq(expected_fast_command), sizeof(expected_fast_command)))
         .Times(1)
         .WillOnce(Return(sizeof(expected_fast_command)));
-    EXPECT_CALL(*comms_layer_mock, recv(_, _))
+    EXPECT_CALL(*transport_layer_mock, recv(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArrayArgument<0>(bad_response, bad_response + sizeof(bad_response)), Return(sizeof(bad_response))));
 
@@ -107,10 +109,10 @@ TEST_F(TestCommandManager, WhenSendingFastCommandIfResponseErrorThenReturnError)
 
 TEST_F(TestCommandManager, WhenSendingSlowCommandIfAckThenSendAndReturnAck)
 {
-    EXPECT_CALL(*comms_layer_mock, send(StrEq(expected_slow_command), sizeof(expected_slow_command)))
+    EXPECT_CALL(*application_layer_mock, send(StrEq(expected_slow_command), sizeof(expected_slow_command)))
         .Times(1)
         .WillOnce(Return(sizeof(expected_slow_command)));
-    EXPECT_CALL(*comms_layer_mock, recv(_, _))
+    EXPECT_CALL(*transport_layer_mock, recv(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArrayArgument<0>(command_manager::ack, command_manager::ack + sizeof(command_manager::ack)), Return(sizeof(command_manager::ack))));
 
@@ -119,10 +121,10 @@ TEST_F(TestCommandManager, WhenSendingSlowCommandIfAckThenSendAndReturnAck)
 
 TEST_F(TestCommandManager, WhenSendingSlowCommandIfNackThenSendAndReturnNack)
 {
-    EXPECT_CALL(*comms_layer_mock, send(StrEq(expected_slow_command), sizeof(expected_slow_command)))
+    EXPECT_CALL(*application_layer_mock, send(StrEq(expected_slow_command), sizeof(expected_slow_command)))
         .Times(1)
         .WillOnce(Return(sizeof(expected_slow_command)));
-    EXPECT_CALL(*comms_layer_mock, recv(_, _))
+    EXPECT_CALL(*transport_layer_mock, recv(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArrayArgument<0>(command_manager::nack, command_manager::nack + sizeof(command_manager::nack)), Return(sizeof(command_manager::nack))));
 
@@ -132,7 +134,7 @@ TEST_F(TestCommandManager, WhenSendingSlowCommandIfNackThenSendAndReturnNack)
 TEST_F(TestCommandManager, WhenSendingSlowCommandIfSendInternalErrorThenReturnError)
 {
     int expected_error = -3;
-    EXPECT_CALL(*comms_layer_mock, send(StrEq(expected_slow_command), sizeof(expected_slow_command)))
+    EXPECT_CALL(*application_layer_mock, send(StrEq(expected_slow_command), sizeof(expected_slow_command)))
         .Times(1)
         .WillOnce(Return(expected_error));
 
@@ -142,10 +144,10 @@ TEST_F(TestCommandManager, WhenSendingSlowCommandIfSendInternalErrorThenReturnEr
 TEST_F(TestCommandManager, WhenSendingSlowCommandIfRecvInternalErrorThenReturnError)
 {
     int expected_error = -3;
-    EXPECT_CALL(*comms_layer_mock, send(StrEq(expected_slow_command), sizeof(expected_slow_command)))
+    EXPECT_CALL(*application_layer_mock, send(StrEq(expected_slow_command), sizeof(expected_slow_command)))
         .Times(1)
         .WillOnce(Return(sizeof(expected_slow_command)));
-    EXPECT_CALL(*comms_layer_mock, recv(_, _))
+    EXPECT_CALL(*transport_layer_mock, recv(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArrayArgument<0>(command_manager::ack, command_manager::ack + sizeof(command_manager::nack)), Return(expected_error)));
 
@@ -156,10 +158,10 @@ TEST_F(TestCommandManager, WhenSendingSlowCommandIfResponseErrorThenReturnError)
 {
     int expected_error = -1;
     char bad_response[] = "BAD";
-    EXPECT_CALL(*comms_layer_mock, send(StrEq(expected_slow_command), sizeof(expected_slow_command)))
+    EXPECT_CALL(*application_layer_mock, send(StrEq(expected_slow_command), sizeof(expected_slow_command)))
         .Times(1)
         .WillOnce(Return(sizeof(expected_slow_command)));
-    EXPECT_CALL(*comms_layer_mock, recv(_, _))
+    EXPECT_CALL(*transport_layer_mock, recv(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArrayArgument<0>(bad_response, bad_response + sizeof(bad_response)), Return(sizeof(bad_response))));
 

@@ -1,19 +1,19 @@
 #include <command-manager/command-manager.hpp>
 #include <cstring>
 
-command_manager::command_manager(communications_layer_interface *comms)
-    : communications(comms), fast_cmd_observer(nullptr), slow_cmd_observer(nullptr) {}
+command_manager::command_manager(communications_layer_interface *application_layer, communications_layer_interface *transport_layer)
+    : application_layer(application_layer), transport_layer(transport_layer), fast_cmd_observer(nullptr), slow_cmd_observer(nullptr) {}
 
 int command_manager::send_fast_cmd()
 {
     char command[] = "FAST COMMAND";
     char response[16];
 
-    int ret = communications->send(command, sizeof(command));
+    int ret = application_layer->send(command, sizeof(command));
     if (ret != sizeof(command))
         return -1;
 
-    ret = communications->recv(response, sizeof(response));
+    ret = transport_layer->recv(response, sizeof(response));
     if (ret < 0)
         return ret;
     else if (strncmp(nack, response, strlen(nack)) == 0)
@@ -29,11 +29,11 @@ int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer
     char command[] = "SLOW COMMAND";
     char response[16];
 
-    int ret = communications->send(command, sizeof(command));
+    int ret = application_layer->send(command, sizeof(command));
     if (ret < 0)
         return -1;
 
-    ret = communications->recv(response, sizeof(response));
+    ret = transport_layer->recv(response, sizeof(response));
     if (ret < 0)
         return ret;
     else if (strncmp(nack, response, strlen(nack)) == 0)
@@ -57,7 +57,7 @@ int command_manager::incoming_cmd()
 {
     char command[16];
 
-    int ret = communications->recv(command, sizeof(command));
+    int ret = transport_layer->recv(command, sizeof(command));
     if (ret < 0)
         return ret;
     command[sizeof(command) - 1] = '\0';
@@ -67,9 +67,9 @@ int command_manager::incoming_cmd()
         ret = slow_cmd_observer->process_command();
 
     if (ret == 0)
-        communications->send(ack, sizeof(ack));
+        application_layer->send(ack, sizeof(ack));
     else
-        communications->send(nack, sizeof(nack));
+        application_layer->send(nack, sizeof(nack));
 
     return 0;
 }
