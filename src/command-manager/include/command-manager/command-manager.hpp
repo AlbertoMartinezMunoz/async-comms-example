@@ -7,7 +7,7 @@
 class command_manager
 {
 public:
-    command_manager(communications_layer_interface *comms);
+    command_manager(communications_layer_interface *application_layer, communications_layer_interface *transport_layer);
 
     ~command_manager()
     {
@@ -27,7 +27,8 @@ public:
     static constexpr char nack[5] = "NACK";
 
 private:
-    communications_layer_interface *communications;
+    communications_layer_interface *application_layer;
+    communications_layer_interface *transport_layer;
     fast_command_observer *fast_cmd_observer;
     slow_command_observer *slow_cmd_observer;
 };
