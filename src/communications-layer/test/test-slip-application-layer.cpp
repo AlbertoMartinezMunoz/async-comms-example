@@ -15,7 +15,7 @@ using ::testing::StrEq;
 class CommunicationsLayerMock : public communications_layer_interface
 {
 public:
-    MOCK_METHOD(communications_layer_interface *, set_next_layer, (communications_layer_interface * handler), (override));
+    MOCK_METHOD(communications_layer_interface *, set_next_send_layer, (communications_layer_interface * handler), (override));
     MOCK_METHOD(ssize_t, send, (const char *buffer, size_t buffer_size), (override));
     MOCK_METHOD(ssize_t, recv, (char *buffer, size_t buffer_size), (override));
 };
@@ -64,7 +64,7 @@ public:
     {
         layer = new slip_application_layer();
         comms_layer_mock = new CommunicationsLayerMock();
-        layer->set_next_layer(comms_layer_mock);
+        layer->set_next_send_layer(comms_layer_mock);
     }
 
     virtual void TearDown()
@@ -118,7 +118,7 @@ public:
     {
         layer = new slip_application_layer();
         comms_layer_mock = new CommunicationsLayerMock();
-        layer->set_next_layer(comms_layer_mock);
+        layer->set_next_send_layer(comms_layer_mock);
     }
 
     virtual void TearDown()
