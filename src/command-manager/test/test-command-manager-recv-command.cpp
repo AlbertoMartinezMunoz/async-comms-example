@@ -68,7 +68,7 @@ protected:
 
 TEST_F(TestCommandManager, WhenReceivingFastCommandIfAckThenResponseAndReturnAck)
 {
-    EXPECT_CALL(*application_layer_mock, recv(_, _))
+    EXPECT_CALL(*transport_layer_mock, recv(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArrayArgument<0>(expected_fast_command, expected_fast_command + sizeof(expected_fast_command)), Return(sizeof(expected_fast_command))));
     EXPECT_CALL(*fast_cmd_observer_mock, process_command()).Times(1).WillOnce(Return(0));
@@ -80,7 +80,7 @@ TEST_F(TestCommandManager, WhenReceivingFastCommandIfAckThenResponseAndReturnAck
 
 TEST_F(TestCommandManager, WhenReceivingSlowCommandIfAckThenResponseAndReturnAck)
 {
-    EXPECT_CALL(*application_layer_mock, recv(_, _))
+    EXPECT_CALL(*transport_layer_mock, recv(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArrayArgument<0>(expected_slow_command, expected_slow_command + sizeof(expected_slow_command)), Return(sizeof(expected_slow_command))));
     EXPECT_CALL(*slow_cmd_observer_mock, process_command()).Times(1).WillOnce(Return(0));
@@ -93,7 +93,7 @@ TEST_F(TestCommandManager, WhenReceivingSlowCommandIfAckThenResponseAndReturnAck
 
 TEST_F(TestCommandManager, WhenReceivingFastCommandIfNAckThenResponseAndReturnNAck)
 {
-    EXPECT_CALL(*application_layer_mock, recv(_, _))
+    EXPECT_CALL(*transport_layer_mock, recv(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArrayArgument<0>(expected_fast_command, expected_fast_command + sizeof(expected_fast_command)), Return(sizeof(expected_fast_command))));
     EXPECT_CALL(*fast_cmd_observer_mock, process_command()).Times(1).WillOnce(Return(1));
@@ -105,7 +105,7 @@ TEST_F(TestCommandManager, WhenReceivingFastCommandIfNAckThenResponseAndReturnNA
 
 TEST_F(TestCommandManager, WhenReceivingSlowCommandIfNAckThenResponseAndReturnNAck)
 {
-    EXPECT_CALL(*application_layer_mock, recv(_, _))
+    EXPECT_CALL(*transport_layer_mock, recv(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArrayArgument<0>(expected_slow_command, expected_slow_command + sizeof(expected_slow_command)), Return(sizeof(expected_slow_command))));
     EXPECT_CALL(*slow_cmd_observer_mock, process_command()).Times(1).WillOnce(Return(1));
@@ -118,7 +118,7 @@ TEST_F(TestCommandManager, WhenReceivingSlowCommandIfNAckThenResponseAndReturnNA
 TEST_F(TestCommandManager, WhenReceivingFastCommandIfRecvErrorThenReturnError)
 {
     int expected_error = -3;
-    EXPECT_CALL(*application_layer_mock, recv(_, _))
+    EXPECT_CALL(*transport_layer_mock, recv(_, _))
         .Times(1)
         .WillOnce(Return(expected_error));
     ASSERT_EQ(expected_error, command_mng->incoming_cmd());

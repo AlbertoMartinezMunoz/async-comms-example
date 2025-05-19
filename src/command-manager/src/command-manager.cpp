@@ -27,7 +27,7 @@ int command_manager::send_fast_cmd()
 int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer_size)
 {
     char command[] = "SLOW COMMAND";
-    char response[16];
+    char response[32];
 
     int ret = application_layer->send(command, sizeof(command));
     if (ret < 0)
@@ -48,14 +48,14 @@ int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer
     }
     else
     {
-        printf("send_slow_cmd: unknown error");
+        printf("send_slow_cmd: unknown error\r\n");
         return -1;
     }
 }
 
 int command_manager::incoming_cmd()
 {
-    char command[16];
+    char command[32];
 
     int ret = transport_layer->recv(command, sizeof(command));
     if (ret < 0)

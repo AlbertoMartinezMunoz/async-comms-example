@@ -89,7 +89,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     buffer[sizeof(buffer) - 1] = 0;
     printf("Receiver: %s\r\n", buffer);
 
-    sprintf(buffer, "ACK");
+    sprintf(buffer, "ACK Command Received");
     ret = socket_layer->send(buffer, sizeof(buffer));
     if (ret == -1)
     {
