@@ -64,7 +64,7 @@ public:
             return this->next_recv_layer_->recv(buffer, size);
         }
 
-        return {};
+        return size;
     }
 };
 
