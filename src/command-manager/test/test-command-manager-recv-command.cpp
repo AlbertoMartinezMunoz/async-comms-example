@@ -19,13 +19,13 @@ public:
     MOCK_METHOD(ssize_t, recv, (char *buffer, size_t buffer_size), (override));
 };
 
-class FastCmdObseverMock : public fast_command_observer
+class FastCmdObseverMock : public command_observer
 {
 public:
     MOCK_METHOD(int, process_command, ());
 };
 
-class SlowCmdObseverMock : public slow_command_observer
+class SlowCmdObseverMock : public command_observer
 {
 public:
     MOCK_METHOD(int, process_command, ());

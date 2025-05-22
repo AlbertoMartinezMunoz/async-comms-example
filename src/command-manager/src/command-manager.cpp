@@ -74,6 +74,6 @@ int command_manager::incoming_message() const
     return 0;
 }
 
-void command_manager::subscribe_fast_cmd(fast_command_observer *observer) { fast_cmd_observer = observer; }
+void command_manager::subscribe_fast_cmd(command_observer *observer) { fast_cmd_observer = observer; }
 
-void command_manager::subscribe_slow_cmd(slow_command_observer *observer) { slow_cmd_observer = observer; }
+void command_manager::subscribe_slow_cmd(command_observer *observer) { slow_cmd_observer = observer; }
