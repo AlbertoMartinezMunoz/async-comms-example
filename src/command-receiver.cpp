@@ -14,7 +14,7 @@
 #include <command-manager/command-observer.hpp>
 #include <communications-layer/socket-transport-layer.hpp>
 
-class slow_cmd_processor: public slow_command_observer
+class slow_cmd_processor: public command_observer
 {
 public:
     int process_command() override {
@@ -23,7 +23,7 @@ public:
     }
 };
 
-class fast_cmd_processor: public fast_command_observer
+class fast_cmd_processor: public command_observer
 {
 public:
     int process_command() override {
