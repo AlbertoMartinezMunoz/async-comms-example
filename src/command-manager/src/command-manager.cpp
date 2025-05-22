@@ -53,7 +53,7 @@ int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer
     }
 }
 
-int command_manager::incoming_cmd()
+int command_manager::incoming_message() const
 {
     char command[32];
 

@@ -75,7 +75,7 @@ TEST_F(TestCommandManager, WhenReceivingFastCommandIfAckThenResponseAndReturnAck
     EXPECT_CALL(*application_layer_mock, send(StrEq(command_manager::ack), sizeof(command_manager::ack)))
         .Times(1)
         .WillOnce(Return(sizeof(command_manager::ack)));
-    ASSERT_EQ(0, command_mng->incoming_cmd());
+    ASSERT_EQ(0, command_mng->incoming_message());
 }
 
 TEST_F(TestCommandManager, WhenReceivingSlowCommandIfAckThenResponseAndReturnAck)
@@ -88,7 +88,7 @@ TEST_F(TestCommandManager, WhenReceivingSlowCommandIfAckThenResponseAndReturnAck
     EXPECT_CALL(*application_layer_mock, send(StrEq(command_manager::ack), sizeof(command_manager::ack)))
         .Times(1)
         .WillOnce(Return(sizeof(command_manager::ack)));
-    ASSERT_EQ(0, command_mng->incoming_cmd());
+    ASSERT_EQ(0, command_mng->incoming_message());
 }
 
 TEST_F(TestCommandManager, WhenReceivingFastCommandIfNAckThenResponseAndReturnNAck)
@@ -100,7 +100,7 @@ TEST_F(TestCommandManager, WhenReceivingFastCommandIfNAckThenResponseAndReturnNA
     EXPECT_CALL(*application_layer_mock, send(StrEq(command_manager::nack), sizeof(command_manager::nack)))
         .Times(1)
         .WillOnce(Return(sizeof(command_manager::nack)));
-    ASSERT_EQ(0, command_mng->incoming_cmd());
+    ASSERT_EQ(0, command_mng->incoming_message());
 }
 
 TEST_F(TestCommandManager, WhenReceivingSlowCommandIfNAckThenResponseAndReturnNAck)
@@ -112,7 +112,7 @@ TEST_F(TestCommandManager, WhenReceivingSlowCommandIfNAckThenResponseAndReturnNA
     EXPECT_CALL(*application_layer_mock, send(StrEq(command_manager::nack), sizeof(command_manager::nack)))
         .Times(1)
         .WillOnce(Return(sizeof(command_manager::nack)));
-    ASSERT_EQ(0, command_mng->incoming_cmd());
+    ASSERT_EQ(0, command_mng->incoming_message());
 }
 
 TEST_F(TestCommandManager, WhenReceivingFastCommandIfRecvErrorThenReturnError)
@@ -121,7 +121,7 @@ TEST_F(TestCommandManager, WhenReceivingFastCommandIfRecvErrorThenReturnError)
     EXPECT_CALL(*transport_layer_mock, recv(_, _))
         .Times(1)
         .WillOnce(Return(expected_error));
-    ASSERT_EQ(expected_error, command_mng->incoming_cmd());
+    ASSERT_EQ(expected_error, command_mng->incoming_message());
 }
 
 int main(int argc, char **argv)
