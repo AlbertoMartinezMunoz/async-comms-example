@@ -111,7 +111,7 @@ TEST_F(TestSocketComms, WhenConnectingIfConnectionErrorThenReturnError)
     ASSERT_EQ(1, connect_fake.call_count);
 }
 
-TEST_F(TestSocketComms, WhenListeningIfOKThenNNNNNNNNNNNNNNNNNNNNNNNNNNNNn)
+TEST_F(TestSocketComms, WhenListeningIfOKThenStartListening)
 {
     ASSERT_EQ(0, layer->listen_connections(expected_connection_socket_id, data_server));
     ASSERT_EQ(1, accept_fake.call_count);
