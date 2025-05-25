@@ -4,12 +4,12 @@
 command_manager::command_manager(communications_layer_interface *application_layer, communications_layer_interface *transport_layer)
     : application_layer(application_layer), transport_layer(transport_layer), fast_cmd_observer(nullptr), slow_cmd_observer(nullptr) {}
 
-int command_manager::send_fast_cmd()
+int command_manager::send_simple_cmd(const char *cmd, size_t cmd_size)
 {
     char response[16];
 
-    int ret = application_layer->send(fast_cmd, sizeof(fast_cmd));
-    if (ret != sizeof(fast_cmd))
+    int ret = application_layer->send(cmd, cmd_size);
+    if ((size_t)ret != cmd_size)
         return -1;
 
     ret = transport_layer->recv(response, sizeof(response));
@@ -21,6 +21,16 @@ int command_manager::send_fast_cmd()
         return 0;
     else
         return -1;
+}
+
+int command_manager::send_fast_cmd()
+{
+    return send_simple_cmd(fast_cmd, sizeof(fast_cmd));
+}
+
+int command_manager::send_shutdown_cmd()
+{
+    return send_simple_cmd(shutdown_cmd, sizeof(shutdown_cmd));
 }
 
 int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer_size)
@@ -49,25 +59,6 @@ int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer
         printf("send_slow_cmd: unknown error\r\n");
         return -1;
     }
-}
-
-int command_manager::send_shutdown_cmd()
-{
-    char response[16];
-
-    int ret = application_layer->send(shutdown_cmd, sizeof(shutdown_cmd));
-    if (ret != sizeof(shutdown_cmd))
-        return -1;
-
-    ret = transport_layer->recv(response, sizeof(response));
-    if (ret < 0)
-        return ret;
-    else if (strncmp(nack, response, strlen(nack)) == 0)
-        return 1;
-    else if (strncmp(ack, response, strlen(ack)) == 0)
-        return 0;
-    else
-        return -1;
 }
 
 int command_manager::incoming_message() const
