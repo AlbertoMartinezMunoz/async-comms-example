@@ -40,6 +40,8 @@ private:
     command_observer *fast_cmd_observer;
     command_observer *slow_cmd_observer;
     command_observer *shutdown_cmd_observer;
+
+    int send_simple_cmd(const char *cmd, size_t cmd_size);
 };
 
 #endif  // IOT_MICRO_FIRMWARE_SRC_COMMAND_MANAGER_INCLUDE_COMMAND_MANAGER_COMMAND_MANAGER_H_
