@@ -6,11 +6,10 @@ command_manager::command_manager(communications_layer_interface *application_lay
 
 int command_manager::send_fast_cmd()
 {
-    char command[] = "FAST COMMAND";
     char response[16];
 
-    int ret = application_layer->send(command, sizeof(command));
-    if (ret != sizeof(command))
+    int ret = application_layer->send(fast_cmd, sizeof(fast_cmd));
+    if (ret != sizeof(fast_cmd))
         return -1;
 
     ret = transport_layer->recv(response, sizeof(response));
@@ -26,10 +25,9 @@ int command_manager::send_fast_cmd()
 
 int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer_size)
 {
-    char command[] = "SLOW COMMAND";
     char response[32];
 
-    int ret = application_layer->send(command, sizeof(command));
+    int ret = application_layer->send(slow_cmd, sizeof(slow_cmd));
     if (ret < 0)
         return -1;
 
@@ -82,9 +80,9 @@ int command_manager::incoming_message() const
 
     ret = -1;
     command[sizeof(command) - 1] = '\0';
-    if (strcmp("FAST COMMAND", command) == 0)
+    if (strcmp(fast_cmd, command) == 0)
         ret = fast_cmd_observer->process_command();
-    else if (strcmp("SLOW COMMAND", command) == 0)
+    else if (strcmp(slow_cmd, command) == 0)
         ret = slow_cmd_observer->process_command();
     else if (strcmp(shutdown_cmd, command) == 0)
         ret = shutdown_cmd_observer->process_command();

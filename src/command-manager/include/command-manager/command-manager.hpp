@@ -30,7 +30,9 @@ public:
 
     static constexpr char ack[4] = "ACK";
     static constexpr char nack[5] = "NACK";
-    static constexpr char shutdown_cmd[17] = "SHUTDOWN COMMAND";
+    static constexpr char fast_cmd[] = "FAST COMMAND";
+    static constexpr char slow_cmd[] = "SLOW COMMAND";
+    static constexpr char shutdown_cmd[] = "SHUTDOWN COMMAND";
 
 private:
     communications_layer_interface *application_layer;
