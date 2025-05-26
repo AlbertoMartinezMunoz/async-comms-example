@@ -7,9 +7,11 @@
 
 using ::testing::_;
 using ::testing::Args;
+using ::testing::DoAll;
 using ::testing::ElementsAreArray;
 using ::testing::Return;
 using ::testing::Sequence;
+using ::testing::SetArrayArgument;
 using ::testing::StrEq;
 
 class CommunicationsLayerMock : public communications_layer_interface
@@ -48,12 +50,12 @@ public:
     size_t expected_msg_size;
 };
 
-char decoded_simple_msg[4] = {0x01, 0x05, 0x06, 0x10};
-char encoded_simple_msg[5] = {0x01, 0x05, 0x06, 0x10, (char)slip_application_layer::END};
-char decoded_escape_end_msg[4] = {0x01, 0x05, (char)slip_application_layer::END, 0x10};
-char encoded_escape_end_msg[6] = {0x01, 0x05, (char)slip_application_layer::ESC, (char)slip_application_layer::ESC_END, 0x10, (char)slip_application_layer::END};
-char decoded_escape_esc_msg[4] = {0x01, 0x05, (char)slip_application_layer::ESC, 0x10};
-char encoded_escape_esc_msg[6] = {0x01, 0x05, (char)slip_application_layer::ESC, (char)slip_application_layer::ESC_ESC, 0x10, (char)slip_application_layer::END};
+char decoded_simple_msg[] = {'S', 'i', 'm', 'p', 'l', 'e', ' ', 'M', 'e', 's', 's', 'a', 'g', 'e'};
+char encoded_simple_msg[] = {'S', 'i', 'm', 'p', 'l', 'e', ' ', 'M', 'e', 's', 's', 'a', 'g', 'e', (char)slip_application_layer::END};
+char decoded_escape_end_msg[] = {'E', 's', 'c', 'a', 'p', 'e', 'd', ' ', (char)slip_application_layer::END, ' ', 'M', 'e', 's', 's', 'a', 'g', 'e'};
+char encoded_escape_end_msg[] = {'E', 's', 'c', 'a', 'p', 'e', 'd', ' ', (char)slip_application_layer::ESC, (char)slip_application_layer::ESC_END, ' ', 'M', 'e', 's', 's', 'a', 'g', 'e', (char)slip_application_layer::END};
+char decoded_escape_esc_msg[] = {'E', 's', 'c', 'a', 'p', 'e', 'd', ' ', (char)slip_application_layer::ESC, ' ', 'M', 'e', 's', 's', 'a', 'g', 'e'};
+char encoded_escape_esc_msg[] = {'E', 's', 'c', 'a', 'p', 'e', 'd', ' ', (char)slip_application_layer::ESC, (char)slip_application_layer::ESC_ESC, ' ', 'M', 'e', 's', 's', 'a', 'g', 'e', (char)slip_application_layer::END};
 
 class TestSendSlipTransportLayer : public testing::TestWithParam<TestSlipTransportLayerParams>
 {
@@ -120,6 +122,7 @@ public:
         layer = new slip_application_layer();
         comms_layer_mock = new CommunicationsLayerMock();
         layer->set_next_recv_layer(comms_layer_mock);
+        memset(buffer, 0, sizeof(buffer));
     }
 
     virtual void TearDown()
@@ -127,12 +130,17 @@ public:
         delete layer;
         delete comms_layer_mock;
     }
+    char buffer[32];
 };
 
 TEST_P(TestRecvSlipTransportLayer, TestNextRecvHandlerMessage)
 {
-    EXPECT_CALL(*comms_layer_mock, recv(_, GetParam().expected_msg_size)).With(Args<0, 1>(ElementsAreArray(GetParam().expected_msg, GetParam().expected_msg_size))).Times(1).WillOnce(Return(GetParam().expected_msg_size));
-    ASSERT_EQ(GetParam().expected_msg_size, layer->recv(GetParam().msg, GetParam().msg_size));
+    EXPECT_CALL(*comms_layer_mock, recv(_, sizeof(buffer)))
+        .Times(1)
+        .WillOnce(DoAll(SetArrayArgument<0>(GetParam().msg, GetParam().msg + GetParam().msg_size), Return(GetParam().msg_size)));
+    ASSERT_EQ(GetParam().expected_msg_size, layer->recv(buffer, sizeof(buffer)));
+    std::vector<char> expected(GetParam().expected_msg, GetParam().expected_msg + GetParam().expected_msg_size);
+    ASSERT_THAT(expected, ElementsAreArray(buffer, GetParam().expected_msg_size));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -151,23 +159,24 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(TestRecvSlipTransportLayer, WhenReceivingTwoDatagramIfOkItShouldDecodeSlipEnd)
 {
     Sequence seq;
-    char decoded_first_message[] = {0x01, 0x05, 0x06, 0x10};
-    char decoded_second_message[] = {0x01, 0x05, 0x06, 0x11, 0x50};
-    char encoded_first_message[] = {0x01, 0x05, 0x06, 0x10, (char)slip_application_layer::END};
-    char encoded_second_message[] = {0x01, 0x05, 0x06, 0x11, 0x50, (char)slip_application_layer::END};
 
-    EXPECT_CALL(*comms_layer_mock, recv(_, sizeof(decoded_first_message))).With(Args<0, 1>(ElementsAreArray(decoded_first_message, sizeof(decoded_first_message)))).Times(1).InSequence(seq).WillOnce(Return(sizeof(decoded_first_message)));
-    EXPECT_CALL(*comms_layer_mock, recv(_, sizeof(decoded_second_message))).With(Args<0, 1>(ElementsAreArray(decoded_second_message, sizeof(decoded_second_message)))).Times(1).InSequence(seq).WillOnce(Return(sizeof(decoded_second_message)));
+    EXPECT_CALL(*comms_layer_mock, recv(_, sizeof(buffer))).Times(1).InSequence(seq).WillOnce(DoAll(SetArrayArgument<0>(encoded_simple_msg, encoded_simple_msg + sizeof(encoded_simple_msg)), Return(sizeof(encoded_simple_msg))));
+    EXPECT_CALL(*comms_layer_mock, recv(_, sizeof(buffer))).Times(1).InSequence(seq).WillOnce(DoAll(SetArrayArgument<0>(encoded_escape_esc_msg, encoded_escape_esc_msg + sizeof(encoded_escape_esc_msg)), Return(sizeof(encoded_escape_esc_msg))));
 
-    ASSERT_EQ(sizeof(decoded_first_message), layer->recv(encoded_first_message, sizeof(encoded_first_message)));
-    ASSERT_EQ(sizeof(decoded_second_message), layer->recv(encoded_second_message, sizeof(encoded_second_message)));
+    ASSERT_EQ(sizeof(decoded_simple_msg), layer->recv(buffer, sizeof(buffer)));
+    std::vector<char> expected(decoded_simple_msg, decoded_simple_msg + sizeof(decoded_simple_msg));
+    ASSERT_THAT(expected, ElementsAreArray(buffer, sizeof(decoded_simple_msg)));
+
+    ASSERT_EQ(sizeof(decoded_escape_esc_msg), layer->recv(buffer, sizeof(buffer)));
+    expected.assign(decoded_escape_esc_msg, decoded_escape_esc_msg + sizeof(decoded_escape_esc_msg));
+    ASSERT_THAT(expected, ElementsAreArray(buffer, sizeof(decoded_escape_esc_msg)));
 }
 
 TEST_F(TestRecvSlipTransportLayer, WhenReceivingIfMessageNoEndItShouldReturnError)
 {
     Sequence seq;
-    char message[] = {0x01, 0x05, 0x06, 0x10};
-    ASSERT_EQ(-1, layer->recv(message, sizeof(message)));
+    EXPECT_CALL(*comms_layer_mock, recv(_, sizeof(buffer))).Times(1).InSequence(seq).WillOnce(DoAll(SetArrayArgument<0>(decoded_simple_msg, decoded_simple_msg + sizeof(decoded_simple_msg)), Return(sizeof(decoded_simple_msg))));
+    ASSERT_EQ(-1, layer->recv(buffer, sizeof(buffer)));
 }
 
 int main(int argc, char **argv)
