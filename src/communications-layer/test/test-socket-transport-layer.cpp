@@ -59,6 +59,7 @@ public:
         RESET_FAKE(connect);
         RESET_FAKE(write);
         RESET_FAKE(read);
+        memset(message_buffer, 0, sizeof(message_buffer));
         socket_fake.return_val = expected_socket_fd;
         connect_fake.return_val = 0;
         write_fake.custom_fake = write_mock;
@@ -128,11 +129,11 @@ TEST_F(TestSocketTransportLayer, WhenSendingIfErrorThenReturnError)
 TEST_F(TestSocketTransportLayer, WhenReceveingIfOKThenMessageIsPassedToNextHandler)
 {
     ASSERT_EQ(0, layer->connect_socket(SOCKET_NAME));
-    EXPECT_CALL(*comms_layer_mock, recv(_, sizeof(expected_message))).With(Args<0, 1>(ElementsAreArray(expected_message, sizeof(expected_message)))).Times(1).WillOnce(Return(sizeof(expected_message)));
+    EXPECT_CALL(*comms_layer_mock, recv(_, sizeof(message_buffer))).Times(1).WillOnce(Return(sizeof(expected_message)));
     ASSERT_EQ(sizeof(expected_message), layer->recv(message_buffer, sizeof(message_buffer)));
+    ASSERT_THAT(expected_message, ElementsAreArray(message_buffer, sizeof(expected_message)));
     ASSERT_EQ(expected_socket_fd, read_fake.arg0_val);
     ASSERT_EQ(sizeof(message_buffer), read_fake.arg2_val);
-    ASSERT_THAT(expected_message, ElementsAreArray(message_buffer, sizeof(expected_message)));
 }
 
 TEST_F(TestSocketTransportLayer, WhenReceveingIfReadErrorThenReturnError)
@@ -140,7 +141,15 @@ TEST_F(TestSocketTransportLayer, WhenReceveingIfReadErrorThenReturnError)
     RESET_FAKE(read);
     read_fake.return_val = -1;
     ASSERT_EQ(0, layer->connect_socket(SOCKET_NAME));
+    EXPECT_CALL(*comms_layer_mock, recv(_, sizeof(message_buffer))).Times(1).WillOnce(Return(sizeof(expected_message)));
     ASSERT_EQ(-1, layer->recv(message_buffer, sizeof(message_buffer)));
+}
+
+TEST_F(TestSocketTransportLayer, WhenReceveingIfRecvErrorThenReturnError)
+{
+    ASSERT_EQ(0, layer->connect_socket(SOCKET_NAME));
+    EXPECT_CALL(*comms_layer_mock, recv(_, sizeof(message_buffer))).Times(1).WillOnce(Return(-2));
+    ASSERT_EQ(-2, layer->recv(message_buffer, sizeof(message_buffer)));
 }
 
 int main(int argc, char **argv)

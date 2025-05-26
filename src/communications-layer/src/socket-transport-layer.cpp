@@ -133,12 +133,19 @@ ssize_t socket_transport_layer::send(const char *buffer, size_t buffer_size)
 
 ssize_t socket_transport_layer::recv(char *buffer, size_t buffer_size)
 {
-    int ret = read(sending_socket, buffer, buffer_size);
+    int ret = communications_layer::recv(buffer, buffer_size);
+    if (ret < 0)
+    {
+        perror("recv");
+        return ret;
+    }
+
+    ret = read(sending_socket, buffer, buffer_size);
     if (ret == -1)
     {
         perror("read");
-        return (-1);
     }
     printf("socket_transport_layer: recv_message '%s'\r\n", buffer);
-    return communications_layer::recv(buffer, ret);
+
+    return ret;
 }
