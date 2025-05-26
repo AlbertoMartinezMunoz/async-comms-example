@@ -11,10 +11,9 @@ const uint8_t slip_application_layer::ESC_ESC = 0xDD;
 ssize_t slip_application_layer::send(const char *buffer, size_t buffer_size)
 {
     size_t slip_size = buffer_size + 1;
-    uint8_t *message_iterator = (uint8_t *)buffer;
     for (size_t i = 0; i < buffer_size; ++i)
     {
-        if ((message_iterator[i] == END) || (message_iterator[i] == ESC))
+        if ((buffer[i] == (char)END) || (buffer[i] == (char)ESC))
         {
             ++slip_size;
         }
@@ -30,18 +29,18 @@ ssize_t slip_application_layer::send(const char *buffer, size_t buffer_size)
     size_t slip_index = 0;
     for (size_t i = 0; i < buffer_size; ++i)
     {
-        if (message_iterator[i] == END)
+        if (buffer[i] == (char)END)
         {
             this->message[slip_index++] = ESC;
             this->message[slip_index++] = ESC_END;
         }
-        else if (message_iterator[i] == ESC)
+        else if (buffer[i] == (char)ESC)
         {
             this->message[slip_index++] = ESC;
             this->message[slip_index++] = ESC_ESC;
         }
         else
-            this->message[slip_index++] = message_iterator[i];
+            this->message[slip_index++] = buffer[i];
     }
     this->message[slip_size - 1] = END;
 
@@ -50,33 +49,33 @@ ssize_t slip_application_layer::send(const char *buffer, size_t buffer_size)
 
 ssize_t slip_application_layer::recv(char *buffer, size_t buffer_size)
 {
-    uint8_t *message_iterator = (uint8_t *)buffer;
-    size_t slip_size = buffer_size;
-    for (size_t i = 0; i < buffer_size; ++i)
+    int ret = communications_layer::recv(buffer, buffer_size);
+    if (ret < 0)
     {
-        if ((message_iterator[i] == END) || (message_iterator[i] == ESC))
-        {
-            --slip_size;
-        }
+        perror("recv");
+        return ret;
     }
-    this->message = (char *)realloc(this->message, slip_size);
+
     size_t j = 0;
     for (size_t i = 0; i < buffer_size; i++)
     {
-        if (message_iterator[i] == END)
-            return communications_layer::recv(this->message, slip_size);
-        else if (message_iterator[i] == ESC)
+        if (buffer[i] == (char)END)
+        {
+            printf("recv: '%s' [%zu]\r\n", buffer, j);
+            return j;
+        }
+        else if (buffer[i] == (char)ESC)
         {
             i = i + 1;
-            if (message_iterator[i] == ESC_ESC)
-                this->message[j++] = ESC;
-            else if (message_iterator[i] == ESC_END)
-                this->message[j++] = END;
+            if (buffer[i] == (char)ESC_ESC)
+                buffer[j++] = ESC;
+            else if (buffer[i] == (char)ESC_END)
+                buffer[j++] = END;
             else
                 return -1;
         }
         else
-            this->message[j++] = message_iterator[i];
+            buffer[j++] = buffer[i];
     }
     return -1;
 }
