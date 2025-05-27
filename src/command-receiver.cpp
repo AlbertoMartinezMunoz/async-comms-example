@@ -45,8 +45,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 
     transport_layer = new socket_transport_layer();
     application_layer = new slip_application_layer();
-    application_layer->set_next_send_layer(transport_layer);
-    application_layer->set_next_recv_layer(transport_layer);
+    application_layer->set_next_communications_layer(transport_layer);
     slow_cmd = new slow_cmd_processor();
     fast_cmd = new fast_cmd_processor();
     cmd_mngr = new command_manager(application_layer, application_layer);
