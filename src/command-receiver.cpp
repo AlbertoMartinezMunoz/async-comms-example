@@ -8,8 +8,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
+
 #include "message-connection.h"
-// #include <socket-comms/socket-comms.hpp>
 #include <command-manager/command-manager.hpp>
 #include <command-manager/command-observer.hpp>
 #include <communications-layer/socket-transport-layer.hpp>
