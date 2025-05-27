@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
+
 #include "message-connection.h"
 #include <command-manager/command-manager.hpp>
 #include <communications-layer/communications-layer.hpp>
