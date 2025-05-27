@@ -22,7 +22,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     transport_layer = new socket_transport_layer();
     application_layer = new slip_application_layer();
     application_layer->set_next_communications_layer(transport_layer);
-    cmd_mngr = new command_manager(application_layer, application_layer);
+    cmd_mngr = new command_manager(application_layer);
 
     ret = transport_layer->connect_socket(SOCKET_NAME);
     if (ret == -1)

@@ -8,7 +8,7 @@
 class command_manager: public communications_layer_observer
 {
 public:
-    command_manager(communications_layer_interface *application_layer, communications_layer_interface *transport_layer);
+    command_manager(communications_layer_interface *communications_layer);
 
     ~command_manager()
     {
@@ -35,8 +35,8 @@ public:
     static constexpr char shutdown_cmd[] = "SHUTDOWN COMMAND";
 
 private:
-    communications_layer_interface *application_layer;
-    communications_layer_interface *transport_layer;
+    communications_layer_interface *communications_layer;
+
     command_observer *fast_cmd_observer;
     command_observer *slow_cmd_observer;
     command_observer *shutdown_cmd_observer;
