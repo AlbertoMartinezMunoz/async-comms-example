@@ -13,7 +13,6 @@ public:
     message_manager(communications_layer *application_layer, communications_layer *transport_layer)
         : application_layer(application_layer), transport_layer(transport_layer)
     {
-        this->application_layer->set_next_send_layer(this->transport_layer);
     }
 
     int send_fast_command()

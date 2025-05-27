@@ -11,8 +11,6 @@
 class communications_layer_interface
 {
 public:
-    virtual communications_layer_interface *set_next_send_layer(communications_layer_interface *handler) = 0;
-    virtual communications_layer_interface *set_next_recv_layer(communications_layer_interface *handler) = 0;
     virtual communications_layer_interface *set_next_communications_layer(communications_layer_interface *handler) = 0;
     virtual ssize_t send(const char *buffer, size_t buffer_size) = 0;
     virtual ssize_t recv(char *buffer, size_t buffer_size) = 0;
@@ -29,11 +27,9 @@ class communications_layer : public communications_layer_interface
      */
 private:
     communications_layer_interface *next_communications_layer_;
-    communications_layer_interface *next_send_layer_;
-    communications_layer_interface *next_recv_layer_;
 
 public:
-    communications_layer() : next_communications_layer_(nullptr), next_send_layer_(nullptr), next_recv_layer_(nullptr)
+    communications_layer() : next_communications_layer_(nullptr)
     {
     }
 
@@ -43,23 +39,11 @@ public:
         return layer;
     }
 
-    communications_layer_interface *set_next_send_layer(communications_layer_interface *layer) override
-    {
-        this->next_send_layer_ = layer;
-        return layer;
-    }
-
-    communications_layer_interface *set_next_recv_layer(communications_layer_interface *layer) override
-    {
-        this->next_recv_layer_ = layer;
-        return layer;
-    }
-
     ssize_t send(const char *buffer, size_t size) override
     {
-        if (this->next_send_layer_)
+        if (this->next_communications_layer_)
         {
-            return this->next_send_layer_->send(buffer, size);
+            return this->next_communications_layer_->send(buffer, size);
         }
 
         return size;
@@ -67,9 +51,9 @@ public:
 
     ssize_t recv(char *buffer, size_t size) override
     {
-        if (this->next_recv_layer_)
+        if (this->next_communications_layer_)
         {
-            return this->next_recv_layer_->recv(buffer, size);
+            return this->next_communications_layer_->recv(buffer, size);
         }
 
         return size;
