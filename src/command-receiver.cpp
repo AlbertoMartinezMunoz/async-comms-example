@@ -48,7 +48,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     application_layer->set_next_communications_layer(transport_layer);
     slow_cmd = new slow_cmd_processor();
     fast_cmd = new fast_cmd_processor();
-    cmd_mngr = new command_manager(application_layer, application_layer);
+    cmd_mngr = new command_manager(application_layer);
     cmd_mngr->subscribe_slow_cmd(slow_cmd);
     cmd_mngr->subscribe_fast_cmd(fast_cmd);
 
