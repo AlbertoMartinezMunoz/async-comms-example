@@ -40,6 +40,7 @@ ssize_t read_mock(__attribute__((unused)) int fd, void *buf, __attribute__((unus
 class CommunicationsLayerMock : public communications_layer_interface
 {
 public:
+    MOCK_METHOD(communications_layer_interface *, set_next_communications_layer, (communications_layer_interface * handler), (override));
     MOCK_METHOD(communications_layer_interface *, set_next_send_layer, (communications_layer_interface * handler), (override));
     MOCK_METHOD(communications_layer_interface *, set_next_recv_layer, (communications_layer_interface * handler), (override));
     MOCK_METHOD(ssize_t, send, (const char *buffer, size_t buffer_size), (override));
