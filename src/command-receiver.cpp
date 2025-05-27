@@ -13,6 +13,7 @@
 #include <command-manager/command-manager.hpp>
 #include <command-manager/command-observer.hpp>
 #include <communications-layer/socket-transport-layer.hpp>
+#include <communications-layer/slip-application-layer.hpp>
 
 class slow_cmd_processor: public command_observer
 {
@@ -37,19 +38,18 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     int ret;
     // char buffer[BUFFER_SIZE];
     socket_transport_layer *transport_layer;
-    // slip_application_layer *application_layer;
+    slip_application_layer *application_layer;
     slow_cmd_processor *slow_cmd;
     fast_cmd_processor *fast_cmd;
     command_manager *cmd_mngr;
 
     transport_layer = new socket_transport_layer();
-    // application_layer = new slip_application_layer();
-    // application_layer->set_next_send_layer(transport_layer);
+    application_layer = new slip_application_layer();
+    application_layer->set_next_send_layer(transport_layer);
+    application_layer->set_next_recv_layer(transport_layer);
     slow_cmd = new slow_cmd_processor();
     fast_cmd = new fast_cmd_processor();
-    // TBD: add after enabling SLIP in the command-receiver executable
-    // transport_layer->set_next_recv_layer(application_layer);
-    cmd_mngr = new command_manager(transport_layer, transport_layer);
+    cmd_mngr = new command_manager(application_layer, application_layer);
     cmd_mngr->subscribe_slow_cmd(slow_cmd);
     cmd_mngr->subscribe_fast_cmd(fast_cmd);
 

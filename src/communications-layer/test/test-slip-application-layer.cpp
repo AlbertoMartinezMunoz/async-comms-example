@@ -50,12 +50,12 @@ public:
     size_t expected_msg_size;
 };
 
-char decoded_simple_msg[] = {'S', 'i', 'm', 'p', 'l', 'e', ' ', 'M', 'e', 's', 's', 'a', 'g', 'e'};
-char encoded_simple_msg[] = {'S', 'i', 'm', 'p', 'l', 'e', ' ', 'M', 'e', 's', 's', 'a', 'g', 'e', (char)slip_application_layer::END};
-char decoded_escape_end_msg[] = {'E', 's', 'c', 'a', 'p', 'e', 'd', ' ', (char)slip_application_layer::END, ' ', 'M', 'e', 's', 's', 'a', 'g', 'e'};
-char encoded_escape_end_msg[] = {'E', 's', 'c', 'a', 'p', 'e', 'd', ' ', (char)slip_application_layer::ESC, (char)slip_application_layer::ESC_END, ' ', 'M', 'e', 's', 's', 'a', 'g', 'e', (char)slip_application_layer::END};
-char decoded_escape_esc_msg[] = {'E', 's', 'c', 'a', 'p', 'e', 'd', ' ', (char)slip_application_layer::ESC, ' ', 'M', 'e', 's', 's', 'a', 'g', 'e'};
-char encoded_escape_esc_msg[] = {'E', 's', 'c', 'a', 'p', 'e', 'd', ' ', (char)slip_application_layer::ESC, (char)slip_application_layer::ESC_ESC, ' ', 'M', 'e', 's', 's', 'a', 'g', 'e', (char)slip_application_layer::END};
+char decoded_simple_msg[] = {'S', 'i', 'm', 'p', 'l', 'e', ' ', 'M', 'e', 's', 's', 'a', 'g', 'e', '\0'};
+char encoded_simple_msg[] = {'S', 'i', 'm', 'p', 'l', 'e', ' ', 'M', 'e', 's', 's', 'a', 'g', 'e', '\0', (char)slip_application_layer::END};
+char decoded_escape_end_msg[] = {'E', 's', 'c', 'a', 'p', 'e', 'd', ' ', (char)slip_application_layer::END, ' ', 'M', 'e', 's', 's', 'a', 'g', 'e', '\0'};
+char encoded_escape_end_msg[] = {'E', 's', 'c', 'a', 'p', 'e', 'd', ' ', (char)slip_application_layer::ESC, (char)slip_application_layer::ESC_END, ' ', 'M', 'e', 's', 's', 'a', 'g', 'e', '\0', (char)slip_application_layer::END};
+char decoded_escape_esc_msg[] = {'E', 's', 'c', 'a', 'p', 'e', 'd', ' ', (char)slip_application_layer::ESC, ' ', 'M', 'e', 's', 's', 'a', 'g', 'e', '\0'};
+char encoded_escape_esc_msg[] = {'E', 's', 'c', 'a', 'p', 'e', 'd', ' ', (char)slip_application_layer::ESC, (char)slip_application_layer::ESC_ESC, ' ', 'M', 'e', 's', 's', 'a', 'g', 'e', '\0', (char)slip_application_layer::END};
 
 class TestSendSlipTransportLayer : public testing::TestWithParam<TestSlipTransportLayerParams>
 {
@@ -99,16 +99,12 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(TestSendSlipTransportLayer, WhenSendingTwoDatagramIfOkItShouldAddSlipEnd)
 {
     Sequence seq;
-    char first_message[] = {0x01, 0x05, 0x06, 0x10};
-    char second_message[] = {0x01, 0x05, 0x06, 0x11, 0x50};
-    char expected_first_message[] = {0x01, 0x05, 0x06, 0x10, (char)slip_application_layer::END};
-    char expected_second_message[] = {0x01, 0x05, 0x06, 0x11, 0x50, (char)slip_application_layer::END};
 
-    EXPECT_CALL(*comms_layer_mock, send(_, sizeof(expected_first_message))).With(Args<0, 1>(ElementsAreArray(expected_first_message, sizeof(expected_first_message)))).Times(1).InSequence(seq).WillOnce(Return(sizeof(expected_first_message)));
-    EXPECT_CALL(*comms_layer_mock, send(_, sizeof(expected_second_message))).With(Args<0, 1>(ElementsAreArray(expected_second_message, sizeof(expected_second_message)))).Times(1).InSequence(seq).WillOnce(Return(sizeof(expected_second_message)));
+    EXPECT_CALL(*comms_layer_mock, send(_, sizeof(encoded_escape_end_msg))).With(Args<0, 1>(ElementsAreArray(encoded_escape_end_msg, sizeof(encoded_escape_end_msg)))).Times(1).InSequence(seq).WillOnce(Return(sizeof(encoded_escape_end_msg)));
+    EXPECT_CALL(*comms_layer_mock, send(_, sizeof(encoded_simple_msg))).With(Args<0, 1>(ElementsAreArray(encoded_simple_msg, sizeof(encoded_simple_msg)))).Times(1).InSequence(seq).WillOnce(Return(sizeof(encoded_simple_msg)));
 
-    ASSERT_EQ(sizeof(expected_first_message), layer->send(first_message, sizeof(first_message)));
-    ASSERT_EQ(sizeof(expected_second_message), layer->send(second_message, sizeof(second_message)));
+    ASSERT_EQ(sizeof(encoded_escape_end_msg), layer->send(decoded_escape_end_msg, sizeof(decoded_escape_end_msg)));
+    ASSERT_EQ(sizeof(encoded_simple_msg), layer->send(decoded_simple_msg, sizeof(decoded_simple_msg)));
 }
 
 class TestRecvSlipTransportLayer : public testing::TestWithParam<TestSlipTransportLayerParams>
