@@ -2,17 +2,23 @@
 #include <cstring>
 
 command_manager::command_manager(communications_layer_interface *application_layer, communications_layer_interface *transport_layer)
-    : application_layer(application_layer), transport_layer(transport_layer), fast_cmd_observer(nullptr), slow_cmd_observer(nullptr) {}
+    : application_layer(application_layer), transport_layer(transport_layer), fast_cmd_observer(nullptr), slow_cmd_observer(nullptr), shutdown_cmd_observer(nullptr) {}
 
 int command_manager::send_simple_cmd(const char *cmd, size_t cmd_size)
 {
-    char response[16];
+    char response[32];
 
+    printf("command_manager::send_simple_cmd send '%s' [%zu]\r\n", cmd, cmd_size);
     int ret = application_layer->send(cmd, cmd_size);
-    if ((size_t)ret != cmd_size)
+    if (ret < (int)cmd_size)
+    {
+        printf("command_manager::send_simple_cmd send error '%d'\r\n", ret);
         return -1;
+    }
 
+    printf("command_manager::send_simple_cmd wait ack\r\n");
     ret = transport_layer->recv(response, sizeof(response));
+    printf("command_manager::send_simple_cmd ack received[%d]\r\n", ret);
     if (ret < 0)
         return ret;
     else if (strncmp(nack, response, strlen(nack)) == 0)
@@ -37,13 +43,22 @@ int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer
 {
     char response[32];
 
+    printf("command_manager::send_slow_cmd send '%s' [%zu]\r\n", slow_cmd, sizeof(slow_cmd));
     int ret = application_layer->send(slow_cmd, sizeof(slow_cmd));
-    if (ret < 0)
+    if (ret < (int)sizeof(slow_cmd))
+    {
+        printf("command_manager::send_slow_cmd send error '%d'\r\n", ret);
         return -1;
+    }
 
+    printf("command_manager::send_slow_cmd wait ack\r\n");
     ret = transport_layer->recv(response, sizeof(response));
+    printf("command_manager::send_slow_cmd ack received [%d]\r\n", ret);
     if (ret < 0)
+    {
+        printf("command_manager::send_slow_cmd ack received '%s' [%d]\r\n", response, ret);
         return ret;
+    }
     else if (strncmp(nack, response, strlen(nack)) == 0)
         return 1;
     else if (ret > (int)response_buffer_size)
@@ -67,10 +82,14 @@ int command_manager::incoming_message() const
 
     int ret = transport_layer->recv(command, sizeof(command));
     if (ret < 0)
+    {
+        printf("command_manager::incoming_message recv error'%d'\r\n", ret);
         return ret;
+    }
 
     ret = -1;
     command[sizeof(command) - 1] = '\0';
+    printf("command_manager::incoming_message '%s'\r\n", command);
     if (strcmp(fast_cmd, command) == 0)
         ret = fast_cmd_observer->process_command();
     else if (strcmp(slow_cmd, command) == 0)
@@ -78,6 +97,7 @@ int command_manager::incoming_message() const
     else if (strcmp(shutdown_cmd, command) == 0)
         ret = shutdown_cmd_observer->process_command();
 
+    printf("command_manager:incoming_message processed '%s' => %d\r\n", command, ret);
     if (ret == 0)
         application_layer->send(ack, sizeof(ack));
     else

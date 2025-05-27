@@ -99,7 +99,7 @@ int socket_transport_layer::listen_connections(
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 1; i++)
     {
         sending_socket = accept(listening_socket, NULL, NULL);
         if (sending_socket == -1)
@@ -107,6 +107,7 @@ int socket_transport_layer::listen_connections(
             perror("accept");
             return -1;
         }
+        printf("socket_transport_layer::listen_connections: incoming connection'\r\n");
 
         in_msg_observer->incoming_message();
 
@@ -121,13 +122,14 @@ int socket_transport_layer::listen_connections(
 
 ssize_t socket_transport_layer::send(const char *buffer, size_t buffer_size)
 {
-    printf("socket_transport_layer: send_message '%s'\r\n", buffer);
     int ret = write(sending_socket, buffer, buffer_size);
     if (ret == -1)
     {
+        printf("socket_transport_layer::send error\r\n");
         perror("write");
         return (-1);
     }
+    printf("socket_transport_layer::send: '%s' [%d / %zu]\r\n", buffer, ret, buffer_size);
     return communications_layer::send(buffer, ret);
 }
 
@@ -145,7 +147,7 @@ ssize_t socket_transport_layer::recv(char *buffer, size_t buffer_size)
     {
         perror("read");
     }
-    printf("socket_transport_layer: recv_message '%s'\r\n", buffer);
+    printf("socket_transport_layer::recv '%s' [%d / %zu]\r\n", buffer, ret, buffer_size);
 
     return ret;
 }
