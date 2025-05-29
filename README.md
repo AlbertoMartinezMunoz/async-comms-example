@@ -46,6 +46,73 @@ sudo apt-get update
 sudo apt-get -y install valgrind
 ```
 
+### Robot Framework
+
+#### Python
+
+Install Python3
+
+```shell
+sudo apt update
+sudo apt install python3
+```
+
+Install pip3
+
+```shell
+sudo apt-get install python3-pip
+python3 -m pip install --user --upgrade pip
+```
+
+#### Python Virtual Environment
+
+Install venv
+
+```shell
+sudo apt-get install python3-venv
+```
+
+The scripts in this folder are designed to be set up using a Python virtual environment (`venv`). The first time you want to set up the application on Linux, execute the steps below on a shell:
+
+```sh
+# Set up a virtual environment
+python3 -m venv .venv
+
+# Activate it
+. .venv/bin/activate
+
+# Install necessary packages and upgrade
+pip install -r requirements.txt --upgrade
+```
+
+Please do _not_ use `sudo` within a virtual environment; it will not work as intended. Instead, set up your system correctly so that you do not need root access to run the script.
+
+**To use the application again at a later time, you only need to perform the activation step.**
+
+#### Requirements File
+
+**While in the python virtuel anvironment**, you can use the following code to generate / update a pip requirements.txt file:
+
+```console
+(.venv) async-comms-example$ pip freeze > requirements.txt
+```
+
+#### Install Robot Framework
+
+Robot Framework is implemented with Python, so you need to have Python installed.
+
+**While in the python virtuel anvironment**, installing Robot Framework with pip is simple:
+
+```console
+(.venv) async-comms-example$ pip install robotframework
+```
+
+To check that the installation was successful, run
+
+```console
+robot --version
+```
+
 ## Build
 
 ### Release
