@@ -37,3 +37,6 @@ docs/**/*.png
 
 # Build folders
 build*/
+
+# Python Environment
+.venv/
