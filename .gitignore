@@ -40,3 +40,6 @@ build*/
 
 # Python Environment
 .venv/
+
+# Robot Framework Results
+atest-results/

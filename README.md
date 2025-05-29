@@ -167,6 +167,14 @@ All in one line:
 cmake . -DUTEST=ON -H. -Bbuildtest; cd buildtest; make -j3 && ctest -T memcheck -VV; cd ..
 ```
 
+### Acceptance Tests
+
+To run the robot framework acceptance tests, **you have to activate the python virtual environment** and run:
+
+```console
+robot --loglevel TRACE:INFO --exclude EXCL --skip SKIP --removekeywords tag:REMOVE --flattenkeywords tag:FLAT --outputdir ./atest-results ./atest/
+```
+
 ### Build C4 diagrams
 
 The C4 diagrams are made using [PlantUML](https://plantuml.com/). First, you have to install the `plantuml` package:
