@@ -11,19 +11,79 @@
 #include <communications-layer/communications-layer.hpp>
 #include <communications-layer/socket-transport-layer.hpp>
 #include <communications-layer/slip-application-layer.hpp>
+#include <interactive-console/interactive-console.hpp>
+#include <interactive-console/interactive-console-command.hpp>
+
+class shutdown_command : public interactive_console_command
+{
+public:
+    shutdown_command(command_manager *cmd_mngr)
+        : cmd_mngr(cmd_mngr) {}
+
+    void execute() const override
+    {
+        cmd_mngr->send_shutdown_cmd();
+    }
+
+private:
+    command_manager *cmd_mngr;
+};
+
+class fast_command : public interactive_console_command
+{
+public:
+    fast_command(command_manager *cmd_mngr)
+        : cmd_mngr(cmd_mngr) {}
+
+    void execute() const override
+    {
+        cmd_mngr->send_fast_cmd();
+    }
+
+private:
+    command_manager *cmd_mngr;
+};
+
+class slow_command : public interactive_console_command
+{
+public:
+    slow_command(command_manager *cmd_mngr)
+        : cmd_mngr(cmd_mngr) {}
+
+    void execute() const override
+    {
+        char hello[] = "Hello World!!!";
+        cmd_mngr->send_slow_cmd(hello, sizeof(hello));
+    }
+
+private:
+    command_manager *cmd_mngr;
+};
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 {
     int ret;
-    char buffer[BUFFER_SIZE];
     socket_transport_layer *transport_layer;
     slip_application_layer *application_layer;
     command_manager *cmd_mngr;
-
+    interactive_console *console;
+    interactive_console_command *shutdown_cmd;
+    interactive_console_command *fast_cmd;
+    interactive_console_command *slow_cmd;
+    
     transport_layer = new socket_transport_layer();
     application_layer = new slip_application_layer();
     application_layer->set_next_communications_layer(transport_layer);
     cmd_mngr = new command_manager(application_layer);
+
+    shutdown_cmd = new shutdown_command(cmd_mngr);
+    fast_cmd = new fast_command(cmd_mngr);
+    slow_cmd = new slow_command(cmd_mngr);
+
+    console = new interactive_console();
+    console->set_shutdown_command(shutdown_cmd);
+    console->set_fast_command(fast_cmd);
+    console->set_slow_command(slow_cmd);
 
     ret = transport_layer->connect_socket(SOCKET_NAME);
     if (ret == -1)
@@ -31,14 +91,17 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    ret = cmd_mngr->send_fast_cmd();
-    printf("send_fast_cmd: %d. '%s'\r\n", ret, buffer);
+    console->listen();
 
     transport_layer->disconnect_socket();
 
+    delete console;
     delete cmd_mngr;
     delete transport_layer;
     delete application_layer;
+    delete shutdown_cmd;
+    delete fast_cmd;
+    delete slow_cmd;
 
     exit(EXIT_SUCCESS);
 }
