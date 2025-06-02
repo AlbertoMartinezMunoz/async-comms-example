@@ -58,7 +58,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    transport_layer->disconnect();
     delete cmd_mngr;
     delete transport_layer;
     delete slow_cmd;

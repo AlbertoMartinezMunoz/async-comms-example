@@ -13,8 +13,6 @@ public:
 
     int disconnect_socket();
 
-    int disconnect();
-
     int listen_connections(const char *socket_path, communications_layer_observer *in_msg_observer);
 
     ssize_t send(const char *buffer, size_t buffer_size) override;
