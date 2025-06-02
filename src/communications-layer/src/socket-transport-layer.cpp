@@ -38,15 +38,6 @@ int socket_transport_layer::disconnect_socket()
     return 0;
 }
 
-int socket_transport_layer::disconnect()
-{
-    close(listening_socket);
-    unlink(socket_path);
-    free(socket_path);
-
-    return 0;
-}
-
 int socket_transport_layer::listen_connections(
     const char *path,
     communications_layer_observer *in_msg_observer)
@@ -99,7 +90,7 @@ int socket_transport_layer::listen_connections(
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 2; i++)
     {
         sending_socket = accept(listening_socket, NULL, NULL);
         if (sending_socket == -1)
@@ -107,7 +98,7 @@ int socket_transport_layer::listen_connections(
             perror("accept");
             return -1;
         }
-        printf("socket_transport_layer::listen_connections: incoming connection'\r\n");
+        printf("socket_transport_layer::listen_connections: incoming connection\r\n");
 
         in_msg_observer->incoming_message();
 
@@ -116,6 +107,10 @@ int socket_transport_layer::listen_connections(
     }
 
     printf("Stop Listening\r\n");
+
+    close(listening_socket);
+    unlink(socket_path);
+    free(socket_path);
 
     return 0;
 }
