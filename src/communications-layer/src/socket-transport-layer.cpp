@@ -6,6 +6,12 @@
 #include <cstdlib>
 #include <unistd.h>
 
+#include <chrono>
+#include <thread>
+
+socket_transport_layer::socket_transport_layer()
+    : is_listening(false) {}
+
 int socket_transport_layer::connect_socket(const char *socket_path)
 {
     struct sockaddr_un addr;
@@ -90,7 +96,8 @@ int socket_transport_layer::listen_connections(
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; i < 2; i++)
+    is_listening = true;
+    while(is_listening)
     {
         sending_socket = accept(listening_socket, NULL, NULL);
         if (sending_socket == -1)
@@ -102,7 +109,7 @@ int socket_transport_layer::listen_connections(
 
         in_msg_observer->incoming_message();
 
-        sleep(1);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         close(sending_socket);
     }
 
@@ -113,6 +120,12 @@ int socket_transport_layer::listen_connections(
     free(socket_path);
 
     return 0;
+}
+
+void socket_transport_layer::stop_listening()
+{
+    printf("socket_transport_layer::stop_listening\r\n");
+    is_listening = false;
 }
 
 ssize_t socket_transport_layer::send(const char *buffer, size_t buffer_size)
