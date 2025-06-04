@@ -13,73 +13,7 @@
 #include <communications-layer/slip-application-layer.hpp>
 #include <interactive-console/interactive-console.hpp>
 #include <interactive-console/interactive-console-command.hpp>
-
-class shutdown_command : public interactive_console_command
-{
-public:
-    shutdown_command(command_manager *cmd_mngr, socket_transport_layer *socket)
-        : cmd_mngr(cmd_mngr), socket(socket) {}
-
-    void execute() const override
-    {
-        int ret = socket->connect_socket(SOCKET_NAME);
-        if (ret == -1)
-        {
-            exit(EXIT_FAILURE);
-        }
-        cmd_mngr->send_shutdown_cmd();
-        socket->disconnect_socket();
-    }
-
-private:
-    command_manager *cmd_mngr;
-    socket_transport_layer *socket;
-};
-
-class fast_command : public interactive_console_command
-{
-public:
-    fast_command(command_manager *cmd_mngr, socket_transport_layer *socket)
-        : cmd_mngr(cmd_mngr), socket(socket) {}
-
-    void execute() const override
-    {
-        int ret = socket->connect_socket(SOCKET_NAME);
-        if (ret == -1)
-        {
-            exit(EXIT_FAILURE);
-        }
-        cmd_mngr->send_fast_cmd();
-        socket->disconnect_socket();
-    }
-
-private:
-    command_manager *cmd_mngr;
-    socket_transport_layer *socket;
-};
-
-class slow_command : public interactive_console_command
-{
-public:
-    slow_command(command_manager *cmd_mngr, socket_transport_layer *socket)
-        : cmd_mngr(cmd_mngr), socket(socket) {}
-
-    void execute() const override
-    {
-        int ret = socket->connect_socket(SOCKET_NAME);
-        if (ret == -1)
-        {
-            exit(EXIT_FAILURE);
-        }
-        char hello[] = "Hello World!!!";
-        cmd_mngr->send_slow_cmd(hello, sizeof(hello));
-        socket->disconnect_socket();
-    }
-
-private:
-    command_manager *cmd_mngr;
-    socket_transport_layer *socket;
-};
+#include <interactive-commands/interactive-commands.hpp>
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 {
@@ -97,9 +31,9 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     application_layer->set_next_communications_layer(transport_layer);
     cmd_mngr = new command_manager(application_layer);
 
-    shutdown_cmd = new shutdown_command(cmd_mngr, transport_layer);
-    fast_cmd = new fast_command(cmd_mngr, transport_layer);
-    slow_cmd = new slow_command(cmd_mngr, transport_layer);
+    shutdown_cmd = new shutdown_command(cmd_mngr, transport_layer, SOCKET_NAME);
+    fast_cmd = new fast_command(cmd_mngr, transport_layer, SOCKET_NAME);
+    slow_cmd = new slow_command(cmd_mngr, transport_layer, SOCKET_NAME);
 
     console = new interactive_console();
     console->set_shutdown_command(shutdown_cmd);
