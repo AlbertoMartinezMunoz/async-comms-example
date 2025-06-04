@@ -9,3 +9,6 @@ target_link_libraries(command-sender command-manager-lib communications-layer-li
 
 add_executable(command-receiver command-receiver.cpp)
 target_link_libraries(command-receiver command-manager-lib communications-layer-lib)
+
+add_executable(command-manager command-manager.cpp)
+target_link_libraries(command-manager command-manager-lib communications-layer-lib interactive-console-lib)
