@@ -16,106 +16,44 @@
 #include <communications-layer/communications-layer.hpp>
 #include <communications-layer/socket-transport-layer.hpp>
 #include <communications-layer/slip-application-layer.hpp>
+#include <interactive-commands/interactive-commands.hpp>
 #include <interactive-console/interactive-console.hpp>
 #include <interactive-console/interactive-console-command.hpp>
 
-class slow_cmd_processor: public command_observer
+class slow_cmd_processor : public command_observer
 {
 public:
-    int process_command() override {
+    int process_command() override
+    {
         printf("********************** Received Slow Command **********************\r\n");
         return 0;
     }
 };
 
-class fast_cmd_processor: public command_observer
+class fast_cmd_processor : public command_observer
 {
 public:
-    int process_command() override {
+    int process_command() override
+    {
         printf("********************** Received Fast Command **********************\r\n");
         return 0;
     }
 };
 
-class shutdown_cmd_processor: public command_observer
+class shutdown_cmd_processor : public command_observer
 {
 public:
     shutdown_cmd_processor(socket_transport_layer *socket)
-        :socket(socket){}
+        : socket(socket) {}
 
-    int process_command() override {
+    int process_command() override
+    {
         printf("********************** Received Shutdown Command **********************\r\n");
         socket->stop_listening();
         return 0;
     }
-private:
-    socket_transport_layer *socket;
-};
-
-class shutdown_command : public interactive_console_command
-{
-public:
-    shutdown_command(command_manager *cmd_mngr, socket_transport_layer *socket)
-        : cmd_mngr(cmd_mngr), socket(socket) {}
-
-    void execute() const override
-    {
-        int ret = socket->connect_socket(SOCKET_NAME);
-        if (ret == -1)
-        {
-            exit(EXIT_FAILURE);
-        }
-        cmd_mngr->send_shutdown_cmd();
-        socket->disconnect_socket();
-    }
 
 private:
-    command_manager *cmd_mngr;
-    socket_transport_layer *socket;
-};
-
-class fast_command : public interactive_console_command
-{
-public:
-    fast_command(command_manager *cmd_mngr, socket_transport_layer *socket)
-        : cmd_mngr(cmd_mngr), socket(socket) {}
-
-    void execute() const override
-    {
-        int ret = socket->connect_socket(SOCKET_NAME);
-        if (ret == -1)
-        {
-            exit(EXIT_FAILURE);
-        }
-        cmd_mngr->send_fast_cmd();
-        socket->disconnect_socket();
-    }
-
-private:
-    command_manager *cmd_mngr;
-    socket_transport_layer *socket;
-};
-
-class slow_command : public interactive_console_command
-{
-public:
-    slow_command(command_manager *cmd_mngr, socket_transport_layer *socket)
-        : cmd_mngr(cmd_mngr), socket(socket) {}
-
-    void execute() const override
-    {
-        int ret = socket->connect_socket(SOCKET_NAME);
-        if (ret == -1)
-        {
-            exit(EXIT_FAILURE);
-        }
-        char hello[] = "Hello World!!!";
-        cmd_mngr->send_slow_cmd(hello, sizeof(hello));
-        socket->disconnect_socket();
-    }
-
-private:
-    command_manager *cmd_mngr;
     socket_transport_layer *socket;
 };
 
@@ -147,10 +85,9 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     cmd_mngr->subscribe_fast_cmd(fast_cmd);
     cmd_mngr->subscribe_shutdown_cmd(shutdown_cmd);
 
-
-    shutdown_cli_cmd = new shutdown_command(cmd_mngr, transport_layer);
-    fast_cli_cmd = new fast_command(cmd_mngr, transport_layer);
-    slow_cli_cmd = new slow_command(cmd_mngr, transport_layer);
+    shutdown_cli_cmd = new shutdown_command(cmd_mngr, transport_layer, SOCKET_NAME);
+    fast_cli_cmd = new fast_command(cmd_mngr, transport_layer, SOCKET_NAME);
+    slow_cli_cmd = new slow_command(cmd_mngr, transport_layer, SOCKET_NAME);
 
     console = new interactive_console();
     console->set_shutdown_command(shutdown_cli_cmd);
@@ -161,7 +98,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 
     console->listen();
 
-    t1.join(); 
+    t1.join();
 
     delete cmd_mngr;
     delete transport_layer;
@@ -172,7 +109,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     delete shutdown_cli_cmd;
     delete fast_cli_cmd;
     delete slow_cli_cmd;
-
 
     exit(EXIT_SUCCESS);
 }
