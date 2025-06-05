@@ -3,14 +3,10 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-// #include <sys/socket.h>
-// #include <sys/un.h>
-// #include <unistd.h>
 #include <thread>
+#include <argp.h>
 
-#include "message-connection.h"
+#include <arguments-parser/arguments-parser.hpp>
 #include <command-manager/command-manager.hpp>
 #include <command-manager/command-observer.hpp>
 #include <communications-layer/communications-layer.hpp>
@@ -72,6 +68,12 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     interactive_console_command *fast_cli_cmd;
     interactive_console_command *slow_cli_cmd;
 
+    arguments_parser *argparser;
+
+    argparser = new arguments_parser();
+
+    argparser->parse(argc, argv);
+
     transport_layer = new socket_transport_layer();
     application_layer = new slip_application_layer();
     application_layer->set_next_communications_layer(transport_layer);
@@ -85,16 +87,16 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     cmd_mngr->subscribe_fast_cmd(fast_cmd);
     cmd_mngr->subscribe_shutdown_cmd(shutdown_cmd);
 
-    shutdown_cli_cmd = new shutdown_command(cmd_mngr, transport_layer, SOCKET_NAME);
-    fast_cli_cmd = new fast_command(cmd_mngr, transport_layer, SOCKET_NAME);
-    slow_cli_cmd = new slow_command(cmd_mngr, transport_layer, SOCKET_NAME);
+    shutdown_cli_cmd = new shutdown_command(cmd_mngr, transport_layer, argparser->get_remote_path());
+    fast_cli_cmd = new fast_command(cmd_mngr, transport_layer, argparser->get_remote_path());
+    slow_cli_cmd = new slow_command(cmd_mngr, transport_layer, argparser->get_remote_path());
 
     console = new interactive_console();
     console->set_shutdown_command(shutdown_cli_cmd);
     console->set_fast_command(fast_cli_cmd);
     console->set_slow_command(slow_cli_cmd);
 
-    std::thread t1(&socket_transport_layer::listen_connections, transport_layer, SOCKET_NAME, cmd_mngr);
+    std::thread t1(&socket_transport_layer::listen_connections, transport_layer, argparser->get_local_path(), cmd_mngr);
 
     console->listen();
 
@@ -109,6 +111,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     delete shutdown_cli_cmd;
     delete fast_cli_cmd;
     delete slow_cli_cmd;
+    delete argparser;
 
     exit(EXIT_SUCCESS);
 }
