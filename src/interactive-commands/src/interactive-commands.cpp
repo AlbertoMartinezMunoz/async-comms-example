@@ -13,6 +13,7 @@ void shutdown_command::execute() const
     }
     cmd_mngr->send_shutdown_cmd();
     socket->disconnect_socket();
+    socket->stop_listening();
 }
 
 fast_command::fast_command(command_manager *cmd_mngr, socket_transport_layer *socket, const char *socket_path)
