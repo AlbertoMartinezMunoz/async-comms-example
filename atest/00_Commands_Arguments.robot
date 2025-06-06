@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation    A test suite for send and receive commands between two different processes at the same time.
+Documentation    A test suite for parsing the arguments using when starting the command manager
 ...              Will be used for acceptance tests
 
 Library          OperatingSystem
