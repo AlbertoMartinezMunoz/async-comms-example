@@ -16,3 +16,8 @@ Test Setup
 
 Test Teardown
     Terminate All Processes    kill=true
+
+Get ${process} stdout file
+    ${error_message}    Get File          ./atest-results/tmp/${process}stdout.txt
+                        Should Not Be Empty    ${error_message}
+                        RETURN                 ${error_message}
