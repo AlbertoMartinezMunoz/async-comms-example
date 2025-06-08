@@ -52,7 +52,7 @@ User launchs it with "${option}" option
     Start Process    ${process_command}    ${option}    alias=master_process    stdout=./atest-results/tmp/stdout.txt    stderr=./atest-results/tmp/stdout.txt
 
 Command-manager will return
-    Wait For Process             handle=master_process
+    Wait For Process             handle=master_process    timeout=300ms
     Process Should Be Stopped    handle=master_process
 
 Help message is printed
