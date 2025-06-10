@@ -2,54 +2,96 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <cerrno>
 #include <readline/readline.h>
 #include <readline/history.h>
 
-interactive_console::interactive_console(void)
-    : shutdown_command(nullptr), fast_command(nullptr), slow_command(nullptr) {}
+#include <signal.h>
+
+static bool running;
+
+static interactive_console_command *shutdown_command = nullptr;
+static interactive_console_command *fast_command = nullptr;
+static interactive_console_command *slow_command = nullptr;
+
+void interactive_console::signal_handler(__attribute__((unused)) int sig)
+{
+    printf("interactive-console::signal_handler: stop listening loop\n");
+    running = false;
+}
+
+void interactive_console::readline_cb(char *line)
+{
+    if (line && *line)
+    {
+        add_history(line);
+        switch (line[0])
+        {
+        case 'D':
+            running = false;
+            rl_callback_handler_remove();
+            if (shutdown_command)
+                shutdown_command->execute();
+            break;
+        case 'F':
+            if (fast_command)
+                fast_command->execute();
+            break;
+        case 'S':
+            if (slow_command)
+                slow_command->execute();
+            break;
+        default:
+            printf("Unknown command '%s'\r\n", line);
+            break;
+        }
+    }
+
+    if (line)
+        free(line);
+}
+
+void interactive_console::init(void)
+{
+    sigset_t mask;
+    struct sigaction act;
+
+    memset(&act, 0, sizeof(act));
+    act.sa_handler = signal_handler;
+    sigaction(SIGUSR1, &act, 0);
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGUSR1);
+    sigprocmask(SIG_BLOCK, &mask, &orig_mask);
+
+    rl_callback_handler_install("$", readline_cb);
+}
 
 void interactive_console::listen(void)
 {
-    static char *line_read = (char *)NULL;
-    bool run = true;
+    fd_set fds;
+    int r;
 
-    while (run)
+    running = true;
+    while (running)
     {
-        /* Get a line from the user. */
-        line_read = readline("$ ");
-
-        /* If the line has any text in it,
-           save it on the history. */
-        if (line_read && *line_read)
+        FD_ZERO(&fds);
+        FD_SET(fileno(rl_instream), &fds);
+        r = pselect(FD_SETSIZE, &fds, NULL, NULL, NULL, &orig_mask);
+        if (r < 0 && errno != EINTR)
         {
-            add_history(line_read);
-            switch (line_read[0])
-            {
-            case 'D':
-                run = false;
-                if (shutdown_command)
-                    shutdown_command->execute();
-                break;
-            case 'F':
-                if (fast_command)
-                    fast_command->execute();
-                break;
-            case 'S':
-                if (slow_command)
-                    slow_command->execute();
-                break;
-            default:
-                printf("Unknown command '%s'\r\n", line_read);
-                break;
-            }
+            perror("interactive_console::listen: select");
+            rl_callback_handler_remove();
+            break;
         }
+        if (r < 0)
+            continue;
 
-        if (line_read)
-        {
-            free(line_read);
-            line_read = (char *)NULL;
-        }
+        if (FD_ISSET(fileno(rl_instream), &fds))
+            rl_callback_read_char();
     }
+
+    printf("interactive_console::listen: exit loop.\r\n");
+    return;
 }
 
 void interactive_console::set_shutdown_command(interactive_console_command *cmd)

@@ -3,32 +3,37 @@
 #include <interactive-console/interactive-console.hpp>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <sys/select.h>
 
 #include "fff.h"
 
-using ::testing::AtLeast;
 using ::testing::AnyNumber;
+using ::testing::AtLeast;
 
 DEFINE_FFF_GLOBALS;
+FAKE_VALUE_FUNC(int, fileno, FILE *);
 FAKE_VALUE_FUNC(char *, readline, const char *);
 FAKE_VOID_FUNC(add_history, const char *);
+FAKE_VOID_FUNC(rl_callback_handler_install, const char *, rl_vcpfunc_t *);
+FAKE_VOID_FUNC(rl_callback_read_char);
 
-char *readline_shutdown_mock(__attribute__((unused)) const char *prompt)
+#undef FD_CLR
+FAKE_VOID_FUNC(FD_CLR, int, fd_set *);
+#undef FD_ISSET
+FAKE_VALUE_FUNC(int, FD_ISSET, int, fd_set *);
+#undef FD_SET
+FAKE_VOID_FUNC(FD_SET, int, fd_set *);
+#undef FD_ZERO
+FAKE_VOID_FUNC(FD_ZERO, fd_set *);
+FAKE_VALUE_FUNC(int, pselect, int, fd_set *, fd_set *, fd_set *, const struct timespec *, const sigset_t *);
+
+int pselect_mock(__attribute__((unused)) int nfds, __attribute__((unused)) fd_set *readfds,
+                 __attribute__((unused)) fd_set *writefds, __attribute__((unused)) fd_set *exceptfds,
+                 __attribute__((unused)) const struct timespec *timeout, __attribute__((unused)) const sigset_t *sigmask)
 {
-    return strdup("D");
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    return 0;
 }
-
-char *readline_fast_mock(__attribute__((unused)) const char *prompt)
-{
-    return strdup("F");
-}
-
-char *readline_slow_mock(__attribute__((unused)) const char *prompt)
-{
-    return strdup("S");
-}
-
-typedef char *(*readline_ptr)(const char *);
 
 class InteractiveConsoleCommandMock : public interactive_console_command
 {
@@ -47,8 +52,8 @@ public:
 class TestInteractiveConsoleParams
 {
 public:
-    TestInteractiveConsoleParams(std::string name, readline_ptr readline_handler, InteractiveConsoleWrapper::SetCommand set_command_func)
-        : name(name), readline_handler(readline_handler), set_command_func(set_command_func) {}
+    TestInteractiveConsoleParams(std::string name, const char *console_cmd, InteractiveConsoleWrapper::SetCommand set_command_func)
+        : name(name), console_cmd(console_cmd), set_command_func(set_command_func) {}
 
     static void *operator new(std::size_t count)
     {
@@ -65,7 +70,7 @@ public:
     }
 
     std::string name;
-    readline_ptr readline_handler;
+    const char *console_cmd;
     InteractiveConsoleWrapper::SetCommand set_command_func;
 };
 
@@ -75,44 +80,45 @@ public:
     virtual void SetUp()
     {
         RESET_FAKE(readline);
+        RESET_FAKE(rl_callback_handler_install);
+        RESET_FAKE(pselect);
         cmd_mock = new InteractiveConsoleCommandMock();
-        shutdown_cmd_mock = new InteractiveConsoleCommandMock();
         console = new InteractiveConsoleWrapper();
+        console->set_shutdown_command(nullptr);
+        console->init();
+        readline_cb = rl_callback_handler_install_fake.arg1_val;
+        pselect_fake.custom_fake = pselect_mock;
     }
 
     virtual void TearDown()
     {
         delete console;
         delete cmd_mock;
-        delete shutdown_cmd_mock;
     }
 
+    rl_vcpfunc_t *readline_cb;
     InteractiveConsoleWrapper *console;
     InteractiveConsoleCommandMock *cmd_mock;
-    InteractiveConsoleCommandMock *shutdown_cmd_mock;
 };
 
 TEST_P(TestInteractiveConsole, WhenReceivesCommandIfOKThenExecutesTheCommand)
 {
-    char *(*custom_fakes[])(const char *) = {GetParam().readline_handler,
-                                             readline_shutdown_mock};
-    SET_CUSTOM_FAKE_SEQ(readline, custom_fakes, 2);
-
     InteractiveConsoleWrapper::SetCommand set_command_func = GetParam().set_command_func;
     (console->*set_command_func)(cmd_mock);
 
     EXPECT_CALL(*cmd_mock, execute()).Times(1);
-    EXPECT_CALL(*shutdown_cmd_mock, execute()).Times(AnyNumber());
-    console->listen();
+
+    char *console_cmd = strdup(GetParam().console_cmd);
+    readline_cb(console_cmd);
 }
 
 INSTANTIATE_TEST_SUITE_P(
     ,
     TestInteractiveConsole,
     ::testing::Values(
-        TestInteractiveConsoleParams{"WhenReceivesShutdownCommandIfOKThenExecutesTheShutdownCommand", readline_shutdown_mock, &interactive_console::set_shutdown_command},
-        TestInteractiveConsoleParams{"WhenReceivesFastCommandIfOKThenExecutesTheFastCommand", readline_fast_mock, &interactive_console::set_fast_command},
-        TestInteractiveConsoleParams{"WhenReceivesSlowCommandIfOKThenExecutesTheSlowCommand", readline_slow_mock, &interactive_console::set_slow_command}),
+        TestInteractiveConsoleParams{"WhenReceivesShutdownCommandIfOKThenExecutesTheShutdownCommand", "D", &interactive_console::set_shutdown_command},
+        TestInteractiveConsoleParams{"WhenReceivesFastCommandIfOKThenExecutesTheFastCommand", "F", &interactive_console::set_fast_command},
+        TestInteractiveConsoleParams{"WhenReceivesSlowCommandIfOKThenExecutesTheSlowCommand", "S", &interactive_console::set_slow_command}),
     [](const testing::TestParamInfo<TestInteractiveConsoleParams> &info)
     {
         return info.param.name;
@@ -120,8 +126,11 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(TestInteractiveConsole, WhenReceivesShudtownCommandIfOKThenStopListeningAndShutdown)
 {
-    readline_fake.custom_fake = readline_shutdown_mock;
-    console->listen();
+    char *console_cmd = strdup("D");
+    std::thread t1(&interactive_console::listen, console);
+    std::this_thread::sleep_for(std::chrono::milliseconds(30));
+    readline_cb(console_cmd);
+    t1.join();
 }
 
 int main(int argc, char **argv)
