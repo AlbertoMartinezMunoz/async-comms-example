@@ -16,7 +16,6 @@ static interactive_console_command *slow_command = nullptr;
 
 void interactive_console::signal_handler(__attribute__((unused)) int sig)
 {
-    printf("interactive-console::signal_handler: stop listening loop\n");
     running = false;
 }
 
@@ -58,10 +57,10 @@ void interactive_console::init(void)
 
     memset(&act, 0, sizeof(act));
     act.sa_handler = signal_handler;
-    sigaction(SIGUSR1, &act, 0);
+    sigaction(SIGUSR2, &act, 0);
     sigemptyset(&mask);
-    sigaddset(&mask, SIGUSR1);
-    sigprocmask(SIG_BLOCK, &mask, &orig_mask);
+    sigaddset(&mask, SIGUSR2);
+    pthread_sigmask(SIG_BLOCK, &mask, &orig_mask);
 
     rl_callback_handler_install("$", readline_cb);
 }
@@ -89,6 +88,8 @@ void interactive_console::listen(void)
         if (FD_ISSET(fileno(rl_instream), &fds))
             rl_callback_read_char();
     }
+
+    rl_callback_handler_remove();
 
     printf("interactive_console::listen: exit loop.\r\n");
     return;

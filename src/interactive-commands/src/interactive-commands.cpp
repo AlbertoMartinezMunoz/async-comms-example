@@ -1,4 +1,5 @@
 #include <interactive-commands/interactive-commands.hpp>
+#include <signal.h>
 
 void printresult(int result, const char *message)
 {
@@ -25,12 +26,13 @@ void shutdown_command::execute() const
     if (ret == -1)
     {
         perror("shutdown_command::execute: connect_socket");
+        kill(getpid(), SIGUSR1);
         return;
     }
 
     printresult(cmd_mngr->send_shutdown_cmd(), "shutdown_command::execute:");
     socket->disconnect_socket();
-    socket->stop_listening();
+    kill(getpid(), SIGUSR1);
 }
 
 fast_command::fast_command(command_manager *cmd_mngr, socket_transport_layer *socket, const char *socket_path)

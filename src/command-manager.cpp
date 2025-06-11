@@ -47,7 +47,7 @@ public:
     {
         printf("********************** Received Shutdown Command **********************\r\n");
         socket->stop_listening();
-        kill(getpid(),SIGUSR1);
+        kill(getpid(), SIGUSR2);
         return 0;
     }
 
@@ -98,10 +98,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     console->set_fast_command(fast_cli_cmd);
     console->set_slow_command(slow_cli_cmd);
 
-    std::thread t1(&socket_transport_layer::listen_connections, transport_layer, argparser->get_local_path(), cmd_mngr);
-
-    console->listen();
-
+    std::thread t1(&interactive_console::listen, console);
+    transport_layer->listen_connections(argparser->get_local_path(), cmd_mngr);
     t1.join();
 
     delete cmd_mngr;
