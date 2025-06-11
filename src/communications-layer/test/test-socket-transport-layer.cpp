@@ -6,6 +6,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/select.h>
+#include <signal.h>
 
 #include "fff.h"
 
@@ -13,6 +15,9 @@ using ::testing::_;
 using ::testing::Args;
 using ::testing::ElementsAreArray;
 using ::testing::Return;
+
+typedef void (*handler_t) (int signal);
+
 
 DEFINE_FFF_GLOBALS;
 FAKE_VALUE_FUNC(int, socket, int, int, int);
@@ -22,6 +27,18 @@ FAKE_VALUE_FUNC(ssize_t, read, int, void *, size_t);
 FAKE_VALUE_FUNC(int, bind, int, const struct sockaddr *, socklen_t);
 FAKE_VALUE_FUNC(int, accept, int, struct sockaddr *, socklen_t *);
 FAKE_VALUE_FUNC(int, listen, int, int);
+
+#undef FD_CLR
+FAKE_VOID_FUNC(FD_CLR, int, fd_set *);
+#undef FD_ISSET
+FAKE_VALUE_FUNC(int, FD_ISSET, int, fd_set *);
+#undef FD_SET
+FAKE_VOID_FUNC(FD_SET, int, fd_set *);
+#undef FD_ZERO
+FAKE_VOID_FUNC(FD_ZERO, fd_set *);
+FAKE_VALUE_FUNC(int, pselect, int, fd_set *, fd_set *, fd_set *, const struct timespec *, const sigset_t *);
+
+FAKE_VALUE_FUNC(int, sigaction, int, const struct sigaction *, struct sigaction *);
 
 #define SOCKET_NAME "/tmp/9Lq7BNBnBycd6nxy.socket"
 
@@ -40,28 +57,20 @@ ssize_t read_mock(__attribute__((unused)) int fd, void *buf, __attribute__((unus
     return sizeof(expected_message);
 }
 
+int pselect_mock(__attribute__((unused)) int nfds, __attribute__((unused)) fd_set *readfds,
+                 __attribute__((unused)) fd_set *writefds, __attribute__((unused)) fd_set *exceptfds,
+                 __attribute__((unused)) const struct timespec *timeout, __attribute__((unused)) const sigset_t *sigmask)
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    return 0;
+}
+
 class CommunicationsLayerMock : public communications_layer_interface
 {
 public:
     MOCK_METHOD(communications_layer_interface *, set_next_communications_layer, (communications_layer_interface * handler), (override));
     MOCK_METHOD(ssize_t, send, (const char *buffer, size_t buffer_size), (override));
     MOCK_METHOD(ssize_t, recv, (char *buffer, size_t buffer_size), (override));
-};
-
-class communications_layer_observer_fake : public communications_layer_observer
-{
-public:
-    communications_layer_observer_fake(socket_transport_layer *socket_layer)
-        : socket_layer(socket_layer) {};
-
-    int incoming_message() const override
-    {
-        socket_layer->stop_listening();
-        return 0;
-    };
-
-private:
-    socket_transport_layer *socket_layer;
 };
 
 class CommunicationsLayerObserverMock : public communications_layer_observer
@@ -76,7 +85,6 @@ public:
     socket_transport_layer *layer;
     CommunicationsLayerMock *comms_layer_mock = nullptr;
     CommunicationsLayerObserverMock *comms_layer_observer_mock = nullptr;
-    communications_layer_observer_fake *incomming_messages_observer = nullptr;
     const int expected_socket_fd = 1;
 
     virtual void SetUp()
@@ -85,16 +93,18 @@ public:
         RESET_FAKE(connect);
         RESET_FAKE(write);
         RESET_FAKE(read);
+        RESET_FAKE(pselect);
+        RESET_FAKE(sigaction);
         memset(message_buffer, 0, sizeof(message_buffer));
         socket_fake.return_val = expected_socket_fd;
         connect_fake.return_val = 0;
         write_fake.custom_fake = write_mock;
         read_fake.custom_fake = read_mock;
+        pselect_fake.custom_fake = pselect_mock;
         comms_layer_mock = new CommunicationsLayerMock();
         comms_layer_observer_mock = new CommunicationsLayerObserverMock();
         layer = new socket_transport_layer();
         layer->set_next_communications_layer(comms_layer_mock);
-        incomming_messages_observer = new communications_layer_observer_fake(layer);
         ASSERT_EQ(0, layer->connect_socket(SOCKET_NAME));
     }
 
@@ -103,8 +113,9 @@ public:
         delete layer;
         delete comms_layer_mock;
         delete comms_layer_observer_mock;
-        delete incomming_messages_observer;
     }
+
+    handler_t signal_cb;
 };
 
 TEST_F(TestSocketTransportLayer, WhenConnectingIfOKThenUseUnixSocket)
@@ -183,7 +194,13 @@ TEST_F(TestSocketTransportLayer, WhenReceveingIfRecvErrorThenReturnError)
 
 TEST_F(TestSocketTransportLayer, WhenListeningIfStopListenThenShouldStop)
 {
-    layer->listen_connections(SOCKET_NAME, incomming_messages_observer);
+    EXPECT_CALL(*comms_layer_observer_mock, incoming_message()).Times(1).WillOnce(Return(0));
+    std::thread t1(&socket_transport_layer::listen_connections, layer, SOCKET_NAME, comms_layer_observer_mock);
+    std::this_thread::sleep_for(std::chrono::milliseconds(30));
+    signal_cb = ((const struct sigaction *)(sigaction_fake.arg1_val))->sa_handler;
+    signal_cb(SIGUSR1);
+    t1.join();
+    
 }
 
 int main(int argc, char **argv)
