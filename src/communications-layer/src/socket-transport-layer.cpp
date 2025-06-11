@@ -9,8 +9,12 @@
 #include <chrono>
 #include <thread>
 
-socket_transport_layer::socket_transport_layer()
-    : is_listening(false) {}
+static bool is_listening = false;
+
+void socket_transport_layer::signal_handler(__attribute__((unused)) int sig)
+{
+    is_listening = false;
+}
 
 int socket_transport_layer::connect_socket(const char *socket_path)
 {
@@ -49,6 +53,17 @@ int socket_transport_layer::listen_connections(
     communications_layer_observer *in_msg_observer)
 {
     struct sockaddr_un name;
+
+    sigset_t mask;
+    struct sigaction act;
+    sigset_t orig_mask;
+
+    memset(&act, 0, sizeof(act));
+    act.sa_handler = signal_handler;
+    sigaction(SIGUSR1, &act, 0);
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGUSR1);
+    pthread_sigmask(SIG_BLOCK, &mask, &orig_mask);
 
     socket_path = strdup(path);
 
@@ -96,24 +111,39 @@ int socket_transport_layer::listen_connections(
         exit(EXIT_FAILURE);
     }
 
+    fd_set fds;
+    int r;
     is_listening = true;
-    while(is_listening)
+    while (is_listening)
     {
-        sending_socket = accept(listening_socket, NULL, NULL);
-        if (sending_socket == -1)
+        FD_ZERO(&fds);
+        FD_SET(listening_socket, &fds);
+        r = pselect(FD_SETSIZE, &fds, NULL, NULL, NULL, &orig_mask);
+        if (r < 0 && errno != EINTR)
         {
-            perror("accept");
-            return -1;
+            perror("interactive_console::listen: select");
+            break;
         }
-        printf("socket_transport_layer::listen_connections: incoming connection\r\n");
+        if (r < 0)
+            continue;
 
-        in_msg_observer->incoming_message();
+        if (FD_ISSET(listening_socket, &fds))
+        {
+            sending_socket = accept(listening_socket, NULL, NULL);
+            if (sending_socket == -1)
+            {
+                perror("accept");
+                return -1;
+            }
+            printf("socket_transport_layer::listen_connections: incoming connection\r\n");
+            in_msg_observer->incoming_message();
+        }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         close(sending_socket);
     }
 
-    printf("Stop Listening\r\n");
+    printf("socket_transport_layer::listen_connections: stopped\r\n");
 
     close(listening_socket);
     unlink(socket_path);
