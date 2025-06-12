@@ -4,6 +4,7 @@ Documentation    A test suite for send and receive commands between two differen
 
 Library          OperatingSystem
 Library          Process
+Library          String
 Resource         keywords.resource
 
 Test Setup       Test Setup
@@ -12,7 +13,6 @@ Test Teardown    Test Teardown
 
 *** Test Cases ***
 Shutdown Command Stops Sender and Receiver
-    [Tags]    SKIP
     Given receiver command-manager is running
     and sender command-manager is running
     When sender command-manager executes "D" command
@@ -20,7 +20,6 @@ Shutdown Command Stops Sender and Receiver
     and sender command-manager will return
 
 Fast Command Is Received and ACK is responded
-    [Tags]    SKIP
     Given receiver command-manager is running
     and sender command-manager is running
     When sender command-manager executes "F" command
@@ -36,16 +35,13 @@ Slow Command Is Received and ACK is responded
 
 
 *** Keywords ***
-${process} Command-manager is running
+${process} command-manager is running
     Is Process Running    ${process}_process
-    Get ${process}- stdout file
+    Get ${process} stdout file
 
 ${process} command-manager executes "${command}" command
-    Append To File    ./atest-results/tmp/${process}-stdin.txt    ${command}${\n}
-
-${process} Command-manager will return
-    Wait For Process             handle=${process}_process    timeout=500ms
-    Process Should Be Stopped    handle=${process}_process
+    ${process}    Convert To Lower Case    ${process}
+                  Append To File           ./atest-results/tmp/${process}-stdin.txt    ${command}${\n}
 
 Receiver command-manager will receive ${command} command
     ${stdout}    Get File          ./atest-results/tmp/receiver-stdout.txt
@@ -55,14 +51,8 @@ Sender command-manager will receive ${ack}
     ${stdout}    Get File          ./atest-results/tmp/sender-stdout.txt
                  Should Contain    ${stdout}    : ${ack} received    ignore_case=True
 
-Get ${process} stdout file
-    ${error_message}    Get File          ./atest-results/tmp/${process}stdout.txt
-                        Should Not Be Empty    ${error_message}
-                        RETURN                 ${error_message}
-
 Test Setup
-    Remove Directory    ./atest-results/tmp/    recursive=True
-    Create Directory    ./atest-results/tmp/
+    Remove tmp Files
     Create File         ./atest-results/tmp/receiver-stdin.txt
     Create File         ./atest-results/tmp/sender-stdin.txt
     Start Process       ${process_command}    /tmp/9Lq7BNBnBycd6nxy.0.socket1    /tmp/9Lq7BNBnBycd6nxy.1.socket1    alias=receiver_process    stdout=./atest-results/tmp/receiver-stdout.txt    stderr=./atest-results/tmp/receiver-stdout.txt    stdin=./atest-results/tmp/receiver-stdin.txt
