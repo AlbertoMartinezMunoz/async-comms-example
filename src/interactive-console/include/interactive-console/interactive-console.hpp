@@ -6,7 +6,9 @@
 class interactive_console
 {
 public:
-    void init(void);
+    static interactive_console *get_instance();
+
+    ~interactive_console();
 
     void listen(void);
 
@@ -20,10 +22,8 @@ public:
 
     void operator=(const interactive_console &) = delete;
 
-    static interactive_console *get_instance();
-
 protected:
-    interactive_console() {}
+    interactive_console();
 
 private:
     static void readline_cb(char *line);

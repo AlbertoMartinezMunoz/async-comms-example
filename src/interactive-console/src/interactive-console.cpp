@@ -21,6 +21,26 @@ static interactive_console_command *slow_command = nullptr;
 
 static sigset_t orig_mask;
 
+interactive_console::interactive_console()
+{
+    sigset_t mask;
+    struct sigaction act;
+
+    memset(&act, 0, sizeof(act));
+    act.sa_handler = signal_handler;
+    sigaction(SIGUSR2, &act, 0);
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGUSR2);
+    pthread_sigmask(SIG_BLOCK, &mask, &orig_mask);
+
+    rl_callback_handler_install("$", readline_cb);
+}
+
+interactive_console::~interactive_console()
+{
+    rl_callback_handler_remove();
+}
+
 void interactive_console::signal_handler(__attribute__((unused)) int sig)
 {
     running = false;
@@ -65,21 +85,6 @@ void interactive_console::readline_cb(char *line)
 
     if (line)
         free(line);
-}
-
-void interactive_console::init(void)
-{
-    sigset_t mask;
-    struct sigaction act;
-
-    memset(&act, 0, sizeof(act));
-    act.sa_handler = signal_handler;
-    sigaction(SIGUSR2, &act, 0);
-    sigemptyset(&mask);
-    sigaddset(&mask, SIGUSR2);
-    pthread_sigmask(SIG_BLOCK, &mask, &orig_mask);
-
-    rl_callback_handler_install("$", readline_cb);
 }
 
 void interactive_console::listen(void)

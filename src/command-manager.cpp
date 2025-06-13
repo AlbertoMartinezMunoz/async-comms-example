@@ -93,7 +93,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     slow_cli_cmd = new slow_command(cmd_mngr, transport_layer, argparser->get_remote_path());
 
     console = interactive_console::get_instance();
-    console->init();
     console->set_shutdown_command(shutdown_cli_cmd);
     console->set_fast_command(fast_cli_cmd);
     console->set_slow_command(slow_cli_cmd);

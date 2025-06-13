@@ -85,7 +85,6 @@ public:
         cmd_mock = new InteractiveConsoleCommandMock();
         console = new InteractiveConsoleWrapper();
         console->set_shutdown_command(nullptr);
-        console->init();
         readline_cb = rl_callback_handler_install_fake.arg1_val;
         pselect_fake.custom_fake = pselect_mock;
     }
