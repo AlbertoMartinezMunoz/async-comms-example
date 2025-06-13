@@ -10,6 +10,8 @@ const uint8_t slip_application_layer::ESC_ESC = 0xDD;
 
 ssize_t slip_application_layer::send(const char *buffer, size_t buffer_size)
 {
+    char *slip_buffer = nullptr;
+
     size_t slip_size = buffer_size + 1;
     for (size_t i = 0; i < buffer_size; ++i)
     {
@@ -19,11 +21,10 @@ ssize_t slip_application_layer::send(const char *buffer, size_t buffer_size)
         }
     }
 
-    this->message = (char *)realloc(this->message, slip_size);
-    if (this->message == nullptr)
+    slip_buffer = (char *)malloc(slip_size);
+    if (slip_buffer == nullptr)
     {
-        printf("slip_application_layer::send error\r\n");
-        perror("malloc");
+        perror("slip_application_layer::send error: malloc");
         return -1;
     }
 
@@ -32,20 +33,22 @@ ssize_t slip_application_layer::send(const char *buffer, size_t buffer_size)
     {
         if (buffer[i] == (char)END)
         {
-            this->message[slip_index++] = ESC;
-            this->message[slip_index++] = ESC_END;
+            slip_buffer[slip_index++] = ESC;
+            slip_buffer[slip_index++] = ESC_END;
         }
         else if (buffer[i] == (char)ESC)
         {
-            this->message[slip_index++] = ESC;
-            this->message[slip_index++] = ESC_ESC;
+            slip_buffer[slip_index++] = ESC;
+            slip_buffer[slip_index++] = ESC_ESC;
         }
         else
-            this->message[slip_index++] = buffer[i];
+            slip_buffer[slip_index++] = buffer[i];
     }
-    this->message[slip_size - 1] = END;
-    printf("slip_application_layer::send '%s' [%zu / %zu]\r\n", this->message, slip_size, buffer_size);
-    return communications_layer::send(this->message, slip_size);
+    slip_buffer[slip_size - 1] = END;
+    printf("slip_application_layer::send '%s' [%zu / %zu]\r\n", slip_buffer, slip_size, buffer_size);
+    ssize_t ret =  communications_layer::send(slip_buffer, slip_size);
+    free(slip_buffer);
+    return ret;
 }
 
 ssize_t slip_application_layer::recv(char *buffer, size_t buffer_size)
@@ -53,7 +56,7 @@ ssize_t slip_application_layer::recv(char *buffer, size_t buffer_size)
     int ret = communications_layer::recv(buffer, buffer_size);
     if (ret < 0)
     {
-        perror("recv");
+        perror("slip_application_layer::recv");
         return ret;
     }
 
@@ -83,10 +86,4 @@ ssize_t slip_application_layer::recv(char *buffer, size_t buffer_size)
     }
     printf("slip_application_layer::recv missing END error\r\n");
     return -1;
-}
-
-slip_application_layer::~slip_application_layer()
-{
-    free(this->message);
-    this->message = nullptr;
 }
