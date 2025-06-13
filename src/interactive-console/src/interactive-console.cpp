@@ -8,15 +8,32 @@
 
 #include <signal.h>
 
+#include <mutex>
+
+static std::mutex mutex_;
+static interactive_console *pinstance_;
+
 static bool running;
 
 static interactive_console_command *shutdown_command = nullptr;
 static interactive_console_command *fast_command = nullptr;
 static interactive_console_command *slow_command = nullptr;
 
+static sigset_t orig_mask;
+
 void interactive_console::signal_handler(__attribute__((unused)) int sig)
 {
     running = false;
+}
+
+interactive_console *interactive_console::get_instance()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (pinstance_ == nullptr)
+    {
+        pinstance_ = new interactive_console();
+    }
+    return pinstance_;
 }
 
 void interactive_console::readline_cb(char *line)

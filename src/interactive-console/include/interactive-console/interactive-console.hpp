@@ -2,7 +2,6 @@
 #define IOT_MICRO_FIRMWARE_SRC_INTERACTIVE_CONSOLE_INCLUDE_INTERACTIVE_CONSOLE_INTERACTIVE_CONSOLE_H_
 
 #include <interactive-console/interactive-console-command.hpp>
-#include <signal.h>
 
 class interactive_console
 {
@@ -17,12 +16,19 @@ public:
 
     void set_slow_command(interactive_console_command *cmd);
 
+    interactive_console(interactive_console &other) = delete;
+
+    void operator=(const interactive_console &) = delete;
+
+    static interactive_console *get_instance();
+
+protected:
+    interactive_console() {}
+
 private:
     static void readline_cb(char *line);
 
     static void signal_handler(int sig);
-
-    sigset_t orig_mask;
 };
 
 #endif // IOT_MICRO_FIRMWARE_SRC_INTERACTIVE_CONSOLE_INCLUDE_INTERACTIVE_CONSOLE_INTERACTIVE_CONSOLE_H_
