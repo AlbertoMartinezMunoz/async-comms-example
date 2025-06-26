@@ -112,16 +112,20 @@ int socket_transport_layer::listen_connections(
     }
 
     fd_set fds;
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 100000;
+
     int r;
     is_listening = true;
     while (is_listening)
     {
         FD_ZERO(&fds);
         FD_SET(listening_socket, &fds);
-        r = pselect(FD_SETSIZE, &fds, NULL, NULL, NULL, &orig_mask);
+        r = select(FD_SETSIZE, &fds, NULL, NULL, &tv);
         if (r < 0 && errno != EINTR)
         {
-            perror("interactive_console::listen: select");
+            perror("socket_transport_layer::listen: select");
             break;
         }
         if (r < 0)
