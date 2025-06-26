@@ -11,11 +11,6 @@
 
 static bool is_listening = false;
 
-void socket_transport_layer::signal_handler(__attribute__((unused)) int sig)
-{
-    is_listening = false;
-}
-
 int socket_transport_layer::connect_socket(const char *socket_path)
 {
     struct sockaddr_un addr;
@@ -48,22 +43,17 @@ int socket_transport_layer::disconnect_socket()
     return 0;
 }
 
+void socket_transport_layer::bind_cleanup()
+{
+    close(listening_socket);
+    unlink(socket_path);
+}
+
 int socket_transport_layer::listen_connections(
     const char *path,
     communications_layer_observer *in_msg_observer)
 {
     struct sockaddr_un name;
-
-    sigset_t mask;
-    struct sigaction act;
-    sigset_t orig_mask;
-
-    memset(&act, 0, sizeof(act));
-    act.sa_handler = signal_handler;
-    sigaction(SIGUSR1, &act, 0);
-    sigemptyset(&mask);
-    sigaddset(&mask, SIGUSR1);
-    pthread_sigmask(SIG_BLOCK, &mask, &orig_mask);
 
     socket_path = strdup(path);
 
@@ -91,8 +81,7 @@ int socket_transport_layer::listen_connections(
     if (ret == -1)
     {
         perror("bind");
-        close(listening_socket);
-        unlink(socket_path);
+        bind_cleanup();
         exit(EXIT_FAILURE);
     }
 
@@ -106,22 +95,25 @@ int socket_transport_layer::listen_connections(
     if (ret == -1)
     {
         perror("listen");
-        close(listening_socket);
-        unlink(socket_path);
+        bind_cleanup();
         exit(EXIT_FAILURE);
     }
 
     fd_set fds;
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 100000;
+
     int r;
     is_listening = true;
     while (is_listening)
     {
         FD_ZERO(&fds);
         FD_SET(listening_socket, &fds);
-        r = pselect(FD_SETSIZE, &fds, NULL, NULL, NULL, &orig_mask);
+        r = select(FD_SETSIZE, &fds, NULL, NULL, &tv);
         if (r < 0 && errno != EINTR)
         {
-            perror("interactive_console::listen: select");
+            perror("socket_transport_layer::listen: select");
             break;
         }
         if (r < 0)
@@ -145,8 +137,7 @@ int socket_transport_layer::listen_connections(
 
     printf("socket_transport_layer::listen_connections: stopped\r\n");
 
-    close(listening_socket);
-    unlink(socket_path);
+    bind_cleanup();
     free(socket_path);
 
     return 0;
