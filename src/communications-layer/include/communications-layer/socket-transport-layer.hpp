@@ -23,6 +23,8 @@ public:
 private:
     static void signal_handler(int sig);
 
+    void bind_cleanup();
+
     int sending_socket;
     int listening_socket;
     char *socket_path;
