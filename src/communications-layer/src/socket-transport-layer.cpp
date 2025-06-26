@@ -11,11 +11,6 @@
 
 static bool is_listening = false;
 
-void socket_transport_layer::signal_handler(__attribute__((unused)) int sig)
-{
-    is_listening = false;
-}
-
 int socket_transport_layer::connect_socket(const char *socket_path)
 {
     struct sockaddr_un addr;
@@ -59,17 +54,6 @@ int socket_transport_layer::listen_connections(
     communications_layer_observer *in_msg_observer)
 {
     struct sockaddr_un name;
-
-    sigset_t mask;
-    struct sigaction act;
-    sigset_t orig_mask;
-
-    memset(&act, 0, sizeof(act));
-    act.sa_handler = signal_handler;
-    sigaction(SIGUSR1, &act, 0);
-    sigemptyset(&mask);
-    sigaddset(&mask, SIGUSR1);
-    pthread_sigmask(SIG_BLOCK, &mask, &orig_mask);
 
     socket_path = strdup(path);
 

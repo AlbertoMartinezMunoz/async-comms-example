@@ -21,8 +21,6 @@ public:
     ssize_t recv(char *buffer, size_t buffer_size) override;
 
 private:
-    static void signal_handler(int sig);
-
     void bind_cleanup();
 
     int sending_socket;
