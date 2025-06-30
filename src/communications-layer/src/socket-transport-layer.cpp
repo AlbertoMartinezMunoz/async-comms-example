@@ -72,7 +72,7 @@ int socket_transport_layer::listen_connections(
     if (listening_socket == -1)
     {
         perror("listening_socket");
-        exit(EXIT_FAILURE);
+        return (-1);
     }
 
     /*
@@ -93,7 +93,7 @@ int socket_transport_layer::listen_connections(
         perror("bind");
         close(listening_socket);
         unlink(socket_path);
-        exit(EXIT_FAILURE);
+        return (-1);
     }
 
     /*
@@ -108,7 +108,7 @@ int socket_transport_layer::listen_connections(
         perror("listen");
         close(listening_socket);
         unlink(socket_path);
-        exit(EXIT_FAILURE);
+        return (-1);
     }
 
     fd_set fds;
