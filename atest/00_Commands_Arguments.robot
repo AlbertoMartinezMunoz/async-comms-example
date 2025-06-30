@@ -6,7 +6,7 @@ Library          OperatingSystem
 Library          Process
 Resource         keywords.resource
 
-Test Setup       Remove tmp Files
+Test Setup       Test Setup
 Test Teardown    Test Teardown
 
 
@@ -79,10 +79,16 @@ Prompt is printed
     ${prompt_message}    Wait Until Keyword Succeeds    3x    200ms    Get master stdout File
                          Wait Until Keyword Succeeds    3x    200ms    Should Contain    ${prompt_message}    $
 
+Test Setup
+    Remove tmp Files
+    Create File         ./atest-results/tmp/master-stdin.txt
+
 Test Teardown
-    Terminate All Processes       kill=true
-    Run Keyword If Test Failed    Log Process stdout
+    master command-manager executes "D" command
+    Wait For Process                               handle=master_process    timeout=500ms
+    Terminate All Processes                        kill=true
+    Run Keyword If Test Failed                     Log Process stdout
 
 Log Process stdout
-    ${stdout}    Get File    ./atest-results/tmp/stdout.txt
+    ${stdout}    Get File    ./atest-results/tmp/master-stdout.txt
                  Log         ${stdout}
