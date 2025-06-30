@@ -39,10 +39,6 @@ ${process} command-manager is running
     Is Process Running    ${process}_process
     Get ${process} stdout file
 
-${process} command-manager executes "${command}" command
-    ${process}    Convert To Lower Case    ${process}
-                  Append To File           ./atest-results/tmp/${process}-stdin.txt    ${command}${\n}
-
 Receiver command-manager will receive ${command} command
     ${stdout}    Get File          ./atest-results/tmp/receiver-stdout.txt
                  Should Contain    ${stdout}    ********************** Received ${command} Command **********************    ignore_case=True
