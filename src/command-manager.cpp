@@ -98,7 +98,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     console->set_slow_command(slow_cli_cmd);
 
     std::thread t1(&interactive_console::listen, console);
-    transport_layer->listen_connections(argparser->get_local_path(), cmd_mngr);
+    if (transport_layer->listen_connections(argparser->get_local_path(), cmd_mngr) != 0)
+        kill(getpid(), SIGUSR2);
     t1.join();
 
     delete cmd_mngr;
