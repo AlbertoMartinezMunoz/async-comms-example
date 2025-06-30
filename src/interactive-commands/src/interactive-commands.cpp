@@ -22,6 +22,7 @@ shutdown_command::shutdown_command(command_manager *cmd_mngr, socket_transport_l
 
 void shutdown_command::execute() const
 {
+    printf("shutdown_command::execute\r\n");
     int ret = socket->connect_socket(socket_path);
     if (ret == -1)
     {
@@ -40,6 +41,7 @@ fast_command::fast_command(command_manager *cmd_mngr, socket_transport_layer *so
 
 void fast_command::execute() const
 {
+    printf("fast_command::execute\r\n");
     int ret = socket->connect_socket(socket_path);
     if (ret == -1)
     {
@@ -55,6 +57,7 @@ slow_command::slow_command(command_manager *cmd_mngr, socket_transport_layer *so
 
 void slow_command::execute() const
 {
+    printf("slow_command::execute\r\n");
     int ret = socket->connect_socket(socket_path);
     if (ret == -1)
     {
