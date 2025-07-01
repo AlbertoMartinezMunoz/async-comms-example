@@ -85,9 +85,9 @@ Test Setup
 
 Test Teardown
     master command-manager executes "D" command
-    Wait For Process                               handle=master_process    timeout=500ms
-    Terminate All Processes                        kill=true
-    Run Keyword If Test Failed                     Log Process stdout
+    Wait For Process           handle=master_process    timeout=500ms
+    Terminate All Processes    kill=true
+    Log Process stdout
 
 Log Process stdout
     ${stdout}    Get File    ./atest-results/tmp/master-stdout.txt

@@ -60,7 +60,7 @@ Test Teardown
     Wait For Process              handle=receiver_process    timeout=500ms
     Wait For Process              handle=sender_process    timeout=500ms
     Terminate All Processes       kill=true
-    Run Keyword If Test Failed    Log Process stdout
+    Log Process stdout
 
 Log Process stdout
     ${stdout}    Get File    ./atest-results/tmp/receiver-stdout.txt
