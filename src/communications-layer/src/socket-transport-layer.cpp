@@ -156,6 +156,7 @@ void socket_transport_layer::stop_listening()
 {
     printf("socket_transport_layer::stop_listening\r\n");
     is_listening = false;
+    kill(getpid(), SIGUSR1);
 }
 
 ssize_t socket_transport_layer::send(const char *buffer, size_t buffer_size)
