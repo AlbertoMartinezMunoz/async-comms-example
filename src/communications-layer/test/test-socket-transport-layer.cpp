@@ -8,6 +8,8 @@
 #include <string.h>
 #include <sys/select.h>
 #include <signal.h>
+#include <condition_variable>
+#include <thread>
 
 #include "fff.h"
 
@@ -16,8 +18,7 @@ using ::testing::Args;
 using ::testing::ElementsAreArray;
 using ::testing::Return;
 
-typedef void (*handler_t) (int signal);
-
+typedef void (*handler_t)(int signal);
 
 DEFINE_FFF_GLOBALS;
 FAKE_VALUE_FUNC(int, socket, int, int, int);
@@ -36,7 +37,7 @@ FAKE_VALUE_FUNC(int, FD_ISSET, int, fd_set *);
 FAKE_VOID_FUNC(FD_SET, int, fd_set *);
 #undef FD_ZERO
 FAKE_VOID_FUNC(FD_ZERO, fd_set *);
-FAKE_VALUE_FUNC(int, pselect, int, fd_set *, fd_set *, fd_set *, const struct timespec *, const sigset_t *);
+FAKE_VALUE_FUNC(int, select, int, fd_set *, fd_set *, fd_set *, struct timeval *);
 
 FAKE_VALUE_FUNC(int, sigaction, int, const struct sigaction *, struct sigaction *);
 
@@ -45,8 +46,13 @@ FAKE_VALUE_FUNC(int, sigaction, int, const struct sigaction *, struct sigaction 
 char message_buffer[32];
 char expected_message[] = "TestMessage";
 
+std::condition_variable cv;
+std::mutex cv_m;
+
 ssize_t write_mock(__attribute__((unused)) int fd, const void *buf, size_t count)
 {
+    std::lock_guard<std::mutex> lk(cv_m);
+    cv.notify_all();
     memcpy(message_buffer, buf, count);
     return count;
 }
@@ -57,11 +63,12 @@ ssize_t read_mock(__attribute__((unused)) int fd, void *buf, __attribute__((unus
     return sizeof(expected_message);
 }
 
-int pselect_mock(__attribute__((unused)) int nfds, __attribute__((unused)) fd_set *readfds,
+int select_mock(__attribute__((unused)) int nfds, __attribute__((unused)) fd_set *readfds,
                  __attribute__((unused)) fd_set *writefds, __attribute__((unused)) fd_set *exceptfds,
-                 __attribute__((unused)) const struct timespec *timeout, __attribute__((unused)) const sigset_t *sigmask)
+                 __attribute__((unused)) struct timeval *timeout)
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    std::unique_lock<std::mutex> lk(cv_m);
+    cv.wait(lk);
     return 0;
 }
 
@@ -93,14 +100,14 @@ public:
         RESET_FAKE(connect);
         RESET_FAKE(write);
         RESET_FAKE(read);
-        RESET_FAKE(pselect);
+        RESET_FAKE(select);
         RESET_FAKE(sigaction);
         memset(message_buffer, 0, sizeof(message_buffer));
         socket_fake.return_val = expected_socket_fd;
         connect_fake.return_val = 0;
         write_fake.custom_fake = write_mock;
         read_fake.custom_fake = read_mock;
-        pselect_fake.custom_fake = pselect_mock;
+        select_fake.custom_fake = select_mock;
         comms_layer_mock = new CommunicationsLayerMock();
         comms_layer_observer_mock = new CommunicationsLayerObserverMock();
         layer = new socket_transport_layer();
@@ -194,13 +201,14 @@ TEST_F(TestSocketTransportLayer, WhenReceveingIfRecvErrorThenReturnError)
 
 TEST_F(TestSocketTransportLayer, WhenListeningIfStopListenThenShouldStop)
 {
-    EXPECT_CALL(*comms_layer_observer_mock, incoming_message()).Times(1).WillOnce(Return(0));
+    using ::testing::Mock;
+    EXPECT_CALL(*comms_layer_observer_mock, incoming_message()).Times(0);
     std::thread t1(&socket_transport_layer::listen_connections, layer, SOCKET_NAME, comms_layer_observer_mock);
     std::this_thread::sleep_for(std::chrono::milliseconds(30));
-    signal_cb = ((const struct sigaction *)(sigaction_fake.arg1_val))->sa_handler;
-    signal_cb(SIGUSR1);
+    ASSERT_EQ(true, Mock::VerifyAndClearExpectations(comms_layer_observer_mock));
+    EXPECT_CALL(*comms_layer_observer_mock, incoming_message()).Times(1).WillOnce(Return(0));
+    layer->stop_listening();
     t1.join();
-    
 }
 
 int main(int argc, char **argv)

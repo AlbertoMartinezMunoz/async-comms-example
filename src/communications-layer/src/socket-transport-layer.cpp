@@ -5,15 +5,40 @@
 #include <sys/un.h>
 #include <cstdlib>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include <chrono>
 #include <thread>
 
-static bool is_listening = false;
 
-void socket_transport_layer::signal_handler(__attribute__((unused)) int sig)
+socket_transport_layer::socket_transport_layer()
 {
     is_listening = false;
+
+    if (pipe(wakeuppfd) == -1)
+        throw std::runtime_error("Error creating wake-up pipe");
+
+    int flags = fcntl(wakeuppfd[0], F_GETFL);
+    if (flags == -1)
+        throw std::runtime_error("Error getting wake-up[0] pipe flags");
+
+    flags |= O_NONBLOCK;
+    if (fcntl(wakeuppfd[0], F_SETFL, flags) == -1)
+        throw std::runtime_error("Error setting wake-up[0] pipe non blocking flag");
+
+    flags = fcntl(wakeuppfd[1], F_GETFL);
+    if (flags == -1)
+        throw std::runtime_error("Error getting wake-up[1] pipe flags");
+
+    flags |= O_NONBLOCK;
+    if (fcntl(wakeuppfd[1], F_SETFL, flags) == -1)
+        throw std::runtime_error("Error setting wake-up[1] pipe non blocking flag");
+}
+
+socket_transport_layer::~socket_transport_layer()
+{
+    close(wakeuppfd[0]);
+    close(wakeuppfd[1]);
 }
 
 int socket_transport_layer::connect_socket(const char *socket_path)
@@ -54,17 +79,6 @@ int socket_transport_layer::listen_connections(
 {
     struct sockaddr_un name;
 
-    sigset_t mask;
-    struct sigaction act;
-    sigset_t orig_mask;
-
-    memset(&act, 0, sizeof(act));
-    act.sa_handler = signal_handler;
-    sigaction(SIGUSR1, &act, 0);
-    sigemptyset(&mask);
-    sigaddset(&mask, SIGUSR1);
-    pthread_sigmask(SIG_BLOCK, &mask, &orig_mask);
-
     socket_path = strdup(path);
 
     /* Create local socket. */
@@ -96,12 +110,6 @@ int socket_transport_layer::listen_connections(
         return (-1);
     }
 
-    /*
-     * Prepare for accepting connections. The backlog size is set
-     * to 20. So while one request is being processed other requests
-     * can be waiting.
-     */
-
     ret = listen(listening_socket, 20);
     if (ret == -1)
     {
@@ -111,14 +119,15 @@ int socket_transport_layer::listen_connections(
         return (-1);
     }
 
-    fd_set fds;
+    fd_set readfds;
     int r;
     is_listening = true;
     while (is_listening)
     {
-        FD_ZERO(&fds);
-        FD_SET(listening_socket, &fds);
-        r = pselect(FD_SETSIZE, &fds, NULL, NULL, NULL, &orig_mask);
+        FD_ZERO(&readfds);
+        FD_SET(listening_socket, &readfds);
+        FD_SET(wakeuppfd[0], &readfds);
+        r = select(FD_SETSIZE, &readfds, NULL, NULL, NULL);
         if (r < 0 && errno != EINTR)
         {
             perror("interactive_console::listen: select");
@@ -127,13 +136,13 @@ int socket_transport_layer::listen_connections(
         if (r < 0)
             continue;
 
-        if (FD_ISSET(listening_socket, &fds))
+        if (FD_ISSET(listening_socket, &readfds))
         {
             sending_socket = accept(listening_socket, NULL, NULL);
             if (sending_socket == -1)
             {
                 perror("accept");
-                return -1;
+                break;
             }
             printf("socket_transport_layer::listen_connections: incoming connection\r\n");
             in_msg_observer->incoming_message();
@@ -156,7 +165,8 @@ void socket_transport_layer::stop_listening()
 {
     printf("socket_transport_layer::stop_listening\r\n");
     is_listening = false;
-    kill(getpid(), SIGUSR1);
+    if (write(wakeuppfd[1], "x", 1) == -1)
+        perror("socket wakeup write");
 }
 
 ssize_t socket_transport_layer::send(const char *buffer, size_t buffer_size)
