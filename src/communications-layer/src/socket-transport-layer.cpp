@@ -10,7 +10,6 @@
 #include <chrono>
 #include <thread>
 
-
 socket_transport_layer::socket_transport_layer()
 {
     is_listening = false;
@@ -74,14 +73,11 @@ int socket_transport_layer::disconnect_socket()
 }
 
 int socket_transport_layer::listen_connections(
-    const char *path,
+    const char *socket_path,
     communications_layer_observer *in_msg_observer)
 {
     struct sockaddr_un name;
 
-    socket_path = strdup(path);
-
-    /* Create local socket. */
     listening_socket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
     if (listening_socket == -1)
     {
@@ -89,19 +85,10 @@ int socket_transport_layer::listen_connections(
         return (-1);
     }
 
-    /*
-     * For portability clear the whole structure, since some
-     * implementations have additional (nonstandard) fields in
-     * the structure.
-     */
     memset(&name, 0, sizeof(name));
-
-    /* Bind socket to socket name. */
     name.sun_family = AF_UNIX;
     strncpy(name.sun_path, socket_path, sizeof(name.sun_path) - 1);
-
-    int ret = bind(listening_socket, (const struct sockaddr *)&name,
-                   sizeof(name));
+    int ret = bind(listening_socket, (const struct sockaddr *)&name, sizeof(name));
     if (ret == -1)
     {
         perror("bind");
@@ -156,7 +143,6 @@ int socket_transport_layer::listen_connections(
 
     close(listening_socket);
     unlink(socket_path);
-    free(socket_path);
 
     return 0;
 }
