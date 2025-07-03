@@ -72,6 +72,12 @@ int socket_transport_layer::disconnect_socket()
     return 0;
 }
 
+void listen_cleanup(int listening_socket, const char *socket_path)
+{
+    close(listening_socket);
+    unlink(socket_path);
+}
+
 int socket_transport_layer::listen_connections(
     const char *socket_path,
     communications_layer_observer *in_msg_observer)
@@ -92,8 +98,7 @@ int socket_transport_layer::listen_connections(
     if (ret == -1)
     {
         perror("bind");
-        close(listening_socket);
-        unlink(socket_path);
+        listen_cleanup(listening_socket, socket_path);
         return (-1);
     }
 
@@ -101,8 +106,7 @@ int socket_transport_layer::listen_connections(
     if (ret == -1)
     {
         perror("listen");
-        close(listening_socket);
-        unlink(socket_path);
+        listen_cleanup(listening_socket, socket_path);
         return (-1);
     }
 
@@ -141,8 +145,7 @@ int socket_transport_layer::listen_connections(
 
     printf("socket_transport_layer::listen_connections: stopped\r\n");
 
-    close(listening_socket);
-    unlink(socket_path);
+    listen_cleanup(listening_socket, socket_path);
 
     return 0;
 }
