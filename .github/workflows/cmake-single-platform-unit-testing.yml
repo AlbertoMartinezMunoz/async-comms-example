@@ -24,6 +24,9 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Update Aptitude Sources
+      run: sudo apt-get update
+
     - name: Install Valgrind
       run: sudo apt install valgrind
 
