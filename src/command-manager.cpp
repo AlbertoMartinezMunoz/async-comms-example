@@ -7,8 +7,8 @@
 #include <argp.h>
 
 #include <arguments-parser/arguments-parser.hpp>
-#include <remote-command-manager/command-manager.hpp>
-#include <remote-command-manager/command-observer.hpp>
+#include <remote-command-manager/remote-command-manager.hpp>
+#include <remote-command-manager/remote-command-observer.hpp>
 #include <communications-layer/communications-layer.hpp>
 #include <communications-layer/socket-transport-layer.hpp>
 #include <communications-layer/slip-application-layer.hpp>
