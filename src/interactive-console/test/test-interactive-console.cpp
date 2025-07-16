@@ -123,12 +123,11 @@ INSTANTIATE_TEST_SUITE_P(
         return info.param.name;
     });
 
-TEST_F(TestInteractiveConsole, WhenReceivesShudtownCommandIfOKThenStopListeningAndShutdown)
+TEST_F(TestInteractiveConsole, WhenListeningIfStopThenStopListeningAndShutdown)
 {
-    char *console_cmd = strdup("D");
     std::thread t1(&interactive_console::listen, console);
     std::this_thread::sleep_for(std::chrono::milliseconds(30));
-    readline_cb(console_cmd);
+    console->stop();
     t1.join();
 }
 

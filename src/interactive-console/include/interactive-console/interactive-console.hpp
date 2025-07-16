@@ -28,6 +28,8 @@ protected:
     interactive_console();
 
 private:
+    int wakeuppfd[2];
+
     static void readline_cb(char *line);
 };
 
