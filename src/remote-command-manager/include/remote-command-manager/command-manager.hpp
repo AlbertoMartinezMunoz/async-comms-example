@@ -3,7 +3,7 @@
 
 #include <communications-layer/communications-layer.hpp>
 #include <communications-layer/communications-observer.hpp>
-#include <command-manager/command-observer.hpp>
+#include <remote-command-manager/command-observer.hpp>
 
 class command_manager: public communications_layer_observer
 {
