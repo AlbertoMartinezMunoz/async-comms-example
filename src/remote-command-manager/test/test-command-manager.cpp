@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include <command-manager/command-manager.hpp>
+#include <remote-command-manager/command-manager.hpp>
 
 using ::testing::_;
 using ::testing::DoAll;

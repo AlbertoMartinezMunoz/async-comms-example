@@ -1,7 +1,7 @@
 #ifndef IOT_MICRO_FIRMWARE_SRC_INTERACTIVE_COMMANDS_INCLUDE_INTERACTIVE_COMMANDS_INTERACTIVE_COMMANDS_H_
 #define IOT_MICRO_FIRMWARE_SRC_INTERACTIVE_COMMANDS_INCLUDE_INTERACTIVE_COMMANDS_INTERACTIVE_COMMANDS_H_
 
-#include <command-manager/command-manager.hpp>
+#include <remote-command-manager/command-manager.hpp>
 #include <communications-layer/socket-transport-layer.hpp>
 #include <interactive-console/interactive-console-command.hpp>
 
