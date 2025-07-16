@@ -3,11 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cerrno>
+#include <fcntl.h>
+#include <unistd.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-
-#include <signal.h>
-
+#include <stdexcept>
 #include <mutex>
 
 static std::mutex mutex_;
@@ -19,15 +19,26 @@ static interactive_console_command *shutdown_command = nullptr;
 static interactive_console_command *fast_command = nullptr;
 static interactive_console_command *slow_command = nullptr;
 
-static sigset_t orig_mask;
-
 interactive_console::interactive_console()
 {
-    sigset_t mask;
+    if (pipe(wakeuppfd) == -1)
+        throw std::runtime_error("Error creating wake-up pipe");
 
-    sigemptyset(&mask);
-    sigaddset(&mask, SIGUSR2);
-    pthread_sigmask(SIG_BLOCK, &mask, &orig_mask);
+    int flags = fcntl(wakeuppfd[0], F_GETFL);
+    if (flags == -1)
+        throw std::runtime_error("Error getting wake-up[0] pipe flags");
+
+    flags |= O_NONBLOCK;
+    if (fcntl(wakeuppfd[0], F_SETFL, flags) == -1)
+        throw std::runtime_error("Error setting wake-up[0] pipe non blocking flag");
+
+    flags = fcntl(wakeuppfd[1], F_GETFL);
+    if (flags == -1)
+        throw std::runtime_error("Error getting wake-up[1] pipe flags");
+
+    flags |= O_NONBLOCK;
+    if (fcntl(wakeuppfd[1], F_SETFL, flags) == -1)
+        throw std::runtime_error("Error setting wake-up[1] pipe non blocking flag");
 
     rl_callback_handler_install("$", readline_cb);
 }
@@ -35,6 +46,8 @@ interactive_console::interactive_console()
 interactive_console::~interactive_console()
 {
     rl_callback_handler_remove();
+    close(wakeuppfd[0]);
+    close(wakeuppfd[1]);
 }
 
 interactive_console *interactive_console::get_instance()
@@ -82,7 +95,8 @@ void interactive_console::stop(void)
 {
     printf("interactive_console::stop\r\n");
     running = false;
-    kill(getpid(), SIGUSR2);
+    if (write(wakeuppfd[1], "x", 1) == -1)
+        perror("interctive console: wakeup write");
 }
 
 void interactive_console::listen(void)
@@ -95,7 +109,8 @@ void interactive_console::listen(void)
     {
         FD_ZERO(&fds);
         FD_SET(fileno(rl_instream), &fds);
-        r = pselect(FD_SETSIZE, &fds, NULL, NULL, NULL, &orig_mask);
+        FD_SET(wakeuppfd[0], &fds);
+        r = select(FD_SETSIZE, &fds, NULL, NULL, NULL);
         if (r < 0 && errno != EINTR)
         {
             perror("interactive_console::listen: select");
