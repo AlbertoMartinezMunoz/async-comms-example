@@ -1,8 +1,8 @@
 project(remote-command-manager CXX)
 
 set(SOURCES
-    ${PROJECT_SOURCE_DIR}/include/remote-command-manager/command-manager.hpp
-    ${PROJECT_SOURCE_DIR}/src/command-manager.cpp
+    ${PROJECT_SOURCE_DIR}/include/remote-command-manager/remote-command-manager.hpp
+    ${PROJECT_SOURCE_DIR}/src/remote-command-manager.cpp
 )
 
 add_library(remote-command-manager-lib ${SOURCES})

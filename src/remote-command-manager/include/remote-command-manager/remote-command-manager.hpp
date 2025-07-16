@@ -1,11 +1,11 @@
-#ifndef IOT_MICRO_FIRMWARE_SRC_COMMAND_MANAGER_INCLUDE_COMMAND_MANAGER_COMMAND_MANAGER_H_
-#define IOT_MICRO_FIRMWARE_SRC_COMMAND_MANAGER_INCLUDE_COMMAND_MANAGER_COMMAND_MANAGER_H_
+#ifndef IOT_MICRO_FIRMWARE_SRC_REMOTE_COMMAND_MANAGER_INCLUDE_REMOTE_COMMAND_MANAGER_REMOTE_COMMAND_MANAGER_H_
+#define IOT_MICRO_FIRMWARE_SRC_REMOTE_COMMAND_MANAGER_INCLUDE_REMOTE_COMMAND_MANAGER_REMOTE_COMMAND_MANAGER_H_
 
 #include <communications-layer/communications-layer.hpp>
 #include <communications-layer/communications-observer.hpp>
-#include <remote-command-manager/command-observer.hpp>
+#include <remote-command-manager/remote-command-observer.hpp>
 
-class command_manager: public communications_layer_observer
+class command_manager : public communications_layer_observer
 {
 public:
     command_manager(communications_layer_interface *communications_layer);
@@ -44,4 +44,4 @@ private:
     int send_simple_cmd(const char *cmd, size_t cmd_size);
 };
 
-#endif  // IOT_MICRO_FIRMWARE_SRC_COMMAND_MANAGER_INCLUDE_COMMAND_MANAGER_COMMAND_MANAGER_H_
+#endif // IOT_MICRO_FIRMWARE_SRC_REMOTE_COMMAND_MANAGER_INCLUDE_REMOTE_COMMAND_MANAGER_REMOTE_COMMAND_MANAGER_H_
