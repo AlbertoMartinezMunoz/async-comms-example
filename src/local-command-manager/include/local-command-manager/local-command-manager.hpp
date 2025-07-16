@@ -1,0 +1,16 @@
+#ifndef IOT_MICRO_FIRMWARE_SRC_LOCAL_COMMAND_MANAGER_INCLUDE_LOCAL_COMMAND_MANAGER_LOCAL_COMMAND_MANAGER_H_
+#define IOT_MICRO_FIRMWARE_SRC_LOCAL_COMMAND_MANAGER_INCLUDE_LOCAL_COMMAND_MANAGER_LOCAL_COMMAND_MANAGER_H_
+
+#include <local-command-manager/local-command-observer.hpp>
+
+class local_command_manager
+{
+public:
+    local_command_manager();
+
+    ~local_command_manager()
+    {
+    }
+};
+
+#endif // IOT_MICRO_FIRMWARE_SRC_LOCAL_COMMAND_MANAGER_INCLUDE_LOCAL_COMMAND_MANAGER_LOCAL_COMMAND_MANAGER_H_
