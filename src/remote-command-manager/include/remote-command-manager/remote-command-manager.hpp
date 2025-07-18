@@ -5,12 +5,12 @@
 #include <communications-layer/communications-observer.hpp>
 #include <remote-command-manager/remote-command-observer.hpp>
 
-class remote_command_manager : public communications_layer_observer
+class command_manager : public communications_layer_observer
 {
 public:
-    remote_command_manager(communications_layer_interface *communications_layer);
+    command_manager(communications_layer_interface *communications_layer);
 
-    ~remote_command_manager()
+    ~command_manager()
     {
     }
 
@@ -22,11 +22,11 @@ public:
 
     int incoming_message() const override;
 
-    void subscribe_fast_cmd(remote_command_observer *observer);
+    void subscribe_fast_cmd(command_observer *observer);
 
-    void subscribe_slow_cmd(remote_command_observer *observer);
+    void subscribe_slow_cmd(command_observer *observer);
 
-    void subscribe_shutdown_cmd(remote_command_observer *observer);
+    void subscribe_shutdown_cmd(command_observer *observer);
 
     static constexpr char ack[4] = "ACK";
     static constexpr char nack[5] = "NACK";
@@ -37,9 +37,9 @@ public:
 private:
     communications_layer_interface *communications_layer;
 
-    remote_command_observer *fast_cmd_observer;
-    remote_command_observer *slow_cmd_observer;
-    remote_command_observer *shutdown_cmd_observer;
+    command_observer *fast_cmd_observer;
+    command_observer *slow_cmd_observer;
+    command_observer *shutdown_cmd_observer;
 
     int send_simple_cmd(const char *cmd, size_t cmd_size);
 };

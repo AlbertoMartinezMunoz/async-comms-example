@@ -16,7 +16,7 @@
 #include <interactive-console/interactive-console.hpp>
 #include <interactive-console/interactive-console-command.hpp>
 
-class slow_cmd_processor : public remote_command_observer
+class slow_cmd_processor : public command_observer
 {
 public:
     int process_command() override
@@ -26,7 +26,7 @@ public:
     }
 };
 
-class fast_cmd_processor : public remote_command_observer
+class fast_cmd_processor : public command_observer
 {
 public:
     int process_command() override
@@ -36,7 +36,7 @@ public:
     }
 };
 
-class shutdown_cmd_processor : public remote_command_observer
+class shutdown_cmd_processor : public command_observer
 {
 public:
     shutdown_cmd_processor(socket_transport_layer *socket, interactive_console *console)
@@ -62,7 +62,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     slow_cmd_processor *slow_cmd;
     fast_cmd_processor *fast_cmd;
     shutdown_cmd_processor *shutdown_cmd;
-    remote_command_manager *cmd_mngr;
+    command_manager *cmd_mngr;
 
     interactive_console *console;
     interactive_console_command *shutdown_cli_cmd;
@@ -85,7 +85,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     fast_cmd = new fast_cmd_processor();
     shutdown_cmd = new shutdown_cmd_processor(transport_layer, console);
 
-    cmd_mngr = new remote_command_manager(application_layer);
+    cmd_mngr = new command_manager(application_layer);
     cmd_mngr->subscribe_slow_cmd(slow_cmd);
     cmd_mngr->subscribe_fast_cmd(fast_cmd);
     cmd_mngr->subscribe_shutdown_cmd(shutdown_cmd);
