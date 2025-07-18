@@ -1,14 +1,14 @@
-project(remote-command-manager CXX)
+project(command-manager CXX)
 
 set(SOURCES
     ${PROJECT_SOURCE_DIR}/include/remote-command-manager/command-manager.hpp
     ${PROJECT_SOURCE_DIR}/src/command-manager.cpp
 )
 
-add_library(remote-command-manager-lib ${SOURCES})
-set_target_properties(remote-command-manager-lib PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(remote-command-manager-lib communications-layer-lib)
-target_include_directories(remote-command-manager-lib PUBLIC ${PROJECT_SOURCE_DIR}/include)
+add_library(command-manager-lib ${SOURCES})
+set_target_properties(command-manager-lib PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries(command-manager-lib communications-layer-lib)
+target_include_directories(command-manager-lib PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 if(UTEST)
 	add_subdirectory("test")
