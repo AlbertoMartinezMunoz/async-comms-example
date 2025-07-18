@@ -1,0 +1,62 @@
+@startuml
+!include <C4/C4_Component>
+
+AddRelTag("invisible", $textColor="transparent", $lineColor="transparent", $lineStyle = DashedLine())
+
+title C4 Component Diagram for Communications Sender
+'----------------------------------------------------------------
+'Actors
+'----------------------------------------------------------------
+Person(user, "User", "A user that sends messages and receives responses")
+System_Ext(ext_command_system, "Remote Command System", "A remote system which receives and sends commands")
+
+'----------------------------------------------------------------
+'Components
+'----------------------------------------------------------------
+Boundary(command_system, "Command System") {
+    Component(arg_parser, "Arg Parser", "component:c++", "Manages the setup option when starting the software")
+    Component(transport_layer, "Transport Layer", "component:c++", "Manages basic data channels used to enable data exchange")
+    Component(application_layer, "Application Layer", "component:c++", "Manages basic data channels used to enable data exchange")
+    Component(cli, "Command Line Interface", "component:c++", "Receive commands from the user on the command line")
+    Component(remote_command_manager, "Command Manager", "component:c++", "Interprets remote commands and calls the action associated")
+    Component(local_command_manager, "Command Manager", "component:c++", "Interprets cli commands and calls the action associated")
+    Component(remote_shutdown_command, "Remote Shutdown Commands", "component:c++", "Shutdowns the system")
+    Component(remote_fast_command, "Remote Fast Command", "component:c++", "Executes a command which takes little time")
+    Component(remote_slow_command, "Remote Slow Command", "component:c++", "Executes a command which takes lot of time")
+    Component(local_shutdown_command, "Local Shutdown Commands", "component:c++", "Sends a shutdown commands request and shutdown the system")
+    Component(local_fast_command, "Local Fast Command", "component:c++", "Sends a fast command request and wait for response")
+    Component(local_slow_command, "Local Slow Command", "component:c++", "Sends a slow command request and wait for response")
+}
+
+'----------------------------------------------------------------
+'Relations
+'----------------------------------------------------------------
+BiRel_R(transport_layer, ext_command_system, "Sends/Receives commands to", "tcp socket")
+Rel_R(user, arg_parser, "Configures the system", "shell")
+Rel_R(user, cli, "Start commands", "shell")
+Rel_D(cli, local_command_manager, "Uses")
+BiRel_U(remote_command_manager, application_layer, "Uses")
+BiRel_R(application_layer, transport_layer, "Uses")
+Rel_D(transport_layer, remote_command_manager, "Notifies")
+Rel_D(remote_command_manager, remote_shutdown_command, "Executes")
+Rel_D(remote_command_manager, remote_fast_command, "Executes")
+Rel_D(remote_command_manager, remote_slow_command, "Executes")
+Rel_D(local_command_manager, local_shutdown_command, "Executes")
+Rel_D(local_command_manager, local_fast_command, "Executes")
+Rel_D(local_command_manager, local_slow_command, "Executes")
+
+Rel_U(remote_shutdown_command, transport_layer, "Uses")
+Rel_U(remote_shutdown_command, cli, "Uses")
+Rel_D(local_shutdown_command, transport_layer, "Uses")
+Rel_D(local_fast_command, transport_layer, "Uses")
+Rel_D(local_slow_command, transport_layer, "Uses")
+
+Rel_D(cli, arg_parser, "", "", $tags="invisible")
+Rel_D(user, ext_command_system, "", "", $tags="invisible")
+Rel_D(local_shutdown_command, application_layer, "", "", $tags="invisible")
+Rel_D(transport_layer, remote_command_manager, "", "", $tags="invisible")
+
+
+SHOW_LEGEND()
+
+@enduml
