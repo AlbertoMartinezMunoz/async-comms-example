@@ -1,7 +1,7 @@
 project(command-manager CXX)
 
 set(SOURCES
-    ${PROJECT_SOURCE_DIR}/include/remote-command-manager/command-manager.hpp
+    ${PROJECT_SOURCE_DIR}/include/command-manager/command-manager.hpp
     ${PROJECT_SOURCE_DIR}/src/command-manager.cpp
 )
 
