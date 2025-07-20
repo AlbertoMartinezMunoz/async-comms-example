@@ -1,15 +1,24 @@
 #include <command-manager/command-manager.hpp>
 #include <cstring>
 
-command_manager::command_manager(communications_layer_interface *communications_layer)
-    : communications_layer(communications_layer), fast_cmd_observer(nullptr), slow_cmd_observer(nullptr), shutdown_cmd_observer(nullptr) {}
+command_manager::command_manager(communications_layer_interface *communications_layer, socket_transport_layer *socket,
+                                 const char *send_cmd_socket_path)
+    : communications_layer(communications_layer), socket(socket), send_cmd_socket_path(send_cmd_socket_path),
+      fast_cmd_observer(nullptr), slow_cmd_observer(nullptr), shutdown_cmd_observer(nullptr) {}
 
 int command_manager::send_simple_cmd(const char *cmd, size_t cmd_size)
 {
     char response[32];
 
     printf("command_manager::send_simple_cmd send '%s' [%zu]\r\n", cmd, cmd_size);
-    int ret = communications_layer->send(cmd, cmd_size);
+    int ret = socket->connect_socket(send_cmd_socket_path);
+    if (ret == -1)
+    {
+        perror("fast_command::execute: connect_socket");
+        return -2;
+    }
+
+    ret = communications_layer->send(cmd, cmd_size);
     if (ret < (int)cmd_size)
     {
         printf("command_manager::send_simple_cmd send error '%d'\r\n", ret);
@@ -17,8 +26,10 @@ int command_manager::send_simple_cmd(const char *cmd, size_t cmd_size)
     }
 
     printf("command_manager::send_simple_cmd wait ack\r\n");
+    response[0] = '\0';
     ret = communications_layer->recv(response, sizeof(response));
     printf("command_manager::send_simple_cmd ack received[%d]\r\n", ret);
+    socket->disconnect_socket();
     if (ret < 0)
         return ret;
     else if (strncmp(nack, response, strlen(nack)) == 0)
@@ -44,7 +55,14 @@ int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer
     char response[32];
 
     printf("command_manager::send_slow_cmd send '%s' [%zu]\r\n", slow_cmd, sizeof(slow_cmd));
-    int ret = communications_layer->send(slow_cmd, sizeof(slow_cmd));
+    int ret = socket->connect_socket(send_cmd_socket_path);
+    if (ret == -1)
+    {
+        perror("fast_command::execute: connect_socket");
+        return -2;
+    }
+
+    ret = communications_layer->send(slow_cmd, sizeof(slow_cmd));
     if (ret < (int)sizeof(slow_cmd))
     {
         printf("command_manager::send_slow_cmd send error '%d'\r\n", ret);
@@ -54,6 +72,7 @@ int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer
     printf("command_manager::send_slow_cmd wait ack\r\n");
     ret = communications_layer->recv(response, sizeof(response));
     printf("command_manager::send_slow_cmd ack received [%d]\r\n", ret);
+    socket->disconnect_socket();
     if (ret < 0)
     {
         printf("command_manager::send_slow_cmd ack received '%s' [%d]\r\n", response, ret);

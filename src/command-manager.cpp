@@ -85,7 +85,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     fast_cmd = new fast_cmd_processor();
     shutdown_cmd = new shutdown_cmd_processor(transport_layer, console);
 
-    cmd_mngr = new command_manager(application_layer);
+    cmd_mngr = new command_manager(application_layer, transport_layer, argparser->get_remote_path());
     cmd_mngr->subscribe_slow_cmd(slow_cmd);
     cmd_mngr->subscribe_fast_cmd(fast_cmd);
     cmd_mngr->subscribe_shutdown_cmd(shutdown_cmd);

@@ -2,13 +2,23 @@
 #include <gmock/gmock.h>
 
 #include <command-manager/command-manager.hpp>
+#include <communications-layer/socket-transport-layer.hpp>
+
+#include <sys/socket.h>
+#include <unistd.h>
+#include "fff.h"
 
 using ::testing::_;
+using ::testing::AnyNumber;
 using ::testing::DoAll;
 using ::testing::Mock;
 using ::testing::Return;
 using ::testing::SetArrayArgument;
 using ::testing::StrEq;
+
+DEFINE_FFF_GLOBALS;
+FAKE_VALUE_FUNC(int, socket, int, int, int);
+FAKE_VALUE_FUNC(int, connect, int, const struct sockaddr *, socklen_t);
 
 class CommunicationsLayerMock : public communications_layer_interface
 {
@@ -18,11 +28,22 @@ public:
     MOCK_METHOD(ssize_t, recv, (char *buffer, size_t buffer_size), (override));
 };
 
+class SocketTransportLayerMock : public socket_transport_layer
+{
+public:
+    MOCK_METHOD(int, connect_socket, (const char *));
+    MOCK_METHOD(int, disconnect_socket, ());
+    MOCK_METHOD(int, listen_connections, (const char *, communications_layer_observer *));
+    MOCK_METHOD(void, stop_listening, ());
+    MOCK_METHOD(ssize_t, send, (const char *, size_t), (override));
+    MOCK_METHOD(ssize_t, recv, (char *, size_t), (override));
+};
+
 class CommandManagerWrapper : public command_manager
 {
 public:
-    CommandManagerWrapper(communications_layer_interface *communications_layer)
-        : command_manager(communications_layer) {}
+    CommandManagerWrapper(communications_layer_interface *communications_layer, socket_transport_layer *socket)
+        : command_manager(communications_layer, socket, "") {}
     typedef int (CommandManagerWrapper::*SendSimpleCommandSignature)(void);
 };
 
@@ -85,25 +106,31 @@ public:
     virtual void SetUp()
     {
         communications_layer_mock = new CommunicationsLayerMock();
-        command_mng = new CommandManagerWrapper(communications_layer_mock);
+        socket_mock = new SocketTransportLayerMock();
+        command_mng = new CommandManagerWrapper(communications_layer_mock, socket_mock);
         memset(slow_response_buffer, 0, sizeof(slow_response_buffer));
     }
 
     virtual void TearDown()
     {
         delete command_mng;
+        delete socket_mock;
         delete communications_layer_mock;
     }
 
 protected:
     CommandManagerWrapper *command_mng;
     CommunicationsLayerMock *communications_layer_mock;
+    SocketTransportLayerMock *socket_mock;
     const char expected_slow_command_ack_response[13] = "ACK-RESPONSE";
     char slow_response_buffer[13];
 };
 
 TEST_P(TestCommandManager, TestNextSendHandlerMessage)
 {
+    EXPECT_CALL(*socket_mock, connect_socket(_))
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(0));
     EXPECT_CALL(*communications_layer_mock, send(StrEq(GetParam().expected_cmd), GetParam().expected_cmd_size))
         .Times(1)
         .WillOnce(Return(GetParam().send_expected_result));
