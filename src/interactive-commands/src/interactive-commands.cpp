@@ -23,16 +23,7 @@ shutdown_command::shutdown_command(command_manager *cmd_mngr, socket_transport_l
 void shutdown_command::execute() const
 {
     printf("shutdown_command::execute\r\n");
-    int ret = socket->connect_socket(socket_path);
-    if (ret == -1)
-    {
-        perror("shutdown_command::execute: connect_socket");
-        socket->stop_listening();
-        return;
-    }
-
     printresult(cmd_mngr->send_shutdown_cmd(), "shutdown_command::execute:");
-    socket->disconnect_socket();
     socket->stop_listening();
 }
 
@@ -42,14 +33,7 @@ fast_command::fast_command(command_manager *cmd_mngr, socket_transport_layer *so
 void fast_command::execute() const
 {
     printf("fast_command::execute\r\n");
-    int ret = socket->connect_socket(socket_path);
-    if (ret == -1)
-    {
-        perror("fast_command::execute: connect_socket");
-        return;
-    }
     printresult(cmd_mngr->send_fast_cmd(), "fast_command::execute:");
-    socket->disconnect_socket();
 }
 
 slow_command::slow_command(command_manager *cmd_mngr, socket_transport_layer *socket, const char *socket_path)
@@ -58,13 +42,6 @@ slow_command::slow_command(command_manager *cmd_mngr, socket_transport_layer *so
 void slow_command::execute() const
 {
     printf("slow_command::execute\r\n");
-    int ret = socket->connect_socket(socket_path);
-    if (ret == -1)
-    {
-        perror("slow_command::execute: connect_socket");
-        return;
-    }
     char hello[] = "Hello World!!!";
     printresult(cmd_mngr->send_slow_cmd(hello, sizeof(hello)), "slow_command::execute:");
-    socket->disconnect_socket();
 }
