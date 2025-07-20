@@ -38,7 +38,7 @@ public:
         communications_layer_mock = new CommunicationsLayerMock();
         fast_cmd_observer_mock = new FastCmdObseverMock();
         slow_cmd_observer_mock = new SlowCmdObseverMock();
-        command_mng = new command_manager(communications_layer_mock);
+        command_mng = new command_manager(communications_layer_mock, NULL, NULL);
         command_mng->subscribe_fast_cmd(fast_cmd_observer_mock);
         command_mng->subscribe_slow_cmd(slow_cmd_observer_mock);
         memset(slow_response_buffer, 0, sizeof(slow_response_buffer));

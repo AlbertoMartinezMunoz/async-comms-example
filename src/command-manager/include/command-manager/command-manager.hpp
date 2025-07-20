@@ -2,13 +2,14 @@
 #define IOT_MICRO_FIRMWARE_SRC_COMMAND_MANAGER_INCLUDE_COMMAND_MANAGER_COMMAND_MANAGER_H_
 
 #include <communications-layer/communications-layer.hpp>
+#include <communications-layer/socket-transport-layer.hpp>
 #include <communications-layer/communications-observer.hpp>
 #include <command-manager/command-observer.hpp>
 
-class command_manager: public communications_layer_observer
+class command_manager : public communications_layer_observer
 {
 public:
-    command_manager(communications_layer_interface *communications_layer);
+    command_manager(communications_layer_interface *communications_layer, socket_transport_layer *socket, const char *send_cmd_socket_path);
 
     ~command_manager()
     {
@@ -36,6 +37,8 @@ public:
 
 private:
     communications_layer_interface *communications_layer;
+    socket_transport_layer *socket;
+    const char *send_cmd_socket_path;
 
     command_observer *fast_cmd_observer;
     command_observer *slow_cmd_observer;
@@ -44,4 +47,4 @@ private:
     int send_simple_cmd(const char *cmd, size_t cmd_size);
 };
 
-#endif  // IOT_MICRO_FIRMWARE_SRC_COMMAND_MANAGER_INCLUDE_COMMAND_MANAGER_COMMAND_MANAGER_H_
+#endif // IOT_MICRO_FIRMWARE_SRC_COMMAND_MANAGER_INCLUDE_COMMAND_MANAGER_COMMAND_MANAGER_H_
