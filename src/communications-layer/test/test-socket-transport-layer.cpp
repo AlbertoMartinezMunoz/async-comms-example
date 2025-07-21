@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/select.h>
-#include <signal.h>
 #include <condition_variable>
 #include <thread>
 
