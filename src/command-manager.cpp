@@ -90,7 +90,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     cmd_mngr->subscribe_fast_cmd(fast_cmd);
     cmd_mngr->subscribe_shutdown_cmd(shutdown_cmd);
 
-    shutdown_local_cmd = new shutdown_command(cmd_mngr, transport_layer);
+    shutdown_local_cmd = new shutdown_command(cmd_mngr, transport_layer, console);
     fast_local_cmd = new fast_command(cmd_mngr);
     slow_local_cmd = new slow_command(cmd_mngr);
 
