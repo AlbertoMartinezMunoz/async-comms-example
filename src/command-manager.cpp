@@ -65,9 +65,9 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     command_manager *cmd_mngr;
 
     interactive_console *console;
-    interactive_console_command *shutdown_cli_cmd;
-    interactive_console_command *fast_cli_cmd;
-    interactive_console_command *slow_cli_cmd;
+    interactive_console_command *shutdown_local_cmd;
+    interactive_console_command *fast_local_cmd;
+    interactive_console_command *slow_local_cmd;
 
     arguments_parser *argparser;
 
@@ -90,13 +90,13 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     cmd_mngr->subscribe_fast_cmd(fast_cmd);
     cmd_mngr->subscribe_shutdown_cmd(shutdown_cmd);
 
-    shutdown_cli_cmd = new shutdown_command(cmd_mngr, transport_layer, argparser->get_remote_path());
-    fast_cli_cmd = new fast_command(cmd_mngr, transport_layer, argparser->get_remote_path());
-    slow_cli_cmd = new slow_command(cmd_mngr, transport_layer, argparser->get_remote_path());
+    shutdown_local_cmd = new shutdown_command(cmd_mngr, transport_layer);
+    fast_local_cmd = new fast_command(cmd_mngr);
+    slow_local_cmd = new slow_command(cmd_mngr);
 
-    console->set_shutdown_command(shutdown_cli_cmd);
-    console->set_fast_command(fast_cli_cmd);
-    console->set_slow_command(slow_cli_cmd);
+    console->set_shutdown_command(shutdown_local_cmd);
+    console->set_fast_command(fast_local_cmd);
+    console->set_slow_command(slow_local_cmd);
 
     std::thread t1(&interactive_console::listen, console);
     if (transport_layer->listen_connections(argparser->get_local_path(), cmd_mngr) != 0)
@@ -109,9 +109,9 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     delete shutdown_cmd;
     delete fast_cmd;
     delete console;
-    delete shutdown_cli_cmd;
-    delete fast_cli_cmd;
-    delete slow_cli_cmd;
+    delete shutdown_local_cmd;
+    delete fast_local_cmd;
+    delete slow_local_cmd;
     delete argparser;
 
     exit(EXIT_SUCCESS);
