@@ -1,5 +1,4 @@
 #include <interactive-commands/interactive-commands.hpp>
-#include <signal.h>
 
 void printresult(int result, const char *message)
 {
