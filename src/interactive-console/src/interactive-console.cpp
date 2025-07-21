@@ -68,8 +68,6 @@ void interactive_console::readline_cb(char *line)
         switch (line[0])
         {
         case 'D':
-            running = false;
-            rl_callback_handler_remove();
             if (shutdown_command)
                 shutdown_command->execute();
             break;
