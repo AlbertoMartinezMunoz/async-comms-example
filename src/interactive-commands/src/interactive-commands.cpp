@@ -16,14 +16,15 @@ void printresult(int result, const char *message)
     }
 }
 
-shutdown_command::shutdown_command(command_manager *cmd_mngr, socket_transport_layer *socket)
-    : cmd_mngr(cmd_mngr), socket(socket) {}
+shutdown_command::shutdown_command(command_manager *cmd_mngr, socket_transport_layer *socket, interactive_console *cli)
+    : cmd_mngr(cmd_mngr), socket(socket), cli(cli) {}
 
 void shutdown_command::execute() const
 {
     printf("shutdown_command::execute\r\n");
     printresult(cmd_mngr->send_shutdown_cmd(), "shutdown_command::execute:");
     socket->stop_listening();
+    cli->stop();
 }
 
 fast_command::fast_command(command_manager *cmd_mngr)
