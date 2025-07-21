@@ -17,8 +17,8 @@ void printresult(int result, const char *message)
     }
 }
 
-shutdown_command::shutdown_command(command_manager *cmd_mngr, socket_transport_layer *socket, const char *socket_path)
-    : cmd_mngr(cmd_mngr), socket(socket), socket_path(socket_path) {}
+shutdown_command::shutdown_command(command_manager *cmd_mngr, socket_transport_layer *socket)
+    : cmd_mngr(cmd_mngr), socket(socket) {}
 
 void shutdown_command::execute() const
 {
@@ -27,8 +27,8 @@ void shutdown_command::execute() const
     socket->stop_listening();
 }
 
-fast_command::fast_command(command_manager *cmd_mngr, socket_transport_layer *socket, const char *socket_path)
-    : cmd_mngr(cmd_mngr), socket(socket), socket_path(socket_path) {}
+fast_command::fast_command(command_manager *cmd_mngr)
+    : cmd_mngr(cmd_mngr) {}
 
 void fast_command::execute() const
 {
@@ -36,8 +36,8 @@ void fast_command::execute() const
     printresult(cmd_mngr->send_fast_cmd(), "fast_command::execute:");
 }
 
-slow_command::slow_command(command_manager *cmd_mngr, socket_transport_layer *socket, const char *socket_path)
-    : cmd_mngr(cmd_mngr), socket(socket), socket_path(socket_path) {}
+slow_command::slow_command(command_manager *cmd_mngr)
+    : cmd_mngr(cmd_mngr) {}
 
 void slow_command::execute() const
 {
