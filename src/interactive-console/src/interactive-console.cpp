@@ -19,6 +19,8 @@ static interactive_console_command *shutdown_command = nullptr;
 static interactive_console_command *fast_command = nullptr;
 static interactive_console_command *slow_command = nullptr;
 
+static interactive_console_observer *cli_observer = nullptr;
+
 interactive_console::interactive_console()
 {
     if (pipe(wakeuppfd) == -1)
@@ -65,6 +67,8 @@ void interactive_console::readline_cb(char *line)
     if (line && *line)
     {
         add_history(line);
+        if (cli_observer)
+            cli_observer->console_incoming_message(line);
         switch (line[0])
         {
         case 'D':
@@ -97,10 +101,12 @@ void interactive_console::stop(void)
         perror("interctive console: wakeup write");
 }
 
-void interactive_console::listen(void)
+void interactive_console::listen(interactive_console_observer *observer)
 {
     fd_set fds;
     int r;
+
+    cli_observer = observer;
 
     running = true;
     while (running)

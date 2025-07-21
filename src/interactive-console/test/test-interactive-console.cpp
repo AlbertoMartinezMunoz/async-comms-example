@@ -41,6 +41,12 @@ public:
     MOCK_METHOD(void, execute, (), (const, override));
 };
 
+class InteractiveConsoleObserverMock : public interactive_console_observer
+{
+public:
+    MOCK_METHOD(int, console_incoming_message, (const char *), (const, override));
+};
+
 class InteractiveConsoleWrapper : public interactive_console
 {
 public:
@@ -87,17 +93,20 @@ public:
         console->set_shutdown_command(nullptr);
         readline_cb = rl_callback_handler_install_fake.arg1_val;
         pselect_fake.custom_fake = pselect_mock;
+        observer_mock = new InteractiveConsoleObserverMock();
     }
 
     virtual void TearDown()
     {
         delete console;
         delete cmd_mock;
+        delete observer_mock;
     }
 
     rl_vcpfunc_t *readline_cb;
     InteractiveConsoleWrapper *console;
     InteractiveConsoleCommandMock *cmd_mock;
+    InteractiveConsoleObserverMock *observer_mock;
 };
 
 TEST_P(TestInteractiveConsole, WhenReceivesCommandIfOKThenExecutesTheCommand)
@@ -125,7 +134,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(TestInteractiveConsole, WhenListeningIfStopThenStopListeningAndShutdown)
 {
-    std::thread t1(&interactive_console::listen, console);
+    std::thread t1(&interactive_console::listen, console, std::ref(observer_mock));
     std::this_thread::sleep_for(std::chrono::milliseconds(30));
     console->stop();
     t1.join();

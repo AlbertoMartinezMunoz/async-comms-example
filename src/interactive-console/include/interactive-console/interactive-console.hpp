@@ -2,6 +2,7 @@
 #define IOT_MICRO_FIRMWARE_SRC_INTERACTIVE_CONSOLE_INCLUDE_INTERACTIVE_CONSOLE_INTERACTIVE_CONSOLE_H_
 
 #include <interactive-console/interactive-console-command.hpp>
+#include <interactive-console/interactive-console-observer.hpp>
 
 class interactive_console
 {
@@ -10,7 +11,7 @@ public:
 
     ~interactive_console();
 
-    void listen(void);
+    void listen(interactive_console_observer *observer);
 
     void stop(void);
 
