@@ -113,6 +113,36 @@ To check that the installation was successful, run
 robot --version
 ```
 
+### pre-commit
+
+Git hook scripts are useful for identifying simple issues before submission to code review. We run our hooks on every commit to automatically point out issues in code such as missing semicolons, trailing whitespace, and debug statements. By pointing these issues out before code review, this allows a code reviewer to focus on the architecture of a change while not wasting time with trivial style nitpicks.
+
+The whole documentation in on the website [pre-commit](https://pre-commit.com/)
+
+#### Installation
+
+Before you can run hooks, you need to have the pre-commit package manager installed.
+
+Using pip:
+
+```console
+pip install pre-commit
+```
+
+#### Setup
+
+1. Add a pre-commit configuration
+
+> create a file named .pre-commit-config.yaml you can generate a very basic configuration using `pre-commit sample-config > .pre-commit-config.yaml`
+
+3. Run against all the files
+
+> Before installing, it's usually a good idea to run the hooks against all of the files when adding new hooks
+
+3. Install the git hook scripts
+
+> run `pre-commit install` to set up the git hook scripts
+
 ## Build
 
 ### Release
