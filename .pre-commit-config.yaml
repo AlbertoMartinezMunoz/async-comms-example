@@ -25,6 +25,12 @@ repos:
 -   repo: https://github.com/commitizen-tools/commitizen
     rev: v2.31.0
     hooks:
-      -   id: commitizen # Enforce Conventional Commits standard
-          name: Conventional commit
-          stages: [commit-msg]
+    -   id: commitizen # Enforce Conventional Commits standard
+        name: Conventional commit
+        stages: [commit-msg]
+
+-   repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.10
+    hooks:
+    -   id: cmake-format
+    -   id: cmake-lint
