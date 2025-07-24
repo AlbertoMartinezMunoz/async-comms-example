@@ -1,6 +1,16 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
+fail_fast: true
+default_install_hook_types: [pre-commit, commit-msg]
+default_stages: [commit]
 repos:
+-   repo: local
+    hooks:
+    -   id: format
+        name: Format
+        entry: bash -c "find ./src -iname '*.h' -o -iname '*.hpp' -o -iname '*.cpp' | xargs clang-format -i -style=llvm"
+        language: system
+
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0
     hooks:
