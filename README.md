@@ -143,6 +143,20 @@ pip install pre-commit
 
 > run `pre-commit install` to set up the git hook scripts
 
+### clang-format
+
+The `clang-format` tool will be used to format the c++ files. To install clang-format:
+
+```console
+sudo apt install clang-format
+```
+
+It will be used to format the c++ files before commiting them to the repo. To manually run it:
+
+```console
+find ./src -iname '*.h' -o -iname '*.hpp' -o -iname '*.cpp' | xargs clang-format -i -style=llvm
+```
+
 ## Build
 
 ### Release
