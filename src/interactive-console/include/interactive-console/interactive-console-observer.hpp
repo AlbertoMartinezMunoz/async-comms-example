@@ -1,10 +1,9 @@
 #ifndef IOT_MICRO_FIRMWARE_SRC_INTERACTIVE_CONSOLE_INCLUDE_INTERACTIVE_CONSOLE_INTERACTIVE_CONSOLE_OBSERVER_H_
 #define IOT_MICRO_FIRMWARE_SRC_INTERACTIVE_CONSOLE_INCLUDE_INTERACTIVE_CONSOLE_INTERACTIVE_CONSOLE_OBSERVER_H_
-class interactive_console_observer
-{
+class interactive_console_observer {
 public:
-    virtual int console_incoming_message(const char *message) const = 0;
-    virtual ~interactive_console_observer() {}
+  virtual int console_incoming_message(const char *message) const = 0;
+  virtual ~interactive_console_observer() {}
 };
 
 #endif // IOT_MICRO_FIRMWARE_SRC_INTERACTIVE_CONSOLE_INCLUDE_INTERACTIVE_CONSOLE_INTERACTIVE_CONSOLE_OBSERVER_H_
