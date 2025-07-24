@@ -71,5 +71,3 @@ Log Process stdout
                  Log         ${stdin}
     ${stdin}     Get File    ./atest-results/tmp/sender-stdin.txt
                  Log         ${stdin}
-
-
