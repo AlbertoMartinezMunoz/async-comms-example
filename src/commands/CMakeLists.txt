@@ -1,7 +1,6 @@
 project(commands-lib CXX)
 
-set(SOURCES ${PROJECT_SOURCE_DIR}/include/commands/commands.hpp
-            ${PROJECT_SOURCE_DIR}/src/commands.cpp)
+set(SOURCES ${PROJECT_SOURCE_DIR}/src/commands-implementations.cpp)
 
 add_library(commands-lib ${SOURCES})
 set_target_properties(commands-lib PROPERTIES LINKER_LANGUAGE CXX)
