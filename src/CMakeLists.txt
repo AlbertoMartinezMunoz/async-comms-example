@@ -4,6 +4,7 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/communications-layer")
 add_subdirectory("${PROJECT_SOURCE_DIR}/command-manager")
 add_subdirectory("${PROJECT_SOURCE_DIR}/interactive-console")
 add_subdirectory("${PROJECT_SOURCE_DIR}/interactive-commands")
+add_subdirectory("${PROJECT_SOURCE_DIR}/commands")
 add_subdirectory("${PROJECT_SOURCE_DIR}/arguments-parser")
 
 add_executable(command-manager command-manager.cpp)
