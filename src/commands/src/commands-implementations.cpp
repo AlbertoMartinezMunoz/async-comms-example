@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include <commands/commands.hpp>
+#include <commands/commands-implementations.hpp>
 
 int local_fast_command::execute() const {
   printf("********************** Local Fast Command "
@@ -14,9 +14,15 @@ int local_slow_command ::execute() const {
   return 0;
 };
 
+local_shutdown_command::local_shutdown_command(shutdown_receiver *comms,
+                                               shutdown_receiver *cli)
+    : comms(comms), cli(cli) {}
+
 int local_shutdown_command ::execute() const {
   printf("********************** Local Shutdown Command "
          "**********************\r\n");
+  comms->shutdown();
+  cli->shutdown();
   return 0;
 };
 
@@ -32,8 +38,14 @@ int remote_slow_command::execute() const {
   return 0;
 }
 
+remote_shutdown_command::remote_shutdown_command(shutdown_receiver *comms,
+                                                 shutdown_receiver *cli)
+    : comms(comms), cli(cli) {}
+
 int remote_shutdown_command ::execute() const {
   printf("********************** Remote Shutdown Command "
          "**********************\r\n");
+  comms->shutdown();
+  cli->shutdown();
   return 0;
 }
