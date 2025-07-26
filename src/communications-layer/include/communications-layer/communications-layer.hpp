@@ -4,11 +4,13 @@
 #include <cstdint>
 #include <cstdio>
 
+#include <commands/shutdown-receiver.hpp>
+
 /**
  * The communications_layer_interface interface declares a method for building
  * the chain of handlers. It also declares a method for executing a request.
  */
-class communications_layer_interface {
+class communications_layer_interface : public shutdown_receiver {
 public:
   virtual communications_layer_interface *
   set_next_communications_layer(communications_layer_interface *handler) = 0;
@@ -51,6 +53,13 @@ public:
 
     return size;
   }
+
+  int shutdown() override {
+    if (this->next_communications_layer_) {
+      return this->next_communications_layer_->shutdown();
+    }
+    return 0;
+  };
 };
 
 #endif // IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYERS_INCLUDE_COMMUNICATIONS_LAYERS_COMMUNICATION_LAYER_H_
