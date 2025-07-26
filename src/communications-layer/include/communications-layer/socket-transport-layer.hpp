@@ -23,6 +23,8 @@ public:
 
   ssize_t recv(char *buffer, size_t buffer_size) override;
 
+  int shutdown() override;
+
 private:
   int sending_socket;
   int listening_socket;

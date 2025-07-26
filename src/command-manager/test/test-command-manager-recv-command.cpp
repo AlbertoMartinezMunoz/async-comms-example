@@ -17,6 +17,7 @@ public:
   MOCK_METHOD(ssize_t, send, (const char *buffer, size_t buffer_size),
               (override));
   MOCK_METHOD(ssize_t, recv, (char *buffer, size_t buffer_size), (override));
+  MOCK_METHOD(int, shutdown, ());
 };
 
 class FastCmdObseverMock : public command_observer {
