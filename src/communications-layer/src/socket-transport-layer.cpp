@@ -137,13 +137,6 @@ int socket_transport_layer::listen_connections(
   return 0;
 }
 
-void socket_transport_layer::stop_listening() {
-  printf("socket_transport_layer::stop_listening\r\n");
-  is_listening = false;
-  if (write(wakeuppfd[1], "x", 1) == -1)
-    perror("socket wakeup write");
-}
-
 ssize_t socket_transport_layer::send(const char *buffer, size_t buffer_size) {
   int ret = write(sending_socket, buffer, buffer_size);
   if (ret == -1) {
@@ -171,4 +164,14 @@ ssize_t socket_transport_layer::recv(char *buffer, size_t buffer_size) {
          buffer_size);
 
   return ret;
+}
+
+int socket_transport_layer::shutdown() {
+  printf("socket_transport_layer::shutdown\r\n");
+  is_listening = false;
+  if (write(wakeuppfd[1], "x", 1) == -1) {
+    perror("socket wakeup write");
+    return -1;
+  }
+  return communications_layer::shutdown();
 }

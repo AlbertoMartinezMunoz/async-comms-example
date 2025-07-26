@@ -81,6 +81,7 @@ public:
   MOCK_METHOD(ssize_t, send, (const char *buffer, size_t buffer_size),
               (override));
   MOCK_METHOD(ssize_t, recv, (char *buffer, size_t buffer_size), (override));
+  MOCK_METHOD(int, shutdown, ());
 };
 
 class CommunicationsLayerObserverMock : public communications_layer_observer {
@@ -206,6 +207,7 @@ TEST_F(TestSocketTransportLayer, WhenReceveingIfRecvErrorThenReturnError) {
 }
 
 TEST_F(TestSocketTransportLayer, WhenListeningIfStopListenThenShouldStop) {
+  layer->set_next_communications_layer(nullptr);
   using ::testing::Mock;
   EXPECT_CALL(*comms_layer_observer_mock, incoming_message()).Times(0);
   std::thread t1(&socket_transport_layer::listen_connections, layer,
@@ -215,7 +217,7 @@ TEST_F(TestSocketTransportLayer, WhenListeningIfStopListenThenShouldStop) {
   EXPECT_CALL(*comms_layer_observer_mock, incoming_message())
       .Times(1)
       .WillOnce(Return(0));
-  layer->stop_listening();
+  layer->shutdown();
   t1.join();
 }
 

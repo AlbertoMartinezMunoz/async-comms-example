@@ -13,6 +13,8 @@ public:
   ssize_t send(const char *buffer, size_t buffer_size) override;
 
   ssize_t recv(char *buffer, size_t buffer_size) override;
+
+  int shutdown() override;
 };
 
 #endif // IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYER_INCLUDE_COMMUNICATIONS_LAYER_SLIP_APPLICATION_LAYER_H_

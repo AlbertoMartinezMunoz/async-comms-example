@@ -53,7 +53,7 @@ public:
   int process_command() override {
     printf("********************** Received Shutdown Command "
            "**********************\r\n");
-    socket->stop_listening();
+    socket->shutdown();
     console->stop();
     return 0;
   }

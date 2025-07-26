@@ -27,6 +27,7 @@ public:
   MOCK_METHOD(ssize_t, send, (const char *buffer, size_t buffer_size),
               (override));
   MOCK_METHOD(ssize_t, recv, (char *buffer, size_t buffer_size), (override));
+  MOCK_METHOD(int, shutdown, ());
 };
 
 class SocketTransportLayerMock : public socket_transport_layer {
@@ -35,9 +36,9 @@ public:
   MOCK_METHOD(int, disconnect_socket, ());
   MOCK_METHOD(int, listen_connections,
               (const char *, communications_layer_observer *));
-  MOCK_METHOD(void, stop_listening, ());
   MOCK_METHOD(ssize_t, send, (const char *, size_t), (override));
   MOCK_METHOD(ssize_t, recv, (char *, size_t), (override));
+  MOCK_METHOD(int, shutdown, ());
 };
 
 class CommandManagerWrapper : public command_manager {

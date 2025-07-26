@@ -72,3 +72,7 @@ ssize_t slip_application_layer::recv(char *buffer, size_t buffer_size) {
   printf("slip_application_layer::recv missing END error\r\n");
   return -1;
 }
+
+int slip_application_layer::shutdown() {
+  return communications_layer::shutdown();
+}

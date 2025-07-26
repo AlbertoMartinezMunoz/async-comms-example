@@ -22,7 +22,7 @@ shutdown_command::shutdown_command(command_manager *cmd_mngr,
 void shutdown_command::execute() const {
   printf("shutdown_command::execute\r\n");
   printresult(cmd_mngr->send_shutdown_cmd(), "shutdown_command::execute:");
-  socket->stop_listening();
+  socket->shutdown();
   cli->stop();
 }
 
