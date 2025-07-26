@@ -3,10 +3,12 @@
 
 #include <commands/commands-implementations.hpp>
 
+using ::testing::NiceMock;
 using ::testing::Return;
 
 class ShutdownReceiverMock : public shutdown_receiver {
 public:
+  virtual ~ShutdownReceiverMock() {}
   MOCK_METHOD(int, shutdown, ());
 };
 
@@ -17,7 +19,7 @@ command *CreateShutdownCommand(shutdown_receiver *comms,
 template <>
 command *CreateShutdownCommand<local_shutdown_command>(shutdown_receiver *comms,
                                                        shutdown_receiver *cli) {
-  return new local_shutdown_command(comms, cli);
+  return new local_shutdown_command(nullptr, comms, cli);
 }
 
 template <>
