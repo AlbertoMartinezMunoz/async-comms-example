@@ -8,7 +8,7 @@ repos:
     hooks:
     -   id: format
         name: Format
-        entry: bash -c "find ./src -iname '*.h' -o -iname '*.hpp' -o -iname '*.cpp' | xargs clang-format -i -style=llvm"
+        entry: bash -c "find ./src -iname '*.h' -o -iname '*.hpp' -o -iname '*.cpp' | xargs clang-format -i -style=file"
         language: system
 
 -   repo: https://github.com/pre-commit/pre-commit-hooks

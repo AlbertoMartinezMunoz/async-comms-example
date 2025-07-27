@@ -1,9 +1,9 @@
 #ifndef IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYER_INCLUDE_COMMUNICATIONS_LAYER_COMMUNICATIONS_OBSERVER_H_
 #define IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYER_INCLUDE_COMMUNICATIONS_LAYER_COMMUNICATIONS_OBSERVER_H_
 class communications_layer_observer {
-public:
-  virtual int incoming_message() const = 0;
-  virtual ~communications_layer_observer() {}
+  public:
+    virtual int incoming_message() const = 0;
+    virtual ~communications_layer_observer() {}
 };
 
 #endif // IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYER_INCLUDE_COMMUNICATIONS_LAYER_COMMUNICATIONS_OBSERVER_H_

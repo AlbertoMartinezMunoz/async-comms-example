@@ -151,10 +151,12 @@ The `clang-format` tool will be used to format the c++ files. To install clang-f
 sudo apt install clang-format
 ```
 
+There some default styles when formatting, but you can modify them using the `.clang-format` configuration file and the option `-style=file`
+
 It will be used to format the c++ files before commiting them to the repo. To manually run it:
 
 ```console
-find ./src -iname '*.h' -o -iname '*.hpp' -o -iname '*.cpp' | xargs clang-format -i -style=llvm
+find ./src -iname '*.h' -o -iname '*.hpp' -o -iname '*.cpp' | xargs clang-format -i -style=file
 ```
 
 ## Build
