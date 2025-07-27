@@ -2,10 +2,10 @@
 #define IOT_MICRO_FIRMWARE_SRC_INTERACTIVE_CONSOLE_INCLUDE_INTERACTIVE_CONSOLE_INTERACTIVE_CONSOLE_COMMAND_H_
 
 class interactive_console_command {
-public:
-  virtual ~interactive_console_command() {}
+  public:
+    virtual ~interactive_console_command() {}
 
-  virtual void execute() const = 0;
+    virtual void execute() const = 0;
 };
 
 #endif // IOT_MICRO_FIRMWARE_SRC_INTERACTIVE_CONSOLE_INCLUDE_INTERACTIVE_CONSOLE_INTERACTIVE_CONSOLE_COMMAND_H_

@@ -2,9 +2,9 @@
 #define IOT_MICRO_FIRMWARE_SRC_COMMANDS_INCLUDE_COMMANDS_COMMANDS_H_
 
 class command {
-public:
-  virtual ~command() {}
-  virtual int execute() const = 0;
+  public:
+    virtual ~command() {}
+    virtual int execute() const = 0;
 };
 
 #endif // IOT_MICRO_FIRMWARE_SRC_COMMANDS_INCLUDE_COMMANDS_COMMANDS_H_
