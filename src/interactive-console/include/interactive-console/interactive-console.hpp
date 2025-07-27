@@ -4,15 +4,15 @@
 #include <interactive-console/interactive-console-command.hpp>
 #include <interactive-console/interactive-console-observer.hpp>
 
-class interactive_console {
+#include <commands/shutdown-receiver.hpp>
+
+class interactive_console : public shutdown_receiver {
   public:
     static interactive_console *get_instance();
 
     ~interactive_console();
 
     void listen(interactive_console_observer *observer);
-
-    void stop(void);
 
     void set_shutdown_command(interactive_console_command *cmd);
 
@@ -23,6 +23,8 @@ class interactive_console {
     interactive_console(interactive_console &other) = delete;
 
     void operator=(const interactive_console &) = delete;
+
+    int shutdown() override;
 
   protected:
     interactive_console();

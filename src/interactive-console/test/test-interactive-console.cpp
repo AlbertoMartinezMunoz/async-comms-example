@@ -123,7 +123,7 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(TestInteractiveConsole, WhenListeningIfStopThenStopListeningAndShutdown) {
     std::thread t1(&interactive_console::listen, console, std::ref(observer_mock));
     std::this_thread::sleep_for(std::chrono::milliseconds(30));
-    console->stop();
+    console->shutdown();
     t1.join();
 }
 
