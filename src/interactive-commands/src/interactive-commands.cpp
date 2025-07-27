@@ -21,7 +21,7 @@ void shutdown_command::execute() const {
     printf("shutdown_command::execute\r\n");
     printresult(cmd_mngr->send_shutdown_cmd(), "shutdown_command::execute:");
     socket->shutdown();
-    cli->stop();
+    cli->shutdown();
 }
 
 fast_command::fast_command(command_manager *cmd_mngr) : cmd_mngr(cmd_mngr) {}

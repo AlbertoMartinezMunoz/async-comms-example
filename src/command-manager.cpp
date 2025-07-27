@@ -50,7 +50,7 @@ class shutdown_cmd_processor : public command_observer {
         printf("********************** Received Shutdown Command "
                "**********************\r\n");
         socket->shutdown();
-        console->stop();
+        console->shutdown();
         return 0;
     }
 
@@ -105,7 +105,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 
     std::thread t1(&interactive_console::listen, console, std::ref(dummy_cli_observer));
     if (transport_layer->listen_connections(argparser->get_local_path(), cmd_mngr) != 0)
-        console->stop();
+        console->shutdown();
     t1.join();
 
     delete cmd_mngr;

@@ -86,11 +86,14 @@ void interactive_console::readline_cb(char *line) {
         free(line);
 }
 
-void interactive_console::stop(void) {
-    printf("interactive_console::stop\r\n");
+int interactive_console::shutdown() {
+    printf("interactive_console::shutdown\r\n");
     running = false;
-    if (write(wakeuppfd[1], "x", 1) == -1)
+    if (write(wakeuppfd[1], "x", 1) == -1) {
         perror("interctive console: wakeup write");
+        return -1;
+    }
+    return 0;
 }
 
 void interactive_console::listen(interactive_console_observer *observer) {
