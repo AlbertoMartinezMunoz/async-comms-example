@@ -1,7 +1,7 @@
 #ifndef IOT_MICRO_FIRMWARE_SRC_COMMAND_MANAGER_INCLUDE_COMMAND_MANAGER_COMMAND_MANAGER_H_
 #define IOT_MICRO_FIRMWARE_SRC_COMMAND_MANAGER_INCLUDE_COMMAND_MANAGER_COMMAND_MANAGER_H_
 
-#include <command-manager/command-observer.hpp>
+#include <commands/commands.hpp>
 #include <communications-layer/communications-layer.hpp>
 #include <communications-layer/communications-observer.hpp>
 #include <communications-layer/socket-transport-layer.hpp>
@@ -21,26 +21,26 @@ class command_manager : public communications_layer_observer {
 
     int incoming_message() const override;
 
-    void subscribe_fast_cmd(command_observer *observer);
+    void subscribe_fast_cmd(command *cmd);
 
-    void subscribe_slow_cmd(command_observer *observer);
+    void subscribe_slow_cmd(command *cmd);
 
-    void subscribe_shutdown_cmd(command_observer *observer);
+    void subscribe_shutdown_cmd(command *cmd);
 
     static constexpr char ack[4] = "ACK";
     static constexpr char nack[5] = "NACK";
-    static constexpr char fast_cmd[] = "FAST COMMAND";
-    static constexpr char slow_cmd[] = "SLOW COMMAND";
-    static constexpr char shutdown_cmd[] = "SHUTDOWN COMMAND";
+    static constexpr char fast_cmd_id[] = "FAST COMMAND";
+    static constexpr char slow_cmd_id[] = "SLOW COMMAND";
+    static constexpr char shutdown_cmd_id[] = "SHUTDOWN COMMAND";
 
   private:
     communications_layer_interface *communications_layer;
     socket_transport_layer *socket;
     const char *send_cmd_socket_path;
 
-    command_observer *fast_cmd_observer;
-    command_observer *slow_cmd_observer;
-    command_observer *shutdown_cmd_observer;
+    command *fast_cmd;
+    command *slow_cmd;
+    command *shutdown_cmd;
 
     int send_simple_cmd(const char *cmd, size_t cmd_size);
 };
