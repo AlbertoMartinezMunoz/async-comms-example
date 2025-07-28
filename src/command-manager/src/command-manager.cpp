@@ -4,7 +4,7 @@
 command_manager::command_manager(communications_layer_interface *communications_layer, socket_transport_layer *socket,
                                  const char *send_cmd_socket_path)
     : communications_layer(communications_layer), socket(socket), send_cmd_socket_path(send_cmd_socket_path),
-      fast_cmd_observer(nullptr), slow_cmd_observer(nullptr), shutdown_cmd_observer(nullptr) {}
+      fast_cmd(nullptr), slow_cmd(nullptr), shutdown_cmd(nullptr) {}
 
 int command_manager::send_simple_cmd(const char *cmd, size_t cmd_size) {
     char response[32];
@@ -37,21 +37,26 @@ int command_manager::send_simple_cmd(const char *cmd, size_t cmd_size) {
         return -1;
 }
 
-int command_manager::send_fast_cmd() { return send_simple_cmd(fast_cmd, sizeof(fast_cmd)); }
+int command_manager::send_fast_cmd() {
+    return send_simple_cmd(command_manager::fast_cmd_id, sizeof(command_manager::fast_cmd_id));
+}
 
-int command_manager::send_shutdown_cmd() { return send_simple_cmd(shutdown_cmd, sizeof(shutdown_cmd)); }
+int command_manager::send_shutdown_cmd() {
+    return send_simple_cmd(command_manager::shutdown_cmd_id, sizeof(command_manager::shutdown_cmd_id));
+}
 
 int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer_size) {
     char response[32];
 
-    printf("command_manager::send_slow_cmd send '%s' [%zu]\r\n", slow_cmd, sizeof(slow_cmd));
+    printf("command_manager::send_slow_cmd send '%s' [%zu]\r\n", command_manager::slow_cmd_id,
+           sizeof(command_manager::slow_cmd_id));
     int ret = socket->connect_socket(send_cmd_socket_path);
     if (ret == -1) {
         perror("fast_command::execute: connect_socket");
         return -2;
     }
 
-    ret = communications_layer->send(slow_cmd, sizeof(slow_cmd));
+    ret = communications_layer->send(command_manager::slow_cmd_id, sizeof(command_manager::slow_cmd_id));
     if (ret < (int)sizeof(slow_cmd)) {
         printf("command_manager::send_slow_cmd send error '%d'\r\n", ret);
         return -1;
@@ -90,12 +95,12 @@ int command_manager::incoming_message() const {
     ret = -1;
     command[sizeof(command) - 1] = '\0';
     printf("command_manager::incoming_message '%s'\r\n", command);
-    if (strcmp(fast_cmd, command) == 0)
-        ret = fast_cmd_observer->process_command();
-    else if (strcmp(slow_cmd, command) == 0)
-        ret = slow_cmd_observer->process_command();
-    else if (strcmp(shutdown_cmd, command) == 0)
-        ret = shutdown_cmd_observer->process_command();
+    if (strcmp(fast_cmd_id, command) == 0)
+        ret = fast_cmd->execute();
+    else if (strcmp(slow_cmd_id, command) == 0)
+        ret = slow_cmd->execute();
+    else if (strcmp(shutdown_cmd_id, command) == 0)
+        ret = shutdown_cmd->execute();
 
     printf("command_manager:incoming_message processed '%s' => %d\r\n", command, ret);
     if (ret == 0)
@@ -106,8 +111,8 @@ int command_manager::incoming_message() const {
     return 0;
 }
 
-void command_manager::subscribe_fast_cmd(command_observer *observer) { fast_cmd_observer = observer; }
+void command_manager::subscribe_fast_cmd(command *cmd) { fast_cmd = cmd; }
 
-void command_manager::subscribe_slow_cmd(command_observer *observer) { slow_cmd_observer = observer; }
+void command_manager::subscribe_slow_cmd(command *cmd) { slow_cmd = cmd; }
 
-void command_manager::subscribe_shutdown_cmd(command_observer *observer) { shutdown_cmd_observer = observer; }
+void command_manager::subscribe_shutdown_cmd(command *cmd) { shutdown_cmd = cmd; }

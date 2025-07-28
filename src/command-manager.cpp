@@ -8,7 +8,7 @@
 
 #include <arguments-parser/arguments-parser.hpp>
 #include <command-manager/command-manager.hpp>
-#include <command-manager/command-observer.hpp>
+#include <commands/commands-implementations.hpp>
 #include <communications-layer/communications-layer.hpp>
 #include <communications-layer/slip-application-layer.hpp>
 #include <communications-layer/socket-transport-layer.hpp>
@@ -23,48 +23,12 @@ class dummy_interactive_console_observer : public interactive_console_observer {
     int console_incoming_message(__attribute__((unused)) const char *message) const override { return 0; }
 };
 
-class slow_cmd_processor : public command_observer {
-  public:
-    int process_command() override {
-        printf("********************** Received Slow Command "
-               "**********************\r\n");
-        return 0;
-    }
-};
-
-class fast_cmd_processor : public command_observer {
-  public:
-    int process_command() override {
-        printf("********************** Received Fast Command "
-               "**********************\r\n");
-        return 0;
-    }
-};
-
-class shutdown_cmd_processor : public command_observer {
-  public:
-    shutdown_cmd_processor(socket_transport_layer *socket, interactive_console *console)
-        : socket(socket), console(console) {}
-
-    int process_command() override {
-        printf("********************** Received Shutdown Command "
-               "**********************\r\n");
-        socket->shutdown();
-        console->shutdown();
-        return 0;
-    }
-
-  private:
-    socket_transport_layer *socket;
-    interactive_console *console;
-};
-
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[]) {
     socket_transport_layer *transport_layer;
     slip_application_layer *application_layer;
-    slow_cmd_processor *slow_cmd;
-    fast_cmd_processor *fast_cmd;
-    shutdown_cmd_processor *shutdown_cmd;
+    remote_slow_command *remote_slow_cmd;
+    remote_fast_command *remote_fast_cmd;
+    remote_shutdown_command *remote_shutdown_cmd;
     command_manager *cmd_mngr;
 
     interactive_console *console;
@@ -84,14 +48,14 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     application_layer = new slip_application_layer();
     application_layer->set_next_communications_layer(transport_layer);
 
-    slow_cmd = new slow_cmd_processor();
-    fast_cmd = new fast_cmd_processor();
-    shutdown_cmd = new shutdown_cmd_processor(transport_layer, console);
+    remote_slow_cmd = new remote_slow_command();
+    remote_fast_cmd = new remote_fast_command();
+    remote_shutdown_cmd = new remote_shutdown_command(transport_layer, console);
 
     cmd_mngr = new command_manager(application_layer, transport_layer, argparser->get_remote_path());
-    cmd_mngr->subscribe_slow_cmd(slow_cmd);
-    cmd_mngr->subscribe_fast_cmd(fast_cmd);
-    cmd_mngr->subscribe_shutdown_cmd(shutdown_cmd);
+    cmd_mngr->subscribe_slow_cmd(remote_slow_cmd);
+    cmd_mngr->subscribe_fast_cmd(remote_fast_cmd);
+    cmd_mngr->subscribe_shutdown_cmd(remote_shutdown_cmd);
 
     shutdown_local_cmd = new shutdown_command(cmd_mngr, transport_layer, console);
     fast_local_cmd = new fast_command(cmd_mngr);
@@ -110,9 +74,9 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 
     delete cmd_mngr;
     delete transport_layer;
-    delete slow_cmd;
-    delete shutdown_cmd;
-    delete fast_cmd;
+    delete remote_slow_cmd;
+    delete remote_shutdown_cmd;
+    delete remote_fast_cmd;
     delete console;
     delete shutdown_local_cmd;
     delete fast_local_cmd;
