@@ -33,4 +33,6 @@ repos:
     rev: v0.6.10
     hooks:
     -   id: cmake-format
+        args: [--line-width=120, --tab-size=4]
     -   id: cmake-lint
+        args: [--line-width=120, --tab-size=4]
