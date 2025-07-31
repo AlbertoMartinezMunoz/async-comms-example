@@ -8,6 +8,7 @@
 
 #include <arguments-parser/arguments-parser.hpp>
 #include <command-manager/command-manager.hpp>
+#include <command-manager/command-remote-handler.hpp>
 #include <commands/commands-implementations.hpp>
 #include <communications-layer/communications-layer.hpp>
 #include <communications-layer/slip-application-layer.hpp>
@@ -30,6 +31,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     remote_fast_command *remote_fast_cmd;
     remote_shutdown_command *remote_shutdown_cmd;
     command_manager *cmd_mngr;
+    command_remote_handler *remote_cmd_handler;
 
     interactive_console *console;
     interactive_console_command *shutdown_local_cmd;
@@ -52,10 +54,11 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     remote_fast_cmd = new remote_fast_command();
     remote_shutdown_cmd = new remote_shutdown_command(transport_layer, console);
 
+    remote_cmd_handler = new command_remote_handler(application_layer);
     cmd_mngr = new command_manager(application_layer, transport_layer, argparser->get_remote_path());
-    cmd_mngr->subscribe_slow_cmd(remote_slow_cmd);
-    cmd_mngr->subscribe_fast_cmd(remote_fast_cmd);
-    cmd_mngr->subscribe_shutdown_cmd(remote_shutdown_cmd);
+    remote_cmd_handler->subscribe_slow_cmd(remote_slow_cmd);
+    remote_cmd_handler->subscribe_fast_cmd(remote_fast_cmd);
+    remote_cmd_handler->subscribe_shutdown_cmd(remote_shutdown_cmd);
 
     shutdown_local_cmd = new shutdown_command(cmd_mngr, transport_layer, console);
     fast_local_cmd = new fast_command(cmd_mngr);
@@ -68,7 +71,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     dummy_interactive_console_observer *dummy_cli_observer = new dummy_interactive_console_observer();
 
     std::thread t1(&interactive_console::listen, console, std::ref(dummy_cli_observer));
-    if (transport_layer->listen_connections(argparser->get_local_path(), cmd_mngr) != 0)
+    if (transport_layer->listen_connections(argparser->get_local_path(), remote_cmd_handler) != 0)
         console->shutdown();
     t1.join();
 

@@ -77,16 +77,17 @@ class CommunicationsLayerMock : public communications_layer_interface {
     MOCK_METHOD(int, shutdown, ());
 };
 
-class CommunicationsLayerObserverMock : public communications_layer_observer {
+class CommandHandlerMock : public command_handler {
   public:
-    MOCK_METHOD(int, incoming_message, (), (const, override));
+    virtual ~CommandHandlerMock() {}
+    MOCK_METHOD(int, handle, ());
 };
 
 class TestSocketTransportLayer : public ::testing::Test {
   public:
     socket_transport_layer *layer;
     CommunicationsLayerMock *comms_layer_mock = nullptr;
-    CommunicationsLayerObserverMock *comms_layer_observer_mock = nullptr;
+    CommandHandlerMock *cmd_handler_mock = nullptr;
     const int expected_socket_fd = 1;
 
     virtual void SetUp() {
@@ -103,7 +104,7 @@ class TestSocketTransportLayer : public ::testing::Test {
         read_fake.custom_fake = read_mock;
         select_fake.custom_fake = select_mock;
         comms_layer_mock = new CommunicationsLayerMock();
-        comms_layer_observer_mock = new CommunicationsLayerObserverMock();
+        cmd_handler_mock = new CommandHandlerMock();
         layer = new socket_transport_layer();
         layer->set_next_communications_layer(comms_layer_mock);
         ASSERT_EQ(0, layer->connect_socket(SOCKET_NAME));
@@ -112,7 +113,7 @@ class TestSocketTransportLayer : public ::testing::Test {
     virtual void TearDown() {
         delete layer;
         delete comms_layer_mock;
-        delete comms_layer_observer_mock;
+        delete cmd_handler_mock;
     }
 
     handler_t signal_cb;
@@ -190,11 +191,11 @@ TEST_F(TestSocketTransportLayer, WhenReceveingIfRecvErrorThenReturnError) {
 TEST_F(TestSocketTransportLayer, WhenListeningIfStopListenThenShouldStop) {
     layer->set_next_communications_layer(nullptr);
     using ::testing::Mock;
-    EXPECT_CALL(*comms_layer_observer_mock, incoming_message()).Times(0);
-    std::thread t1(&socket_transport_layer::listen_connections, layer, SOCKET_NAME, comms_layer_observer_mock);
+    EXPECT_CALL(*cmd_handler_mock, handle()).Times(0);
+    std::thread t1(&socket_transport_layer::listen_connections, layer, SOCKET_NAME, cmd_handler_mock);
     std::this_thread::sleep_for(std::chrono::milliseconds(30));
-    ASSERT_EQ(true, Mock::VerifyAndClearExpectations(comms_layer_observer_mock));
-    EXPECT_CALL(*comms_layer_observer_mock, incoming_message()).Times(1).WillOnce(Return(0));
+    ASSERT_EQ(true, Mock::VerifyAndClearExpectations(cmd_handler_mock));
+    EXPECT_CALL(*cmd_handler_mock, handle()).Times(1).WillOnce(Return(0));
     layer->shutdown();
     t1.join();
 }

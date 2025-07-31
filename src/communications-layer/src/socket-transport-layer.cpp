@@ -71,8 +71,7 @@ void listen_cleanup(int listening_socket, const char *socket_path) {
     unlink(socket_path);
 }
 
-int socket_transport_layer::listen_connections(const char *socket_path,
-                                               communications_layer_observer *in_msg_observer) {
+int socket_transport_layer::listen_connections(const char *socket_path, command_handler *cmd_handler) {
     struct sockaddr_un name;
 
     listening_socket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
@@ -121,7 +120,7 @@ int socket_transport_layer::listen_connections(const char *socket_path,
             }
             printf("socket_transport_layer::listen_connections: incoming "
                    "connection\r\n");
-            in_msg_observer->incoming_message();
+            cmd_handler->handle();
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
