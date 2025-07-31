@@ -2,6 +2,7 @@
 #define IOT_MICRO_FIRMWARE_SRC_COMMAND_MANAGER_INCLUDE_COMMAND_MANAGER_COMMAND_HANDLER_H_
 
 class command_handler {
+  public:
     virtual int handle() = 0;
 };
 
