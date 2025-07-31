@@ -1,6 +1,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <command-manager/command-ids.hpp>
 #include <command-manager/command-manager.hpp>
 #include <communications-layer/socket-transport-layer.hpp>
 
@@ -84,8 +85,8 @@ class TestCommandManagerFastCmdParams : public TestCommandManagerParams {
   public:
     TestCommandManagerFastCmdParams(std::string name, ssize_t send_expected_result, const char *expected_response,
                                     size_t expected_response_size, ssize_t recv_expected_result, int expected_result)
-        : TestCommandManagerParams(name, &command_manager::send_fast_cmd, command_manager::fast_cmd_id,
-                                   sizeof(command_manager::fast_cmd_id), send_expected_result, expected_response,
+        : TestCommandManagerParams(name, &command_manager::send_fast_cmd, command_ids::fast_cmd_id,
+                                   sizeof(command_ids::fast_cmd_id), send_expected_result, expected_response,
                                    expected_response_size, recv_expected_result, expected_result) {}
 };
 
@@ -94,8 +95,8 @@ class TestCommandManagerShutdownCmdParams : public TestCommandManagerParams {
     TestCommandManagerShutdownCmdParams(std::string name, ssize_t send_expected_result, const char *expected_response,
                                         size_t expected_response_size, ssize_t recv_expected_result,
                                         int expected_result)
-        : TestCommandManagerParams(name, &command_manager::send_shutdown_cmd, command_manager::shutdown_cmd_id,
-                                   sizeof(command_manager::shutdown_cmd_id), send_expected_result, expected_response,
+        : TestCommandManagerParams(name, &command_manager::send_shutdown_cmd, command_ids::shutdown_cmd_id,
+                                   sizeof(command_ids::shutdown_cmd_id), send_expected_result, expected_response,
                                    expected_response_size, recv_expected_result, expected_result) {}
 };
 
@@ -145,63 +146,59 @@ INSTANTIATE_TEST_SUITE_P(
     , TestCommandManager,
     ::testing::Values(
         TestCommandManagerFastCmdParams{"WhenSendingFastCommandIfAckThenSendAndReturnAck",
-                                        sizeof(command_manager::fast_cmd_id), command_manager::ack,
-                                        sizeof(command_manager::ack), sizeof(command_manager::ack), 0},
+                                        sizeof(command_ids::fast_cmd_id), command_ids::ack, sizeof(command_ids::ack),
+                                        sizeof(command_ids::ack), 0},
         TestCommandManagerFastCmdParams{"WhenSendingFastCommandIfNackThenSendAndReturnNack",
-                                        sizeof(command_manager::fast_cmd_id), command_manager::nack,
-                                        sizeof(command_manager::nack), sizeof(command_manager::nack), 1},
+                                        sizeof(command_ids::fast_cmd_id), command_ids::nack, sizeof(command_ids::nack),
+                                        sizeof(command_ids::nack), 1},
         TestCommandManagerFastCmdParams{"WhenSendingFastCommandIfResponseErrorThenReturnError",
-                                        sizeof(command_manager::fast_cmd_id), "BAD", sizeof("BAD"), sizeof("BAD"), -1},
+                                        sizeof(command_ids::fast_cmd_id), "BAD", sizeof("BAD"), sizeof("BAD"), -1},
         TestCommandManagerFastCmdParams{"WhenSendingFastCommandIfSendInternalErrorThenReturnError", -3, nullptr, 0, 0,
                                         -1},
         TestCommandManagerFastCmdParams{"WhenSendingFastCommandIfRecvInternalErrorThenReturnError",
-                                        sizeof(command_manager::fast_cmd_id), nullptr, 0, -3, -3},
+                                        sizeof(command_ids::fast_cmd_id), nullptr, 0, -3, -3},
         TestCommandManagerShutdownCmdParams{"WhenSendingShutdownCommandIfAckThenSendAndReturnAck",
-                                            sizeof(command_manager::shutdown_cmd_id), command_manager::ack,
-                                            sizeof(command_manager::ack), sizeof(command_manager::ack), 0},
+                                            sizeof(command_ids::shutdown_cmd_id), command_ids::ack,
+                                            sizeof(command_ids::ack), sizeof(command_ids::ack), 0},
         TestCommandManagerShutdownCmdParams{"WhenSendingShutdownCommandIfNackThenSendAndReturnNack",
-                                            sizeof(command_manager::shutdown_cmd_id), command_manager::nack,
-                                            sizeof(command_manager::nack), sizeof(command_manager::nack), 1},
+                                            sizeof(command_ids::shutdown_cmd_id), command_ids::nack,
+                                            sizeof(command_ids::nack), sizeof(command_ids::nack), 1},
         TestCommandManagerShutdownCmdParams{"WhenSendingShutdownCommandIfResponseErrorThenReturnError",
-                                            sizeof(command_manager::shutdown_cmd_id), "BAD", sizeof("BAD"),
-                                            sizeof("BAD"), -1},
+                                            sizeof(command_ids::shutdown_cmd_id), "BAD", sizeof("BAD"), sizeof("BAD"),
+                                            -1},
         TestCommandManagerShutdownCmdParams{"WhenSendingShutdownCommandIfSendInternalErrorThenReturnError", -3, nullptr,
                                             0, 0, -1},
         TestCommandManagerShutdownCmdParams{"WhenSendingShutdownCommandIfRecvInternalErrorThenReturnError",
-                                            sizeof(command_manager::shutdown_cmd_id), nullptr, 0, -3, -3}),
+                                            sizeof(command_ids::shutdown_cmd_id), nullptr, 0, -3, -3}),
     [](const testing::TestParamInfo<TestCommandManagerParams> &info) { return info.param.name; });
 
 TEST_F(TestCommandManager, WhenSendingSlowCommandIfAckThenSendAndReturnAck) {
-    EXPECT_CALL(*communications_layer_mock,
-                send(StrEq(command_manager::slow_cmd_id), sizeof(command_manager::slow_cmd_id)))
+    EXPECT_CALL(*communications_layer_mock, send(StrEq(command_ids::slow_cmd_id), sizeof(command_ids::slow_cmd_id)))
         .Times(1)
-        .WillOnce(Return(sizeof(command_manager::slow_cmd_id)));
+        .WillOnce(Return(sizeof(command_ids::slow_cmd_id)));
     EXPECT_CALL(*communications_layer_mock, recv(_, _))
         .Times(1)
-        .WillOnce(DoAll(SetArrayArgument<0>(command_manager::ack, command_manager::ack + sizeof(command_manager::ack)),
-                        Return(sizeof(command_manager::ack))));
+        .WillOnce(DoAll(SetArrayArgument<0>(command_ids::ack, command_ids::ack + sizeof(command_ids::ack)),
+                        Return(sizeof(command_ids::ack))));
 
     ASSERT_EQ(0, command_mng->send_slow_cmd(slow_response_buffer, sizeof(slow_response_buffer)));
 }
 
 TEST_F(TestCommandManager, WhenSendingSlowCommandIfNackThenSendAndReturnNack) {
-    EXPECT_CALL(*communications_layer_mock,
-                send(StrEq(command_manager::slow_cmd_id), sizeof(command_manager::slow_cmd_id)))
+    EXPECT_CALL(*communications_layer_mock, send(StrEq(command_ids::slow_cmd_id), sizeof(command_ids::slow_cmd_id)))
         .Times(1)
-        .WillOnce(Return(sizeof(command_manager::slow_cmd_id)));
+        .WillOnce(Return(sizeof(command_ids::slow_cmd_id)));
     EXPECT_CALL(*communications_layer_mock, recv(_, _))
         .Times(1)
-        .WillOnce(
-            DoAll(SetArrayArgument<0>(command_manager::nack, command_manager::nack + sizeof(command_manager::nack)),
-                  Return(sizeof(command_manager::nack))));
+        .WillOnce(DoAll(SetArrayArgument<0>(command_ids::nack, command_ids::nack + sizeof(command_ids::nack)),
+                        Return(sizeof(command_ids::nack))));
 
     ASSERT_EQ(1, command_mng->send_slow_cmd(slow_response_buffer, sizeof(slow_response_buffer)));
 }
 
 TEST_F(TestCommandManager, WhenSendingSlowCommandIfSendInternalErrorThenReturnError) {
     int expected_error = -3;
-    EXPECT_CALL(*communications_layer_mock,
-                send(StrEq(command_manager::slow_cmd_id), sizeof(command_manager::slow_cmd_id)))
+    EXPECT_CALL(*communications_layer_mock, send(StrEq(command_ids::slow_cmd_id), sizeof(command_ids::slow_cmd_id)))
         .Times(1)
         .WillOnce(Return(expected_error));
 
@@ -210,13 +207,12 @@ TEST_F(TestCommandManager, WhenSendingSlowCommandIfSendInternalErrorThenReturnEr
 
 TEST_F(TestCommandManager, WhenSendingSlowCommandIfRecvInternalErrorThenReturnError) {
     int expected_error = -3;
-    EXPECT_CALL(*communications_layer_mock,
-                send(StrEq(command_manager::slow_cmd_id), sizeof(command_manager::slow_cmd_id)))
+    EXPECT_CALL(*communications_layer_mock, send(StrEq(command_ids::slow_cmd_id), sizeof(command_ids::slow_cmd_id)))
         .Times(1)
-        .WillOnce(Return(sizeof(command_manager::slow_cmd_id)));
+        .WillOnce(Return(sizeof(command_ids::slow_cmd_id)));
     EXPECT_CALL(*communications_layer_mock, recv(_, _))
         .Times(1)
-        .WillOnce(DoAll(SetArrayArgument<0>(command_manager::ack, command_manager::ack + sizeof(command_manager::nack)),
+        .WillOnce(DoAll(SetArrayArgument<0>(command_ids::ack, command_ids::ack + sizeof(command_ids::nack)),
                         Return(expected_error)));
 
     ASSERT_EQ(expected_error, command_mng->send_slow_cmd(slow_response_buffer, sizeof(slow_response_buffer)));
@@ -225,10 +221,9 @@ TEST_F(TestCommandManager, WhenSendingSlowCommandIfRecvInternalErrorThenReturnEr
 TEST_F(TestCommandManager, WhenSendingSlowCommandIfResponseErrorThenReturnError) {
     int expected_error = -1;
     char bad_response[] = "BAD";
-    EXPECT_CALL(*communications_layer_mock,
-                send(StrEq(command_manager::slow_cmd_id), sizeof(command_manager::slow_cmd_id)))
+    EXPECT_CALL(*communications_layer_mock, send(StrEq(command_ids::slow_cmd_id), sizeof(command_ids::slow_cmd_id)))
         .Times(1)
-        .WillOnce(Return(sizeof(command_manager::slow_cmd_id)));
+        .WillOnce(Return(sizeof(command_ids::slow_cmd_id)));
     EXPECT_CALL(*communications_layer_mock, recv(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArrayArgument<0>(bad_response, bad_response + sizeof(bad_response)),

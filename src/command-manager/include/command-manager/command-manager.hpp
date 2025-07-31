@@ -27,12 +27,6 @@ class command_manager : public communications_layer_observer {
 
     void subscribe_shutdown_cmd(command *cmd);
 
-    static constexpr char ack[4] = "ACK";
-    static constexpr char nack[5] = "NACK";
-    static constexpr char fast_cmd_id[] = "FAST COMMAND";
-    static constexpr char slow_cmd_id[] = "SLOW COMMAND";
-    static constexpr char shutdown_cmd_id[] = "SHUTDOWN COMMAND";
-
   private:
     communications_layer_interface *communications_layer;
     socket_transport_layer *socket;

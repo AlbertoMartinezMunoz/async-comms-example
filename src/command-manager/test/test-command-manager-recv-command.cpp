@@ -1,6 +1,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <command-manager/command-ids.hpp>
 #include <command-manager/command-manager.hpp>
 
 using ::testing::_;
@@ -55,53 +56,53 @@ class TestCommandManager : public ::testing::Test {
 TEST_F(TestCommandManager, WhenReceivingFastCommandIfAckThenResponseAndReturnAck) {
     EXPECT_CALL(*communications_layer_mock, recv(_, _))
         .Times(1)
-        .WillOnce(DoAll(SetArrayArgument<0>(command_manager::fast_cmd_id,
-                                            command_manager::fast_cmd_id + sizeof(command_manager::fast_cmd_id)),
-                        Return(sizeof(command_manager::fast_cmd_id))));
+        .WillOnce(DoAll(
+            SetArrayArgument<0>(command_ids::fast_cmd_id, command_ids::fast_cmd_id + sizeof(command_ids::fast_cmd_id)),
+            Return(sizeof(command_ids::fast_cmd_id))));
     EXPECT_CALL(*fast_cmd_mock, execute()).Times(1).WillOnce(Return(0));
-    EXPECT_CALL(*communications_layer_mock, send(StrEq(command_manager::ack), sizeof(command_manager::ack)))
+    EXPECT_CALL(*communications_layer_mock, send(StrEq(command_ids::ack), sizeof(command_ids::ack)))
         .Times(1)
-        .WillOnce(Return(sizeof(command_manager::ack)));
+        .WillOnce(Return(sizeof(command_ids::ack)));
     ASSERT_EQ(0, command_mng->incoming_message());
 }
 
 TEST_F(TestCommandManager, WhenReceivingSlowCommandIfAckThenResponseAndReturnAck) {
     EXPECT_CALL(*communications_layer_mock, recv(_, _))
         .Times(1)
-        .WillOnce(DoAll(SetArrayArgument<0>(command_manager::slow_cmd_id,
-                                            command_manager::slow_cmd_id + sizeof(command_manager::slow_cmd_id)),
-                        Return(sizeof(command_manager::slow_cmd_id))));
+        .WillOnce(DoAll(
+            SetArrayArgument<0>(command_ids::slow_cmd_id, command_ids::slow_cmd_id + sizeof(command_ids::slow_cmd_id)),
+            Return(sizeof(command_ids::slow_cmd_id))));
     EXPECT_CALL(*slow_cmd_mock, execute()).Times(1).WillOnce(Return(0));
     ;
-    EXPECT_CALL(*communications_layer_mock, send(StrEq(command_manager::ack), sizeof(command_manager::ack)))
+    EXPECT_CALL(*communications_layer_mock, send(StrEq(command_ids::ack), sizeof(command_ids::ack)))
         .Times(1)
-        .WillOnce(Return(sizeof(command_manager::ack)));
+        .WillOnce(Return(sizeof(command_ids::ack)));
     ASSERT_EQ(0, command_mng->incoming_message());
 }
 
 TEST_F(TestCommandManager, WhenReceivingFastCommandIfNAckThenResponseAndReturnNAck) {
     EXPECT_CALL(*communications_layer_mock, recv(_, _))
         .Times(1)
-        .WillOnce(DoAll(SetArrayArgument<0>(command_manager::fast_cmd_id,
-                                            command_manager::fast_cmd_id + sizeof(command_manager::fast_cmd_id)),
-                        Return(sizeof(command_manager::fast_cmd_id))));
+        .WillOnce(DoAll(
+            SetArrayArgument<0>(command_ids::fast_cmd_id, command_ids::fast_cmd_id + sizeof(command_ids::fast_cmd_id)),
+            Return(sizeof(command_ids::fast_cmd_id))));
     EXPECT_CALL(*fast_cmd_mock, execute()).Times(1).WillOnce(Return(1));
-    EXPECT_CALL(*communications_layer_mock, send(StrEq(command_manager::nack), sizeof(command_manager::nack)))
+    EXPECT_CALL(*communications_layer_mock, send(StrEq(command_ids::nack), sizeof(command_ids::nack)))
         .Times(1)
-        .WillOnce(Return(sizeof(command_manager::nack)));
+        .WillOnce(Return(sizeof(command_ids::nack)));
     ASSERT_EQ(0, command_mng->incoming_message());
 }
 
 TEST_F(TestCommandManager, WhenReceivingSlowCommandIfNAckThenResponseAndReturnNAck) {
     EXPECT_CALL(*communications_layer_mock, recv(_, _))
         .Times(1)
-        .WillOnce(DoAll(SetArrayArgument<0>(command_manager::slow_cmd_id,
-                                            command_manager::slow_cmd_id + sizeof(command_manager::slow_cmd_id)),
-                        Return(sizeof(command_manager::slow_cmd_id))));
+        .WillOnce(DoAll(
+            SetArrayArgument<0>(command_ids::slow_cmd_id, command_ids::slow_cmd_id + sizeof(command_ids::slow_cmd_id)),
+            Return(sizeof(command_ids::slow_cmd_id))));
     EXPECT_CALL(*slow_cmd_mock, execute()).Times(1).WillOnce(Return(1));
-    EXPECT_CALL(*communications_layer_mock, send(StrEq(command_manager::nack), sizeof(command_manager::nack)))
+    EXPECT_CALL(*communications_layer_mock, send(StrEq(command_ids::nack), sizeof(command_ids::nack)))
         .Times(1)
-        .WillOnce(Return(sizeof(command_manager::nack)));
+        .WillOnce(Return(sizeof(command_ids::nack)));
     ASSERT_EQ(0, command_mng->incoming_message());
 }
 
