@@ -1,4 +1,4 @@
-project(command-manager CXX)
+project(command-manager-lib CXX)
 
 set(SOURCES
     ${PROJECT_SOURCE_DIR}/include/command-manager/command-manager.hpp
