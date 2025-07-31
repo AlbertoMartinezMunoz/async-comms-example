@@ -1,8 +1,8 @@
 #ifndef IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYER_INCLUDE_COMMUNICATIONS_LAYER_SOCKET_TRANSPORT_LAYER_H_
 #define IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYER_INCLUDE_COMMUNICATIONS_LAYER_SOCKET_TRANSPORT_LAYER_H_
 
+#include <command-manager/command-handler.hpp>
 #include <communications-layer/communications-layer.hpp>
-#include <communications-layer/communications-observer.hpp>
 
 class socket_transport_layer : public communications_layer {
   public:
@@ -14,7 +14,7 @@ class socket_transport_layer : public communications_layer {
 
     int disconnect_socket();
 
-    int listen_connections(const char *socket_path, communications_layer_observer *in_msg_observer);
+    int listen_connections(const char *socket_path, command_handler *cmd_handler);
 
     void stop_listening();
 
