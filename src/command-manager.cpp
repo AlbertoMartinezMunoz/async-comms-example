@@ -55,10 +55,10 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     remote_shutdown_cmd = new remote_shutdown_command(transport_layer, console);
 
     remote_cmd_handler = new command_remote_handler(application_layer);
-    cmd_mngr = new command_manager(application_layer, transport_layer, argparser->get_remote_path());
     remote_cmd_handler->subscribe_slow_cmd(remote_slow_cmd);
     remote_cmd_handler->subscribe_fast_cmd(remote_fast_cmd);
     remote_cmd_handler->subscribe_shutdown_cmd(remote_shutdown_cmd);
+    cmd_mngr = new command_manager(application_layer, transport_layer, argparser->get_remote_path());
 
     shutdown_local_cmd = new shutdown_command(cmd_mngr, transport_layer, console);
     fast_local_cmd = new fast_command(cmd_mngr);
