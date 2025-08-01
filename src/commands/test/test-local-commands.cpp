@@ -4,7 +4,6 @@
 #include <commands/commands-implementations.hpp>
 
 using ::testing::_;
-using ::testing::NiceMock;
 using ::testing::Return;
 
 class LocalCommandReceiverMock : public local_command_receiver {
