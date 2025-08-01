@@ -6,11 +6,11 @@
 
 class socket_transport_layer : public communications_layer {
   public:
-    socket_transport_layer();
+    socket_transport_layer(const char *socket_path);
 
     ~socket_transport_layer();
 
-    int connect_socket(const char *socket_path);
+    int connect_socket();
 
     int disconnect_socket();
 
@@ -25,6 +25,7 @@ class socket_transport_layer : public communications_layer {
     int shutdown() override;
 
   private:
+    char *socket_path;
     int sending_socket;
     int listening_socket;
     bool is_listening;
