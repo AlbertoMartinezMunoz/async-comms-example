@@ -233,5 +233,5 @@ sudo apt-get install plantuml
 Then, to build the diagrams, you only have to run the `plantuml` command:
 
 ```console
-plantuml -tsvg <path-to-the-files>
+plantuml -tpng <path-to-the-files>
 ```
