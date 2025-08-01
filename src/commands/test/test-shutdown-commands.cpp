@@ -3,7 +3,6 @@
 
 #include <commands/commands-implementations.hpp>
 
-using ::testing::NiceMock;
 using ::testing::Return;
 
 class ShutdownReceiverMock : public shutdown_receiver {
