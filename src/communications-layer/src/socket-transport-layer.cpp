@@ -5,9 +5,12 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+namespace socket {
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <unistd.h>
+} // namespace socket
 
 #include <chrono>
 #include <thread>
@@ -43,10 +46,10 @@ socket_transport_layer::~socket_transport_layer() {
     close(wakeuppfd[1]);
 }
 
-int socket_transport_layer::connect_socket() {
-    struct sockaddr_un addr;
+int socket_transport_layer::connect() {
+    struct socket::sockaddr_un addr;
 
-    sending_socket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+    sending_socket = socket::socket(AF_UNIX, socket::SOCK_SEQPACKET, 0);
     if (sending_socket == -1) {
         perror("socket");
         return (-1);
@@ -56,7 +59,7 @@ int socket_transport_layer::connect_socket() {
     addr.sun_family = AF_UNIX;
     strncpy(addr.sun_path, this->socket_path, sizeof(addr.sun_path) - 1);
 
-    int ret = connect(sending_socket, (const struct sockaddr *)&addr, sizeof(addr));
+    int ret = socket::connect(sending_socket, (const struct socket::sockaddr *)&addr, sizeof(addr));
     if (ret == -1) {
         fprintf(stderr, "The server is down.\n");
         return (-1);
@@ -65,9 +68,8 @@ int socket_transport_layer::connect_socket() {
     return 0;
 }
 
-int socket_transport_layer::disconnect_socket() {
+int socket_transport_layer::disconnect() {
     close(sending_socket);
-
     return 0;
 }
 
@@ -77,9 +79,9 @@ void listen_cleanup(int listening_socket, const char *socket_path) {
 }
 
 int socket_transport_layer::listen_connections(const char *socket_path, command_handler *cmd_handler) {
-    struct sockaddr_un name;
+    struct socket::sockaddr_un name;
 
-    listening_socket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+    listening_socket = socket::socket(AF_UNIX, socket::SOCK_SEQPACKET, 0);
     if (listening_socket == -1) {
         perror("listening_socket");
         return (-1);
@@ -88,14 +90,14 @@ int socket_transport_layer::listen_connections(const char *socket_path, command_
     memset(&name, 0, sizeof(name));
     name.sun_family = AF_UNIX;
     strncpy(name.sun_path, socket_path, sizeof(name.sun_path) - 1);
-    int ret = bind(listening_socket, (const struct sockaddr *)&name, sizeof(name));
+    int ret = socket::bind(listening_socket, (const struct socket::sockaddr *)&name, sizeof(name));
     if (ret == -1) {
         perror("bind");
         listen_cleanup(listening_socket, socket_path);
         return (-1);
     }
 
-    ret = listen(listening_socket, 20);
+    ret = socket::listen(listening_socket, 20);
     if (ret == -1) {
         perror("listen");
         listen_cleanup(listening_socket, socket_path);
@@ -118,7 +120,7 @@ int socket_transport_layer::listen_connections(const char *socket_path, command_
             continue;
 
         if (FD_ISSET(listening_socket, &readfds)) {
-            sending_socket = accept(listening_socket, NULL, NULL);
+            sending_socket = socket::accept(listening_socket, NULL, NULL);
             if (sending_socket == -1) {
                 perror("accept");
                 break;

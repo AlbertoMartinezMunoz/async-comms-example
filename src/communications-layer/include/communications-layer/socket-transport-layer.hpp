@@ -10,9 +10,9 @@ class socket_transport_layer : public communications_layer {
 
     ~socket_transport_layer();
 
-    int connect_socket();
+    int connect() override;
 
-    int disconnect_socket();
+    int disconnect() override;
 
     int listen_connections(const char *socket_path, command_handler *cmd_handler);
 

@@ -10,9 +10,9 @@ int command_manager::send_simple_cmd(const char *cmd, size_t cmd_size) {
     char response[32];
 
     printf("command_manager::send_simple_cmd send '%s' [%zu]\r\n", cmd, cmd_size);
-    int ret = socket->connect_socket();
+    int ret = socket->connect();
     if (ret == -1) {
-        perror("fast_command::execute: connect_socket");
+        perror("fast_command::execute: connect");
         return -2;
     }
 
@@ -26,7 +26,7 @@ int command_manager::send_simple_cmd(const char *cmd, size_t cmd_size) {
     response[0] = '\0';
     ret = communications_layer->recv(response, sizeof(response));
     printf("command_manager::send_simple_cmd ack received[%d]\r\n", ret);
-    socket->disconnect_socket();
+    socket->disconnect();
     if (ret < 0)
         return ret;
     else if (strncmp(command_ids::nack, response, strlen(command_ids::nack)) == 0)
@@ -50,9 +50,9 @@ int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer
 
     printf("command_manager::send_slow_cmd send '%s' [%zu]\r\n", command_ids::slow_cmd_id,
            sizeof(command_ids::slow_cmd_id));
-    int ret = socket->connect_socket();
+    int ret = socket->connect();
     if (ret == -1) {
-        perror("fast_command::execute: connect_socket");
+        perror("fast_command::execute: connect");
         return -2;
     }
 
@@ -65,7 +65,7 @@ int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer
     printf("command_manager::send_slow_cmd wait ack\r\n");
     ret = communications_layer->recv(response, sizeof(response));
     printf("command_manager::send_slow_cmd ack received [%d]\r\n", ret);
-    socket->disconnect_socket();
+    socket->disconnect();
     if (ret < 0) {
         printf("command_manager::send_slow_cmd ack received '%s' [%d]\r\n", response, ret);
         return ret;

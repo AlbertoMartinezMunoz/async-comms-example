@@ -27,14 +27,16 @@ class CommunicationsLayerMock : public communications_layer_interface {
                 (communications_layer_interface * handler), (override));
     MOCK_METHOD(ssize_t, send, (const char *buffer, size_t buffer_size), (override));
     MOCK_METHOD(ssize_t, recv, (char *buffer, size_t buffer_size), (override));
+    MOCK_METHOD(int, connect, ());
+    MOCK_METHOD(int, disconnect, ());
     MOCK_METHOD(int, shutdown, ());
 };
 
 class SocketTransportLayerMock : public socket_transport_layer {
   public:
     SocketTransportLayerMock() : socket_transport_layer("") {}
-    MOCK_METHOD(int, connect_socket, ());
-    MOCK_METHOD(int, disconnect_socket, ());
+    MOCK_METHOD(int, connect, ());
+    MOCK_METHOD(int, disconnect, ());
     MOCK_METHOD(int, listen_connections, (const char *, communications_layer_observer *));
     MOCK_METHOD(ssize_t, send, (const char *, size_t), (override));
     MOCK_METHOD(ssize_t, recv, (char *, size_t), (override));
@@ -108,6 +110,10 @@ class TestCommandManager : public testing::TestWithParam<TestCommandManagerParam
         socket_mock = new SocketTransportLayerMock();
         command_mng = new CommandManagerWrapper(communications_layer_mock, socket_mock);
         memset(slow_response_buffer, 0, sizeof(slow_response_buffer));
+        EXPECT_CALL(*socket_mock, connect()).Times(AnyNumber()).WillRepeatedly(Return(0));
+        EXPECT_CALL(*communications_layer_mock, connect()).Times(AnyNumber()).WillRepeatedly(Return(0));
+        EXPECT_CALL(*socket_mock, disconnect()).Times(AnyNumber()).WillRepeatedly(Return(0));
+        EXPECT_CALL(*communications_layer_mock, disconnect()).Times(AnyNumber()).WillRepeatedly(Return(0));
     }
 
     virtual void TearDown() {
@@ -125,7 +131,7 @@ class TestCommandManager : public testing::TestWithParam<TestCommandManagerParam
 };
 
 TEST_P(TestCommandManager, TestNextSendHandlerMessage) {
-    EXPECT_CALL(*socket_mock, connect_socket()).Times(AnyNumber()).WillRepeatedly(Return(0));
+
     EXPECT_CALL(*communications_layer_mock, send(StrEq(GetParam().expected_cmd), GetParam().expected_cmd_size))
         .Times(1)
         .WillOnce(Return(GetParam().send_expected_result));

@@ -20,6 +20,8 @@ class CommunicationsLayerMock : public communications_layer_interface {
                 (communications_layer_interface * handler), (override));
     MOCK_METHOD(ssize_t, send, (const char *buffer, size_t buffer_size), (override));
     MOCK_METHOD(ssize_t, recv, (char *buffer, size_t buffer_size), (override));
+    MOCK_METHOD(int, connect, ());
+    MOCK_METHOD(int, disconnect, ());
     MOCK_METHOD(int, shutdown, ());
 };
 
