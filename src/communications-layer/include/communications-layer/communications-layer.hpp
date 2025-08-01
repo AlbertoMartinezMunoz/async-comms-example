@@ -1,5 +1,5 @@
-#ifndef IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYERS_INCLUDE_COMMUNICATIONS_LAYERS_COMMUNICATION_LAYER_H_
-#define IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYERS_INCLUDE_COMMUNICATIONS_LAYERS_COMMUNICATION_LAYER_H_
+#ifndef IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYER_INCLUDE_COMMUNICATIONS_LAYER_COMMUNICATIONS_LAYER_H_
+#define IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYER_INCLUDE_COMMUNICATIONS_LAYER_COMMUNICATIONS_LAYER_H_
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -13,6 +13,8 @@
 class communications_layer_interface : public shutdown_receiver {
   public:
     virtual communications_layer_interface *set_next_communications_layer(communications_layer_interface *handler) = 0;
+    virtual int connect() = 0;
+    virtual int disconnect() = 0;
     virtual ssize_t send(const char *buffer, size_t buffer_size) = 0;
     virtual ssize_t recv(char *buffer, size_t buffer_size) = 0;
     virtual ~communications_layer_interface() {}
@@ -52,6 +54,22 @@ class communications_layer : public communications_layer_interface {
         return size;
     }
 
+    int connect() override {
+        if (this->next_communications_layer_) {
+            return this->next_communications_layer_->connect();
+        }
+
+        return 0;
+    }
+
+    int disconnect() override {
+        if (this->next_communications_layer_) {
+            return this->next_communications_layer_->disconnect();
+        }
+
+        return 0;
+    }
+
     int shutdown() override {
         if (this->next_communications_layer_) {
             return this->next_communications_layer_->shutdown();
@@ -60,4 +78,4 @@ class communications_layer : public communications_layer_interface {
     };
 };
 
-#endif // IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYERS_INCLUDE_COMMUNICATIONS_LAYERS_COMMUNICATION_LAYER_H_
+#endif // IOT_MICRO_FIRMWARE_SRC_COMMUNICATIONS_LAYER_INCLUDE_COMMUNICATIONS_LAYER_COMMUNICATIONS_LAYER_H_
