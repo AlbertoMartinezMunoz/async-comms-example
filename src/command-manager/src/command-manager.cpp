@@ -10,7 +10,7 @@ int command_manager::send_simple_cmd(const char *cmd, size_t cmd_size) {
     char response[32];
 
     printf("command_manager::send_simple_cmd send '%s' [%zu]\r\n", cmd, cmd_size);
-    int ret = socket->connect_socket(send_cmd_socket_path);
+    int ret = socket->connect_socket();
     if (ret == -1) {
         perror("fast_command::execute: connect_socket");
         return -2;
@@ -50,7 +50,7 @@ int command_manager::send_slow_cmd(char *response_buffer, size_t response_buffer
 
     printf("command_manager::send_slow_cmd send '%s' [%zu]\r\n", command_ids::slow_cmd_id,
            sizeof(command_ids::slow_cmd_id));
-    int ret = socket->connect_socket(send_cmd_socket_path);
+    int ret = socket->connect_socket();
     if (ret == -1) {
         perror("fast_command::execute: connect_socket");
         return -2;

@@ -32,7 +32,8 @@ class CommunicationsLayerMock : public communications_layer_interface {
 
 class SocketTransportLayerMock : public socket_transport_layer {
   public:
-    MOCK_METHOD(int, connect_socket, (const char *));
+    SocketTransportLayerMock() : socket_transport_layer("") {}
+    MOCK_METHOD(int, connect_socket, ());
     MOCK_METHOD(int, disconnect_socket, ());
     MOCK_METHOD(int, listen_connections, (const char *, communications_layer_observer *));
     MOCK_METHOD(ssize_t, send, (const char *, size_t), (override));
@@ -124,7 +125,7 @@ class TestCommandManager : public testing::TestWithParam<TestCommandManagerParam
 };
 
 TEST_P(TestCommandManager, TestNextSendHandlerMessage) {
-    EXPECT_CALL(*socket_mock, connect_socket(_)).Times(AnyNumber()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*socket_mock, connect_socket()).Times(AnyNumber()).WillRepeatedly(Return(0));
     EXPECT_CALL(*communications_layer_mock, send(StrEq(GetParam().expected_cmd), GetParam().expected_cmd_size))
         .Times(1)
         .WillOnce(Return(GetParam().send_expected_result));

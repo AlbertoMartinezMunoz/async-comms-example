@@ -3,6 +3,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <fcntl.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
@@ -10,8 +12,10 @@
 #include <chrono>
 #include <thread>
 
-socket_transport_layer::socket_transport_layer() {
+socket_transport_layer::socket_transport_layer(const char *socket_path) {
     is_listening = false;
+
+    this->socket_path = strdup(socket_path);
 
     if (pipe(wakeuppfd) == -1)
         throw std::runtime_error("Error creating wake-up pipe");
@@ -34,11 +38,12 @@ socket_transport_layer::socket_transport_layer() {
 }
 
 socket_transport_layer::~socket_transport_layer() {
+    free(socket_path);
     close(wakeuppfd[0]);
     close(wakeuppfd[1]);
 }
 
-int socket_transport_layer::connect_socket(const char *socket_path) {
+int socket_transport_layer::connect_socket() {
     struct sockaddr_un addr;
 
     sending_socket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
@@ -49,7 +54,7 @@ int socket_transport_layer::connect_socket(const char *socket_path) {
 
     memset(&addr, 0, sizeof(addr));
     addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, socket_path, sizeof(addr.sun_path) - 1);
+    strncpy(addr.sun_path, this->socket_path, sizeof(addr.sun_path) - 1);
 
     int ret = connect(sending_socket, (const struct sockaddr *)&addr, sizeof(addr));
     if (ret == -1) {

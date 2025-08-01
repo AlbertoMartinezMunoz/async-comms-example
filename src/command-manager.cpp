@@ -46,7 +46,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 
     console = interactive_console::get_instance();
 
-    transport_layer = new socket_transport_layer();
+    transport_layer = new socket_transport_layer(argparser->get_remote_path());
     application_layer = new slip_application_layer();
     application_layer->set_next_communications_layer(transport_layer);
 
