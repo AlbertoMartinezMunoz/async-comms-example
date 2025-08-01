@@ -32,26 +32,37 @@ Boundary(command_system, "Command System") {
 'Relations
 '----------------------------------------------------------------
 BiRel_R(transport_layer, ext_command_system, "Sends/Receives commands to", "tcp socket")
-Rel_R(user, arg_parser, "Configures the system", "shell")
+Rel_U(user, arg_parser, "Configures the system", "shell")
 Rel_R(user, cli, "Start commands", "shell")
+
 Rel_D(cli, local_command_manager, "Uses")
-BiRel_U(remote_command_manager, application_layer, "Uses")
-BiRel_R(application_layer, transport_layer, "Uses")
-Rel_D(transport_layer, remote_command_manager, "Notifies")
-Rel_D(remote_command_manager, remote_shutdown_command, "Executes")
-Rel_D(remote_command_manager, remote_fast_command, "Executes")
-Rel_D(remote_command_manager, remote_slow_command, "Executes")
+Rel_U(local_command_manager, cli, "Notify")
+
 Rel_D(local_command_manager, local_shutdown_command, "Executes")
 Rel_D(local_command_manager, local_fast_command, "Executes")
 Rel_D(local_command_manager, local_slow_command, "Executes")
 
-Rel_U(remote_shutdown_command, transport_layer, "Uses")
-Rel_U(remote_shutdown_command, cli, "Uses")
-Rel_D(local_shutdown_command, transport_layer, "Uses")
-Rel_D(local_fast_command, transport_layer, "Uses")
-Rel_D(local_slow_command, transport_layer, "Uses")
+Rel_D(local_shutdown_command, application_layer, "Uses")
+Rel_D(local_shutdown_command, application_layer, "Stop")
+Rel_D(local_fast_command, application_layer, "Uses")
+Rel_D(local_slow_command, application_layer, "Uses")
 
-Rel_D(cli, arg_parser, "", "", $tags="invisible")
+Rel_D(application_layer, remote_command_manager, "Notifies")
+Rel_R(application_layer, transport_layer, "Uses")
+Rel_L(transport_layer, application_layer, "Notifies")
+
+Rel_U(remote_command_manager, application_layer, "Uses")
+Rel_D(remote_command_manager, remote_shutdown_command, "Executes")
+Rel_D(remote_command_manager, remote_fast_command, "Executes")
+Rel_D(remote_command_manager, remote_slow_command, "Executes")
+
+Rel_U(remote_shutdown_command, application_layer, "Stop")
+Rel_U(remote_shutdown_command, cli, "Stop")
+
+'----------------------------------------------------------------
+'Fix Positions
+'----------------------------------------------------------------
+Rel_U(cli, arg_parser, "", "", $tags="invisible")
 Rel_D(user, ext_command_system, "", "", $tags="invisible")
 Rel_D(local_shutdown_command, application_layer, "", "", $tags="invisible")
 Rel_D(transport_layer, remote_command_manager, "", "", $tags="invisible")
