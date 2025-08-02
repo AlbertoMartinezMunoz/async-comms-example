@@ -1,4 +1,3 @@
-#include <command-manager/command-ids.hpp>
 #include <command-manager/command-remote-handler.hpp>
 
 #include <stdio.h>
@@ -19,18 +18,18 @@ int command_remote_handler::handle() {
     ret = -1;
     command[sizeof(command) - 1] = '\0';
     printf("command_manager::incoming_message '%s'\r\n", command);
-    if (strcmp(command_ids::fast_cmd_id, command) == 0)
+    if (strcmp(command::remote_fast_cmd_id, command) == 0)
         ret = fast_cmd->execute();
-    else if (strcmp(command_ids::slow_cmd_id, command) == 0)
+    else if (strcmp(command::remote_slow_cmd_id, command) == 0)
         ret = slow_cmd->execute();
-    else if (strcmp(command_ids::shutdown_cmd_id, command) == 0)
+    else if (strcmp(command::remote_shutdown_cmd_id, command) == 0)
         ret = shutdown_cmd->execute();
 
     printf("command_manager:incoming_message processed '%s' => %d\r\n", command, ret);
     if (ret == 0)
-        communications_layer->send(command_ids::ack, sizeof(command_ids::ack));
+        communications_layer->send(command::ack, sizeof(command::ack));
     else
-        communications_layer->send(command_ids::nack, sizeof(command_ids::nack));
+        communications_layer->send(command::nack, sizeof(command::nack));
 
     return 0;
 }

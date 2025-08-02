@@ -1,7 +1,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <command-manager/command-ids.hpp>
 #include <command-manager/command-remote-handler.hpp>
 
 using ::testing::_;
@@ -77,11 +76,11 @@ class TestCommandRemoteHandler : public testing::TestWithParam<TestCommandRemote
     CommandMock *shutdown_cmd_mock;
 
     CommandMock *GetExpectedMock(const char *remote_command) {
-        if (strcmp(command_ids::fast_cmd_id, remote_command) == 0)
+        if (strcmp(command::remote_fast_cmd_id, remote_command) == 0)
             return fast_cmd_mock;
-        else if (strcmp(command_ids::slow_cmd_id, remote_command) == 0)
+        else if (strcmp(command::remote_slow_cmd_id, remote_command) == 0)
             return slow_cmd_mock;
-        else if (strcmp(command_ids::shutdown_cmd_id, remote_command) == 0)
+        else if (strcmp(command::remote_shutdown_cmd_id, remote_command) == 0)
             return shutdown_cmd_mock;
         return nullptr;
     }
@@ -96,9 +95,9 @@ TEST_P(TestCommandRemoteHandler, GivenCommandRemoteHandlerWhenReceiveACommandThe
         .Times(1)
         .WillOnce(DoAll(SetArrayArgument<0>(cmd_id, cmd_id + cmd_id_size), Return(cmd_id_size)));
     EXPECT_CALL(*cmd_mock, execute()).Times(1).WillOnce(Return(0));
-    EXPECT_CALL(*communications_layer_mock, send(StrEq(command_ids::ack), sizeof(command_ids::ack)))
+    EXPECT_CALL(*communications_layer_mock, send(StrEq(command::ack), sizeof(command::ack)))
         .Times(1)
-        .WillOnce(Return(sizeof(command_ids::ack)));
+        .WillOnce(Return(sizeof(command::ack)));
     ASSERT_EQ(0, command_handler->handle());
 }
 
@@ -111,9 +110,9 @@ TEST_P(TestCommandRemoteHandler, GivenCommandRemoteHandlerWhenCommandErrorThenRe
         .Times(1)
         .WillOnce(DoAll(SetArrayArgument<0>(cmd_id, cmd_id + cmd_id_size), Return(cmd_id_size)));
     EXPECT_CALL(*cmd_mock, execute()).Times(1).WillOnce(Return(-1));
-    EXPECT_CALL(*communications_layer_mock, send(StrEq(command_ids::nack), sizeof(command_ids::nack)))
+    EXPECT_CALL(*communications_layer_mock, send(StrEq(command::nack), sizeof(command::nack)))
         .Times(1)
-        .WillOnce(Return(sizeof(command_ids::nack)));
+        .WillOnce(Return(sizeof(command::nack)));
     ASSERT_EQ(0, command_handler->handle());
 }
 
@@ -121,9 +120,9 @@ TEST_P(TestCommandRemoteHandler, GivenCommandRemoteHandlerWhenCommandErrorThenRe
 INSTANTIATE_TEST_SUITE_P(
     , TestCommandRemoteHandler,
     ::testing::Values(
-        TestCommandRemoteHandlerParams{"FastCommand", command_ids::fast_cmd_id, sizeof(command_ids::fast_cmd_id)},
-        TestCommandRemoteHandlerParams{"SlowCommand", command_ids::slow_cmd_id, sizeof(command_ids::slow_cmd_id)},
-        TestCommandRemoteHandlerParams{"ShutdownCommand", command_ids::shutdown_cmd_id, sizeof(command_ids::shutdown_cmd_id)}),
+        TestCommandRemoteHandlerParams{"FastCommand", command::remote_fast_cmd_id, sizeof(command::remote_fast_cmd_id)},
+        TestCommandRemoteHandlerParams{"SlowCommand", command::remote_slow_cmd_id, sizeof(command::remote_slow_cmd_id)},
+        TestCommandRemoteHandlerParams{"ShutdownCommand", command::remote_shutdown_cmd_id, sizeof(command::remote_shutdown_cmd_id)}),
     [](const testing::TestParamInfo<TestCommandRemoteHandlerParams> &info) { return info.param.name; });
 // clang-format on
 
