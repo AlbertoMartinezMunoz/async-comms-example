@@ -3,33 +3,33 @@
 #include <commands/commands.hpp>
 #include <commands/local-command-receiver.hpp>
 #include <commands/shutdown-receiver.hpp>
+#include <communications-layer/communications-layer.hpp>
 
 class local_fast_command : public command {
   public:
-    local_fast_command(local_command_receiver *cmd_rcv);
+    local_fast_command(communications_layer *comms);
     int execute() const override;
 
   private:
-    local_command_receiver *cmd_rcv;
+    communications_layer *comms;
 };
 
 class local_slow_command : public command {
   public:
-    local_slow_command(local_command_receiver *cmd_rcv);
+    local_slow_command(communications_layer *comms);
     int execute() const override;
 
   private:
-    local_command_receiver *cmd_rcv;
+    communications_layer *comms;
 };
 
 class local_shutdown_command : public command {
   public:
-    local_shutdown_command(local_command_receiver *cmd_rcv, shutdown_receiver *comms, shutdown_receiver *cli);
+    local_shutdown_command(communications_layer *comms, shutdown_receiver *cli);
     int execute() const override;
 
   private:
-    local_command_receiver *cmd_rcv;
-    shutdown_receiver *comms;
+    communications_layer *comms;
     shutdown_receiver *cli;
 };
 
