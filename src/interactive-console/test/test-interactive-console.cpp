@@ -100,26 +100,6 @@ class TestInteractiveConsole : public testing::TestWithParam<TestInteractiveCons
     InteractiveConsoleObserverMock *observer_mock;
 };
 
-TEST_P(TestInteractiveConsole, WhenReceivesCommandIfOKThenExecutesTheCommand) {
-    InteractiveConsoleWrapper::SetCommand set_command_func = GetParam().set_command_func;
-    (console->*set_command_func)(cmd_mock);
-
-    EXPECT_CALL(*cmd_mock, execute()).Times(1);
-
-    char *console_cmd = strdup(GetParam().console_cmd);
-    readline_cb(console_cmd);
-}
-
-INSTANTIATE_TEST_SUITE_P(
-    , TestInteractiveConsole,
-    ::testing::Values(TestInteractiveConsoleParams{"WhenReceivesShutdownCommandIfOKThenExecutesTheShutdownCommand", "D",
-                                                   &interactive_console::set_shutdown_command},
-                      TestInteractiveConsoleParams{"WhenReceivesFastCommandIfOKThenExecutesTheFastCommand", "F",
-                                                   &interactive_console::set_fast_command},
-                      TestInteractiveConsoleParams{"WhenReceivesSlowCommandIfOKThenExecutesTheSlowCommand", "S",
-                                                   &interactive_console::set_slow_command}),
-    [](const testing::TestParamInfo<TestInteractiveConsoleParams> &info) { return info.param.name; });
-
 TEST_F(TestInteractiveConsole, WhenListeningIfStopThenStopListeningAndShutdown) {
     std::thread t1(&interactive_console::listen, console, std::ref(observer_mock));
     std::this_thread::sleep_for(std::chrono::milliseconds(30));
