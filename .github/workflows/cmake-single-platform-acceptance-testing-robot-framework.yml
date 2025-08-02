@@ -45,8 +45,12 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Robot Framework tests
+        id: robotframework
+        continue-on-error: true
         run: |
+          echo "ROBOT_RESULT=1" >> "$GITHUB_OUTPUT"
           if ! robot --loglevel TRACE:INFO --exclude EXCL --skip SKIP --removekeywords tag:REMOVE --flattenkeywords tag:FLAT --outputdir ./atest-results ./atest/; then
+              echo "ROBOT_RESULT=$?" >> "$GITHUB_OUTPUT"
               echo "Robot Framework tests failed. Rerunning failed tests..."
               if [ -f atest-results/output.xml ]; then
                   robot --rerunfailed atest-results/output.xml --outputdir atest-results-rerun tests/ || true
@@ -61,7 +65,6 @@ jobs:
           fi
 
           echo "Script execution completed"
-        continue-on-error: true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -69,3 +72,10 @@ jobs:
           path: ./atest-results
           name: robot-test-results
           retention-days: 7
+
+      - name: Check Result
+        run: |
+          if [ ${{ steps.robotframework.outputs.ROBOT_RESULT }} -ne 1 ]; then
+              echo "Robot Framework tests failed."
+              exit 1
+          fi
