@@ -24,7 +24,7 @@ Fast Command Is Received and ACK is responded
     and sender command-manager is running
     When sender command-manager executes "F" command
     Then receiver command-manager will receive fast command
-    and sender command-manager will receive 'ACK'
+    and sender command-manager will receive 'NACK'
 
 Slow Command Is Received and ACK is responded
     Given receiver command-manager is running
