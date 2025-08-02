@@ -1,10 +1,10 @@
 #ifndef IOT_MICRO_FIRMWARE_SRC_INTERACTIVE_CONSOLE_INCLUDE_INTERACTIVE_CONSOLE_INTERACTIVE_CONSOLE_H_
 #define IOT_MICRO_FIRMWARE_SRC_INTERACTIVE_CONSOLE_INCLUDE_INTERACTIVE_CONSOLE_INTERACTIVE_CONSOLE_H_
 
+#include <commands/commands.hpp>
+#include <commands/shutdown-receiver.hpp>
 #include <interactive-console/interactive-console-command.hpp>
 #include <interactive-console/interactive-console-observer.hpp>
-
-#include <commands/shutdown-receiver.hpp>
 
 class interactive_console : public shutdown_receiver {
   public:
@@ -14,11 +14,11 @@ class interactive_console : public shutdown_receiver {
 
     void listen(interactive_console_observer *observer);
 
-    void set_shutdown_command(interactive_console_command *cmd);
+    void set_shutdown_command(command *cmd);
 
-    void set_fast_command(interactive_console_command *cmd);
+    void set_fast_command(command *cmd);
 
-    void set_slow_command(interactive_console_command *cmd);
+    void set_slow_command(command *cmd);
 
     interactive_console(interactive_console &other) = delete;
 

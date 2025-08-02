@@ -34,9 +34,9 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     command_remote_handler *remote_cmd_handler;
 
     interactive_console *console;
-    interactive_console_command *shutdown_local_cmd;
-    interactive_console_command *fast_local_cmd;
-    interactive_console_command *slow_local_cmd;
+    local_shutdown_command *shutdown_local_cmd;
+    local_fast_command *fast_local_cmd;
+    local_slow_command *slow_local_cmd;
 
     arguments_parser *argparser;
 
@@ -60,9 +60,9 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     remote_cmd_handler->subscribe_shutdown_cmd(remote_shutdown_cmd);
     cmd_mngr = new command_manager(application_layer, transport_layer, argparser->get_remote_path());
 
-    shutdown_local_cmd = new shutdown_command(cmd_mngr, transport_layer, console);
-    fast_local_cmd = new fast_command(cmd_mngr);
-    slow_local_cmd = new slow_command(cmd_mngr);
+    shutdown_local_cmd = new local_shutdown_command(application_layer, console);
+    fast_local_cmd = new local_fast_command(application_layer);
+    slow_local_cmd = new local_slow_command(application_layer);
 
     console->set_shutdown_command(shutdown_local_cmd);
     console->set_fast_command(fast_local_cmd);

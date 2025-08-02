@@ -15,9 +15,9 @@ static interactive_console *pinstance_;
 
 static bool running;
 
-static interactive_console_command *shutdown_command = nullptr;
-static interactive_console_command *fast_command = nullptr;
-static interactive_console_command *slow_command = nullptr;
+static command *shutdown_command = nullptr;
+static command *fast_command = nullptr;
+static command *slow_command = nullptr;
 
 static interactive_console_observer *cli_observer = nullptr;
 
@@ -126,8 +126,8 @@ void interactive_console::listen(interactive_console_observer *observer) {
     return;
 }
 
-void interactive_console::set_shutdown_command(interactive_console_command *cmd) { shutdown_command = cmd; }
+void interactive_console::set_shutdown_command(command *cmd) { shutdown_command = cmd; }
 
-void interactive_console::set_fast_command(interactive_console_command *cmd) { fast_command = cmd; }
+void interactive_console::set_fast_command(command *cmd) { fast_command = cmd; }
 
-void interactive_console::set_slow_command(interactive_console_command *cmd) { slow_command = cmd; }
+void interactive_console::set_slow_command(command *cmd) { slow_command = cmd; }
