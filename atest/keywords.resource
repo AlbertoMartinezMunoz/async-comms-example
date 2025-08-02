@@ -25,7 +25,7 @@ Get ${process} stdout file
                         RETURN                 ${error_message}
 
 Start ${process} process
-    Start Process       ${process_command}    /tmp/9Lq7BNBnBycd6nxy.0.socket1    /tmp/9Lq7BNBnBycd6nxy.1.socket1    alias=${process}_process    stdout=./atest-results/tmp/${process}-stdout.txt    stderr=./atest-results/tmp/${process}-stdout.txt    stdin=./atest-results/tmp/${process}-stdin.txt
+    Start Process       ${process_command}    /tmp/9Lq7BNBnBycd6nxy.0.socket    /tmp/9Lq7BNBnBycd6nxy.1.socket    alias=${process}_process    stdout=./atest-results/tmp/${process}-stdout.txt    stderr=./atest-results/tmp/${process}-stdout.txt    stdin=./atest-results/tmp/${process}-stdin.txt
 
 ${process} command-manager executes "${command}" command
     ${process}    Convert To Lower Case    ${process}

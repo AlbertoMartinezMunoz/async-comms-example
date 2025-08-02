@@ -24,14 +24,14 @@ Fast Command Is Received and ACK is responded
     and sender command-manager is running
     When sender command-manager executes "F" command
     Then receiver command-manager will receive fast command
-    and sender command-manager will receive ack
+    and sender command-manager will receive 'ACK'
 
 Slow Command Is Received and ACK is responded
     Given receiver command-manager is running
     and sender command-manager is running
     When sender command-manager executes "S" command
     Then receiver command-manager will receive slow command
-    and sender command-manager will receive ack
+    and sender command-manager will receive 'ACK'
 
 
 *** Keywords ***
@@ -41,7 +41,7 @@ ${process} command-manager is running
 
 Receiver command-manager will receive ${command} command
     ${stdout}    Get File          ./atest-results/tmp/receiver-stdout.txt
-                 Should Contain    ${stdout}    ********************** Received ${command} Command **********************    ignore_case=True
+                 Should Contain    ${stdout}    ********************** Remote ${command} Command **********************    ignore_case=True
 
 Sender command-manager will receive ${ack}
     ${stdout}    Get File          ./atest-results/tmp/sender-stdout.txt
@@ -51,8 +51,8 @@ Test Setup
     Remove tmp Files
     Create File         ./atest-results/tmp/receiver-stdin.txt
     Create File         ./atest-results/tmp/sender-stdin.txt
-    Start Process       ${process_command}    /tmp/9Lq7BNBnBycd6nxy.0.socket1    /tmp/9Lq7BNBnBycd6nxy.1.socket1    alias=receiver_process    stdout=./atest-results/tmp/receiver-stdout.txt    stderr=./atest-results/tmp/receiver-stdout.txt    stdin=./atest-results/tmp/receiver-stdin.txt
-    Start Process       ${process_command}    /tmp/9Lq7BNBnBycd6nxy.1.socket1    /tmp/9Lq7BNBnBycd6nxy.0.socket1   alias=sender_process    stdout=./atest-results/tmp/sender-stdout.txt    stderr=./atest-results/tmp/sender-stdout.txt    stdin=./atest-results/tmp/sender-stdin.txt
+    Start Process       ${process_command}    /tmp/9Lq7BNBnBycd6nxy.0.socket    /tmp/9Lq7BNBnBycd6nxy.1.socket    alias=receiver_process    stdout=./atest-results/tmp/receiver-stdout.txt    stderr=./atest-results/tmp/receiver-stdout.txt    stdin=./atest-results/tmp/receiver-stdin.txt
+    Start Process       ${process_command}    /tmp/9Lq7BNBnBycd6nxy.1.socket    /tmp/9Lq7BNBnBycd6nxy.0.socket   alias=sender_process    stdout=./atest-results/tmp/sender-stdout.txt    stderr=./atest-results/tmp/sender-stdout.txt    stdin=./atest-results/tmp/sender-stdin.txt
 
 Test Teardown
     Sender command-manager executes "D" command
