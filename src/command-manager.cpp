@@ -14,13 +14,6 @@
 #include <communications-layer/socket-transport-layer.hpp>
 #include <interactive-console/interactive-console.hpp>
 
-#include <interactive-console/interactive-console-observer.hpp>
-
-class dummy_interactive_console_observer : public interactive_console_observer {
-  public:
-    int console_incoming_message(__attribute__((unused)) const char *message) const override { return 0; }
-};
-
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[]) {
     socket_transport_layer *transport_layer;
     slip_application_layer *application_layer;
@@ -63,9 +56,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     console->set_fast_command(fast_local_cmd);
     console->set_slow_command(slow_local_cmd);
 
-    dummy_interactive_console_observer *dummy_cli_observer = new dummy_interactive_console_observer();
-
-    std::thread t1(&interactive_console::listen, console, std::ref(dummy_cli_observer));
+    std::thread t1(&interactive_console::listen, console);
     if (transport_layer->listen_connections(argparser->get_local_path(), remote_cmd_handler) != 0)
         console->shutdown();
     t1.join();

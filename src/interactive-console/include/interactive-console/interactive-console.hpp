@@ -3,7 +3,6 @@
 
 #include <commands/commands.hpp>
 #include <commands/shutdown-receiver.hpp>
-#include <interactive-console/interactive-console-observer.hpp>
 
 class interactive_console : public shutdown_receiver {
   public:
@@ -11,7 +10,7 @@ class interactive_console : public shutdown_receiver {
 
     ~interactive_console();
 
-    void listen(interactive_console_observer *observer);
+    void listen();
 
     void set_shutdown_command(command *cmd);
 
