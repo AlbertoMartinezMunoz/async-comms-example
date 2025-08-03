@@ -12,7 +12,6 @@
 #include <communications-layer/communications-layer.hpp>
 #include <communications-layer/slip-application-layer.hpp>
 #include <communications-layer/socket-transport-layer.hpp>
-#include <interactive-console/interactive-console-command.hpp>
 #include <interactive-console/interactive-console.hpp>
 
 #include <interactive-console/interactive-console-observer.hpp>

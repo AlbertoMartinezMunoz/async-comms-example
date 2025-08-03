@@ -35,53 +35,18 @@ int pselect_mock(__attribute__((unused)) int nfds, __attribute__((unused)) fd_se
     return 0;
 }
 
-class InteractiveConsoleCommandMock : public interactive_console_command {
-  public:
-    MOCK_METHOD(void, execute, (), (const, override));
-};
-
 class InteractiveConsoleObserverMock : public interactive_console_observer {
   public:
     MOCK_METHOD(int, console_incoming_message, (const char *), (const, override));
 };
 
-class InteractiveConsoleWrapper : public interactive_console {
-  public:
-    InteractiveConsoleWrapper() : interactive_console() {}
-    typedef void (InteractiveConsoleWrapper::*SetCommand)(interactive_console_command *);
-};
-
-class TestInteractiveConsoleParams {
-  public:
-    TestInteractiveConsoleParams(std::string name, const char *console_cmd,
-                                 InteractiveConsoleWrapper::SetCommand set_command_func)
-        : name(name), console_cmd(console_cmd), set_command_func(set_command_func) {}
-
-    static void *operator new(std::size_t count) {
-        void *p = ::operator new(count);
-        memset(p, 0, count);
-        return p;
-    }
-
-    static void *operator new[](std::size_t count) {
-        void *p = ::operator new[](count);
-        memset(p, 0, count);
-        return p;
-    }
-
-    std::string name;
-    const char *console_cmd;
-    InteractiveConsoleWrapper::SetCommand set_command_func;
-};
-
-class TestInteractiveConsole : public testing::TestWithParam<TestInteractiveConsoleParams> {
+class TestInteractiveConsole : public testing::Test {
   public:
     virtual void SetUp() {
         RESET_FAKE(readline);
         RESET_FAKE(rl_callback_handler_install);
         RESET_FAKE(pselect);
-        cmd_mock = new InteractiveConsoleCommandMock();
-        console = new InteractiveConsoleWrapper();
+        console = interactive_console::get_instance();
         console->set_shutdown_command(nullptr);
         readline_cb = rl_callback_handler_install_fake.arg1_val;
         pselect_fake.custom_fake = pselect_mock;
@@ -90,13 +55,11 @@ class TestInteractiveConsole : public testing::TestWithParam<TestInteractiveCons
 
     virtual void TearDown() {
         delete console;
-        delete cmd_mock;
         delete observer_mock;
     }
 
     rl_vcpfunc_t *readline_cb;
-    InteractiveConsoleWrapper *console;
-    InteractiveConsoleCommandMock *cmd_mock;
+    interactive_console *console;
     InteractiveConsoleObserverMock *observer_mock;
 };
 

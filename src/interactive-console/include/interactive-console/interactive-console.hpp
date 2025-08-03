@@ -3,7 +3,6 @@
 
 #include <commands/commands.hpp>
 #include <commands/shutdown-receiver.hpp>
-#include <interactive-console/interactive-console-command.hpp>
 #include <interactive-console/interactive-console-observer.hpp>
 
 class interactive_console : public shutdown_receiver {
