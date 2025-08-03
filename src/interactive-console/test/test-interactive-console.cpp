@@ -35,11 +35,6 @@ int pselect_mock(__attribute__((unused)) int nfds, __attribute__((unused)) fd_se
     return 0;
 }
 
-class InteractiveConsoleObserverMock : public interactive_console_observer {
-  public:
-    MOCK_METHOD(int, console_incoming_message, (const char *), (const, override));
-};
-
 class TestInteractiveConsole : public testing::Test {
   public:
     virtual void SetUp() {
@@ -50,21 +45,16 @@ class TestInteractiveConsole : public testing::Test {
         console->set_shutdown_command(nullptr);
         readline_cb = rl_callback_handler_install_fake.arg1_val;
         pselect_fake.custom_fake = pselect_mock;
-        observer_mock = new InteractiveConsoleObserverMock();
     }
 
-    virtual void TearDown() {
-        delete console;
-        delete observer_mock;
-    }
+    virtual void TearDown() { delete console; }
 
     rl_vcpfunc_t *readline_cb;
     interactive_console *console;
-    InteractiveConsoleObserverMock *observer_mock;
 };
 
 TEST_F(TestInteractiveConsole, WhenListeningIfStopThenStopListeningAndShutdown) {
-    std::thread t1(&interactive_console::listen, console, std::ref(observer_mock));
+    std::thread t1(&interactive_console::listen, console);
     std::this_thread::sleep_for(std::chrono::milliseconds(30));
     console->shutdown();
     t1.join();

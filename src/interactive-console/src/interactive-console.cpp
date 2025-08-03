@@ -19,8 +19,6 @@ static command *shutdown_command = nullptr;
 static command *fast_command = nullptr;
 static command *slow_command = nullptr;
 
-static interactive_console_observer *cli_observer = nullptr;
-
 interactive_console::interactive_console() {
     if (pipe(wakeuppfd) == -1)
         throw std::runtime_error("Error creating wake-up pipe");
@@ -61,8 +59,7 @@ interactive_console *interactive_console::get_instance() {
 void interactive_console::readline_cb(char *line) {
     if (line && *line) {
         add_history(line);
-        if (cli_observer)
-            cli_observer->console_incoming_message(line);
+
         switch (line[0]) {
         case 'D':
             if (shutdown_command)
@@ -96,11 +93,9 @@ int interactive_console::shutdown() {
     return 0;
 }
 
-void interactive_console::listen(interactive_console_observer *observer) {
+void interactive_console::listen() {
     fd_set fds;
     int r;
-
-    cli_observer = observer;
 
     running = true;
     while (running) {
