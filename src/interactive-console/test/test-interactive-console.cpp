@@ -4,6 +4,7 @@
 #include <readline/history.h>
 #include <readline/readline.h>
 #include <sys/select.h>
+#include <unistd.h>
 
 #include "fff.h"
 
@@ -16,6 +17,7 @@ FAKE_VALUE_FUNC(char *, readline, const char *);
 FAKE_VOID_FUNC(add_history, const char *);
 FAKE_VOID_FUNC(rl_callback_handler_install, const char *, rl_vcpfunc_t *);
 FAKE_VOID_FUNC(rl_callback_read_char);
+FAKE_VOID_FUNC(rl_callback_handler_remove);
 
 #undef FD_CLR
 FAKE_VOID_FUNC(FD_CLR, int, fd_set *);
@@ -25,12 +27,12 @@ FAKE_VALUE_FUNC(int, FD_ISSET, int, fd_set *);
 FAKE_VOID_FUNC(FD_SET, int, fd_set *);
 #undef FD_ZERO
 FAKE_VOID_FUNC(FD_ZERO, fd_set *);
-FAKE_VALUE_FUNC(int, pselect, int, fd_set *, fd_set *, fd_set *, const struct timespec *, const sigset_t *);
+FAKE_VALUE_FUNC(int, select, int, fd_set *, fd_set *, fd_set *, struct timeval *);
+FAKE_VALUE_FUNC(ssize_t, write, int, const void *, size_t);
 
-int pselect_mock(__attribute__((unused)) int nfds, __attribute__((unused)) fd_set *readfds,
-                 __attribute__((unused)) fd_set *writefds, __attribute__((unused)) fd_set *exceptfds,
-                 __attribute__((unused)) const struct timespec *timeout,
-                 __attribute__((unused)) const sigset_t *sigmask) {
+int select_mock(__attribute__((unused)) int nfds, __attribute__((unused)) fd_set *readfds,
+                __attribute__((unused)) fd_set *writefds, __attribute__((unused)) fd_set *exceptfds,
+                __attribute__((unused)) struct timeval *) {
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     return 0;
 }
@@ -40,11 +42,11 @@ class TestInteractiveConsole : public testing::Test {
     virtual void SetUp() {
         RESET_FAKE(readline);
         RESET_FAKE(rl_callback_handler_install);
-        RESET_FAKE(pselect);
+        RESET_FAKE(select);
         console = interactive_console::get_instance();
         console->set_shutdown_command(nullptr);
         readline_cb = rl_callback_handler_install_fake.arg1_val;
-        pselect_fake.custom_fake = pselect_mock;
+        select_fake.custom_fake = select_mock;
     }
 
     virtual void TearDown() { delete console; }
@@ -52,6 +54,16 @@ class TestInteractiveConsole : public testing::Test {
     rl_vcpfunc_t *readline_cb;
     interactive_console *console;
 };
+
+TEST_F(TestInteractiveConsole, GivenALineHasBeenReceivedWhenRetirevingThatLineThenReturnTheLine) {
+    char line[32];
+    char expected_line[] = "Expected Line\r\n";
+
+    readline_cb(strdup(expected_line));
+
+    ASSERT_EQ(sizeof(expected_line), console->recv(line, sizeof(line)));
+    EXPECT_STREQ(expected_line, line);
+}
 
 TEST_F(TestInteractiveConsole, WhenListeningIfStopThenStopListeningAndShutdown) {
     std::thread t1(&interactive_console::listen, console);
