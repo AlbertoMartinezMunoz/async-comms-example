@@ -19,6 +19,8 @@ static command *shutdown_command = nullptr;
 static command *fast_command = nullptr;
 static command *slow_command = nullptr;
 
+static char line_buffer[32] = "";
+
 interactive_console::interactive_console() {
     if (pipe(wakeuppfd) == -1)
         throw std::runtime_error("Error creating wake-up pipe");
@@ -46,6 +48,7 @@ interactive_console::~interactive_console() {
     rl_callback_handler_remove();
     close(wakeuppfd[0]);
     close(wakeuppfd[1]);
+    pinstance_ = nullptr;
 }
 
 interactive_console *interactive_console::get_instance() {
@@ -56,9 +59,19 @@ interactive_console *interactive_console::get_instance() {
     return pinstance_;
 }
 
+ssize_t interactive_console::recv(char *buffer, size_t buffer_size) {
+    (void)buffer;
+    (void)buffer_size;
+
+    strcpy(buffer, line_buffer);
+    return strlen(line_buffer) + 1;
+}
+
 void interactive_console::readline_cb(char *line) {
     if (line && *line) {
         add_history(line);
+
+        strcpy(line_buffer, line);
 
         switch (line[0]) {
         case 'D':

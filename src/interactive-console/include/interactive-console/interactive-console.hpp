@@ -3,6 +3,7 @@
 
 #include <commands/commands.hpp>
 #include <commands/shutdown-receiver.hpp>
+#include <cstdlib>
 
 class interactive_console : public shutdown_receiver {
   public:
@@ -11,6 +12,8 @@ class interactive_console : public shutdown_receiver {
     ~interactive_console();
 
     void listen();
+
+    ssize_t recv(char *buffer, size_t buffer_size);
 
     void set_shutdown_command(command *cmd);
 
