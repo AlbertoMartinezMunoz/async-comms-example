@@ -1,6 +1,7 @@
 #ifndef IOT_MICRO_FIRMWARE_SRC_INTERACTIVE_CONSOLE_INCLUDE_INTERACTIVE_CONSOLE_INTERACTIVE_CONSOLE_H_
 #define IOT_MICRO_FIRMWARE_SRC_INTERACTIVE_CONSOLE_INCLUDE_INTERACTIVE_CONSOLE_INTERACTIVE_CONSOLE_H_
 
+#include <command-manager/command-handler.hpp>
 #include <commands/commands.hpp>
 #include <communications-layer/communications-layer.hpp>
 #include <cstdlib>
@@ -11,15 +12,9 @@ class interactive_console : public communications_layer {
 
     ~interactive_console();
 
-    void listen();
+    void listen(command_handler *cmd_handler);
 
     ssize_t recv(char *buffer, size_t buffer_size) override;
-
-    void set_shutdown_command(command *cmd);
-
-    void set_fast_command(command *cmd);
-
-    void set_slow_command(command *cmd);
 
     interactive_console(interactive_console &other) = delete;
 
