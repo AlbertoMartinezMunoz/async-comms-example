@@ -2,10 +2,10 @@
 #define IOT_MICRO_FIRMWARE_SRC_INTERACTIVE_CONSOLE_INCLUDE_INTERACTIVE_CONSOLE_INTERACTIVE_CONSOLE_H_
 
 #include <commands/commands.hpp>
-#include <commands/shutdown-receiver.hpp>
+#include <communications-layer/communications-layer.hpp>
 #include <cstdlib>
 
-class interactive_console : public shutdown_receiver {
+class interactive_console : public communications_layer {
   public:
     static interactive_console *get_instance();
 
@@ -13,7 +13,7 @@ class interactive_console : public shutdown_receiver {
 
     void listen();
 
-    ssize_t recv(char *buffer, size_t buffer_size);
+    ssize_t recv(char *buffer, size_t buffer_size) override;
 
     void set_shutdown_command(command *cmd);
 
