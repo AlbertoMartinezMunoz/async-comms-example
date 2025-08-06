@@ -15,9 +15,7 @@ static interactive_console *pinstance_;
 
 static bool running;
 
-static command *shutdown_command = nullptr;
-static command *fast_command = nullptr;
-static command *slow_command = nullptr;
+static command_handler *local_cmd_handler = nullptr;
 
 static char line_buffer[32] = "";
 
@@ -73,23 +71,8 @@ void interactive_console::readline_cb(char *line) {
 
         strcpy(line_buffer, line);
 
-        switch (line[0]) {
-        case 'D':
-            if (shutdown_command)
-                shutdown_command->execute();
-            break;
-        case 'F':
-            if (fast_command)
-                fast_command->execute();
-            break;
-        case 'S':
-            if (slow_command)
-                slow_command->execute();
-            break;
-        default:
-            printf("Unknown command '%s'\r\n", line);
-            break;
-        }
+        if (local_cmd_handler)
+            local_cmd_handler->handle();
     }
 
     if (line)
@@ -106,9 +89,11 @@ int interactive_console::shutdown() {
     return 0;
 }
 
-void interactive_console::listen() {
+void interactive_console::listen(command_handler *cmd_handler) {
     fd_set fds;
     int r;
+
+    local_cmd_handler = cmd_handler;
 
     running = true;
     while (running) {
@@ -133,9 +118,3 @@ void interactive_console::listen() {
     printf("interactive_console::listen: exit loop.\r\n");
     return;
 }
-
-void interactive_console::set_shutdown_command(command *cmd) { shutdown_command = cmd; }
-
-void interactive_console::set_fast_command(command *cmd) { fast_command = cmd; }
-
-void interactive_console::set_slow_command(command *cmd) { slow_command = cmd; }

@@ -7,6 +7,7 @@
 #include <thread>
 
 #include <arguments-parser/arguments-parser.hpp>
+#include <command-manager/command-local-handler.hpp>
 #include <command-manager/command-remote-handler.hpp>
 #include <commands/commands-implementations.hpp>
 #include <communications-layer/communications-layer.hpp>
@@ -21,6 +22,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     remote_fast_command *remote_fast_cmd;
     remote_shutdown_command *remote_shutdown_cmd;
     command_remote_handler *remote_cmd_handler;
+    command_local_handler *local_cmd_handler;
 
     interactive_console *console;
     local_shutdown_command *shutdown_local_cmd;
@@ -52,11 +54,12 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     fast_local_cmd = new local_fast_command(application_layer);
     slow_local_cmd = new local_slow_command(application_layer);
 
-    console->set_shutdown_command(shutdown_local_cmd);
-    console->set_fast_command(fast_local_cmd);
-    console->set_slow_command(slow_local_cmd);
+    local_cmd_handler = new command_local_handler(console);
+    local_cmd_handler->subscribe_fast_cmd(fast_local_cmd);
+    local_cmd_handler->subscribe_slow_cmd(slow_local_cmd);
+    local_cmd_handler->subscribe_shutdown_cmd(shutdown_local_cmd);
 
-    std::thread t1(&interactive_console::listen, console);
+    std::thread t1(&interactive_console::listen, console, local_cmd_handler);
     if (transport_layer->listen_connections(argparser->get_local_path(), remote_cmd_handler) != 0)
         console->shutdown();
     t1.join();
