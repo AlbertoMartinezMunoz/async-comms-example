@@ -8,6 +8,18 @@ class networking_client {
     virtual ~networking_client() {}
 };
 
-class networking_server {};
+class networking_server_observer {
+  public:
+    virtual void client_connected() = 0;
+};
+
+class networking_server {
+  public:
+    virtual int listen(const char *socket_path, networking_server_observer *connection_observer) = 0;
+    virtual int stop() = 0;
+
+  private:
+    networking_server_observer *connection_observer;
+};
 
 #endif // IOT_MICRO_FIRMWARE_SRC_NETWORKING_INCLUDE_NETWORKING_NETWORKING_H_
