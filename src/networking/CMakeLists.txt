@@ -3,7 +3,8 @@ project(networking-lib CXX)
  set(SOURCES
      ${PROJECT_SOURCE_DIR}/include/networking/networking.hpp
      ${PROJECT_SOURCE_DIR}/include/networking/local-tcp-networking.hpp
-     ${PROJECT_SOURCE_DIR}/src/local-tcp-networking-client.cpp)
+     ${PROJECT_SOURCE_DIR}/src/local-tcp-networking-client.cpp
+     ${PROJECT_SOURCE_DIR}/src/local-tcp-networking-server.cpp)
 
 add_library(networking-lib ${SOURCES})
 set_target_properties(networking-lib PROPERTIES LINKER_LANGUAGE CXX)
