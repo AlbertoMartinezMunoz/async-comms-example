@@ -143,6 +143,12 @@ pip install pre-commit
 
 > run `pre-commit install` to set up the git hook scripts
 
+To run the hooks manually
+
+```console
+pre-commit run --all-files
+```
+
 ### clang-format
 
 The `clang-format` tool will be used to format the c++ files. To install clang-format:
@@ -235,3 +241,9 @@ Then, to build the diagrams, you only have to run the `plantuml` command:
 ```console
 plantuml -tpng <path-to-the-files>
 ```
+
+## References
+
+https://vichargrave.github.io/programming/multithreaded-work-queue-based-server-in-cpp/
+https://vichargrave.github.io/programming/tcp-ip-network-programming-design-patterns-in-cpp/
+https://www.geeksforgeeks.org/cpp/thread-pool-in-cpp/
