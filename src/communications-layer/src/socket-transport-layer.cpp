@@ -49,8 +49,8 @@ socket_transport_layer::~socket_transport_layer() {
 int socket_transport_layer::connect() {
     struct socket::sockaddr_un addr;
 
-    sending_socket = socket::socket(AF_UNIX, socket::SOCK_SEQPACKET, 0);
-    if (sending_socket == -1) {
+    socket = socket::socket(AF_UNIX, socket::SOCK_SEQPACKET, 0);
+    if (socket == -1) {
         perror("socket");
         return (-1);
     }
@@ -59,7 +59,7 @@ int socket_transport_layer::connect() {
     addr.sun_family = AF_UNIX;
     strncpy(addr.sun_path, this->socket_path, sizeof(addr.sun_path) - 1);
 
-    int ret = socket::connect(sending_socket, (const struct socket::sockaddr *)&addr, sizeof(addr));
+    int ret = socket::connect(socket, (const struct socket::sockaddr *)&addr, sizeof(addr));
     if (ret == -1) {
         fprintf(stderr, "The server is down.\n");
         return (-1);
@@ -69,7 +69,7 @@ int socket_transport_layer::connect() {
 }
 
 int socket_transport_layer::disconnect() {
-    close(sending_socket);
+    close(socket);
     return 0;
 }
 
@@ -120,8 +120,8 @@ int socket_transport_layer::listen_connections(const char *socket_path, command_
             continue;
 
         if (FD_ISSET(listening_socket, &readfds)) {
-            sending_socket = socket::accept(listening_socket, NULL, NULL);
-            if (sending_socket == -1) {
+            socket = socket::accept(listening_socket, NULL, NULL);
+            if (socket == -1) {
                 perror("accept");
                 break;
             }
@@ -131,7 +131,7 @@ int socket_transport_layer::listen_connections(const char *socket_path, command_
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        close(sending_socket);
+        close(socket);
     }
 
     printf("socket_transport_layer::listen_connections: stopped\r\n");
@@ -142,7 +142,7 @@ int socket_transport_layer::listen_connections(const char *socket_path, command_
 }
 
 ssize_t socket_transport_layer::send(const char *buffer, size_t buffer_size) {
-    int ret = write(sending_socket, buffer, buffer_size);
+    int ret = write(socket, buffer, buffer_size);
     if (ret == -1) {
         printf("socket_transport_layer::send error\r\n");
         perror("write");
@@ -159,7 +159,7 @@ ssize_t socket_transport_layer::recv(char *buffer, size_t buffer_size) {
         return ret;
     }
 
-    ret = read(sending_socket, buffer, buffer_size);
+    ret = read(socket, buffer, buffer_size);
     if (ret == -1) {
         perror("read");
     }

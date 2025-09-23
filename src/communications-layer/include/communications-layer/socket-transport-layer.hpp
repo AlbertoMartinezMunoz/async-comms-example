@@ -24,9 +24,11 @@ class socket_transport_layer : public communications_layer {
 
     int shutdown() override;
 
+  protected:
+    int socket;
+
   private:
     char *socket_path;
-    int sending_socket;
     int listening_socket;
     bool is_listening;
 
