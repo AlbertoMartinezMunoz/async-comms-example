@@ -43,3 +43,6 @@ build*/
 
 # Robot Framework Results
 atest-results/
+
+# Visual Studio Code
+.vscode
