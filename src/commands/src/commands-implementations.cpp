@@ -77,8 +77,9 @@ int local_slow_command ::execute() const {
         return -1;
 };
 
-local_shutdown_command::local_shutdown_command(communications_layer *comms, shutdown_receiver *cli)
-    : comms(comms), cli(cli) {}
+local_shutdown_command::local_shutdown_command(communications_layer *comms, shutdown_receiver *listener,
+                                               shutdown_receiver *cli)
+    : comms(comms), listener(listener), cli(cli) {}
 
 int local_shutdown_command ::execute() const {
     char response[32];
@@ -105,7 +106,8 @@ int local_shutdown_command ::execute() const {
     else if (strncmp(command::ack, response, strlen(command::ack)) == 0)
         printf("local_shutdown_command::execute: '%s' received\r\n", response);
 
-    comms->shutdown();
+    if (listener)
+        listener->shutdown();
 
     if (cli)
         cli->shutdown();

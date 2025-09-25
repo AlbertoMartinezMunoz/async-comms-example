@@ -50,7 +50,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     remote_cmd_handler->subscribe_fast_cmd(remote_fast_cmd);
     remote_cmd_handler->subscribe_shutdown_cmd(remote_shutdown_cmd);
 
-    shutdown_local_cmd = new local_shutdown_command(application_layer, console);
+    shutdown_local_cmd = new local_shutdown_command(application_layer, transport_layer, console);
     fast_local_cmd = new local_fast_command(application_layer);
     slow_local_cmd = new local_slow_command(application_layer);
 

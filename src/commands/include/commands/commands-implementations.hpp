@@ -25,11 +25,12 @@ class local_slow_command : public command {
 
 class local_shutdown_command : public command {
   public:
-    local_shutdown_command(communications_layer *comms, shutdown_receiver *cli);
+    local_shutdown_command(communications_layer *comms, shutdown_receiver *listener, shutdown_receiver *cli);
     int execute() const override;
 
   private:
     communications_layer *comms;
+    shutdown_receiver *listener;
     shutdown_receiver *cli;
 };
 

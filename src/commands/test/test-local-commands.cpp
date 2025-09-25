@@ -24,7 +24,7 @@ class CommunicationsLayerMock : public communications_layer {
 template <class T> command *CreateLocalCommand(communications_layer *comms);
 
 template <> command *CreateLocalCommand<local_shutdown_command>(communications_layer *comms) {
-    return new local_shutdown_command(comms, nullptr);
+    return new local_shutdown_command(comms, nullptr, nullptr);
 }
 
 template <> command *CreateLocalCommand<local_fast_command>(communications_layer *comms) {
