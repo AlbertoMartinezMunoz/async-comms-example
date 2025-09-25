@@ -26,22 +26,29 @@ class CommunicationsLayerMock : public communications_layer {
     MOCK_METHOD(int, shutdown, ());
 };
 
-template <class T> command *CreateShutdownCommand(communications_layer *comms, shutdown_receiver *cli);
+template <class T>
+command *CreateShutdownCommand(communications_layer *comms, shutdown_receiver *listener, shutdown_receiver *cli);
 
 template <>
-command *CreateShutdownCommand<local_shutdown_command>(communications_layer *comms, shutdown_receiver *cli) {
-    return new local_shutdown_command(comms, cli);
+command *CreateShutdownCommand<local_shutdown_command>(communications_layer *comms, shutdown_receiver *listener,
+                                                       shutdown_receiver *cli) {
+    return new local_shutdown_command(comms, listener, cli);
 }
 
 template <>
-command *CreateShutdownCommand<remote_shutdown_command>(communications_layer *comms, shutdown_receiver *cli) {
+command *CreateShutdownCommand<remote_shutdown_command>(communications_layer *comms,
+                                                        __attribute__((unused)) shutdown_receiver *listener,
+                                                        shutdown_receiver *cli) {
     return new remote_shutdown_command(comms, cli);
 }
 
-template <class T> void CreateShutdonCmdRcvExpectation(CommunicationsLayerMock *comms, ShutdownReceiverMock *cli);
+template <class T>
+void CreateShutdonCmdRcvExpectation(CommunicationsLayerMock *comms, ShutdownReceiverMock *listener,
+                                    ShutdownReceiverMock *cli);
 
 template <>
-void CreateShutdonCmdRcvExpectation<local_shutdown_command>(CommunicationsLayerMock *comms, ShutdownReceiverMock *cli) {
+void CreateShutdonCmdRcvExpectation<local_shutdown_command>(CommunicationsLayerMock *comms,
+                                                            ShutdownReceiverMock *listener, ShutdownReceiverMock *cli) {
     EXPECT_CALL(*comms, connect()).Times(AnyNumber()).WillRepeatedly(Return(0));
     EXPECT_CALL(*comms, send(_, _)).Times(AnyNumber()).WillRepeatedly(Return(sizeof(command::remote_shutdown_cmd_id)));
     EXPECT_CALL(*comms, recv(_, _))
@@ -51,11 +58,12 @@ void CreateShutdonCmdRcvExpectation<local_shutdown_command>(CommunicationsLayerM
     EXPECT_CALL(*comms, disconnect()).Times(AnyNumber()).WillRepeatedly(Return(0));
 
     EXPECT_CALL(*cli, shutdown()).Times(1).WillOnce(Return(0));
-    EXPECT_CALL(*comms, shutdown()).Times(1).WillOnce(Return(0));
+    EXPECT_CALL(*listener, shutdown()).Times(1).WillOnce(Return(0));
 }
 
 template <>
 void CreateShutdonCmdRcvExpectation<remote_shutdown_command>(CommunicationsLayerMock *comms,
+                                                             __attribute__((unused)) ShutdownReceiverMock *listener,
                                                              ShutdownReceiverMock *cli) {
     EXPECT_CALL(*cli, shutdown()).Times(1).WillOnce(Return(0));
     EXPECT_CALL(*comms, shutdown()).Times(1).WillOnce(Return(0));
@@ -66,25 +74,28 @@ template <typename T> class TestShutdownCommands : public testing::Test {
     virtual void SetUp() {
         comms_mock = new CommunicationsLayerMock();
         cli_mock = new ShutdownReceiverMock();
-        shutdown_command = CreateShutdownCommand<T>(comms_mock, cli_mock);
+        listener_mock = new ShutdownReceiverMock();
+        shutdown_command = CreateShutdownCommand<T>(comms_mock, listener_mock, cli_mock);
     }
 
     virtual void TearDown() {
         delete shutdown_command;
         delete cli_mock;
+        delete listener_mock;
         delete comms_mock;
     }
 
   protected:
     command *shutdown_command;
     CommunicationsLayerMock *comms_mock;
+    ShutdownReceiverMock *listener_mock;
     ShutdownReceiverMock *cli_mock;
 };
 
 TYPED_TEST_SUITE_P(TestShutdownCommands);
 
 TYPED_TEST_P(TestShutdownCommands, WhenExecutingShutdownCmdIfOKThenShutdownCommsAndCli) {
-    CreateShutdonCmdRcvExpectation<TypeParam>(this->comms_mock, this->cli_mock);
+    CreateShutdonCmdRcvExpectation<TypeParam>(this->comms_mock, this->listener_mock, this->cli_mock);
     ASSERT_EQ(0, this->shutdown_command->execute());
 }
 
