@@ -15,7 +15,6 @@
 #include <communications-layer/local-tcp-socket-client-transport-layer.hpp>
 #include <communications-layer/local-tcp-socket-listener-transport-layer.hpp>
 #include <communications-layer/slip-application-layer.hpp>
-#include <communications-layer/socket-transport-layer.hpp>
 #include <interactive-console/interactive-console.hpp>
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[]) {
