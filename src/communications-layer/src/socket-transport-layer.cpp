@@ -61,7 +61,7 @@ int socket_transport_layer::connect() {
 
     int ret = socket::connect(socket, (const struct socket::sockaddr *)&addr, sizeof(addr));
     if (ret == -1) {
-        fprintf(stderr, "The server is down.\n");
+        fprintf(stderr, "socket_transport_layer: The server is down.\n");
         return (-1);
     }
 
