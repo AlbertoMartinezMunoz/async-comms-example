@@ -7,29 +7,33 @@
 
 class local_fast_command : public command {
   public:
-    local_fast_command(communications_layer *comms);
+    local_fast_command(communications_layer *comms, communications_layer *client);
     int execute() const override;
 
   private:
     communications_layer *comms;
+    communications_layer *client;
 };
 
 class local_slow_command : public command {
   public:
-    local_slow_command(communications_layer *comms);
+    local_slow_command(communications_layer *comms, communications_layer *client);
     int execute() const override;
 
   private:
     communications_layer *comms;
+    communications_layer *client;
 };
 
 class local_shutdown_command : public command {
   public:
-    local_shutdown_command(communications_layer *comms, shutdown_receiver *listener, shutdown_receiver *cli);
+    local_shutdown_command(communications_layer *comms, communications_layer *client, shutdown_receiver *listener,
+                           shutdown_receiver *cli);
     int execute() const override;
 
   private:
     communications_layer *comms;
+    communications_layer *client;
     shutdown_receiver *listener;
     shutdown_receiver *cli;
 };

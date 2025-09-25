@@ -3,14 +3,15 @@
 
 #include <commands/commands-implementations.hpp>
 
-local_fast_command::local_fast_command(communications_layer *comms) : comms(comms) {}
+local_fast_command::local_fast_command(communications_layer *comms, communications_layer *client)
+    : comms(comms), client(client) {}
 
 int local_fast_command::execute() const {
     char response[32];
 
     printf("********************** Local Fast Command **********************\r\n");
 
-    int ret = comms->connect();
+    int ret = client->connect();
     if (ret == -1) {
         perror("local_fast_command::execute: connect");
         return -2;
@@ -25,7 +26,7 @@ int local_fast_command::execute() const {
     printf("local_fast_command::execute: wait ack\r\n");
     response[0] = '\0';
     ret = comms->recv(response, sizeof(response));
-    comms->disconnect();
+    client->disconnect();
     printf("local_fast_command::execute: response received[%d]\r\n", ret);
     if (ret < 0) {
         perror("local_fast_command::execute: recv");
@@ -40,14 +41,15 @@ int local_fast_command::execute() const {
         return -1;
 };
 
-local_slow_command::local_slow_command(communications_layer *comms) : comms(comms) {}
+local_slow_command::local_slow_command(communications_layer *comms, communications_layer *client)
+    : comms(comms), client(client) {}
 
 int local_slow_command ::execute() const {
     char response[32];
 
     printf("********************** Local Slow Command **********************\r\n");
 
-    int ret = comms->connect();
+    int ret = client->connect();
     if (ret == -1) {
         perror("local_slow_command::execute: connect");
         return -2;
@@ -62,7 +64,7 @@ int local_slow_command ::execute() const {
     printf("local_slow_command::execute: wait ack\r\n");
     response[0] = '\0';
     ret = comms->recv(response, sizeof(response));
-    comms->disconnect();
+    client->disconnect();
     printf("local_slow_command::execute: response received[%d]\r\n", ret);
     if (ret < 0) {
         perror("local_slow_command::execute: recv");
@@ -77,16 +79,16 @@ int local_slow_command ::execute() const {
         return -1;
 };
 
-local_shutdown_command::local_shutdown_command(communications_layer *comms, shutdown_receiver *listener,
-                                               shutdown_receiver *cli)
-    : comms(comms), listener(listener), cli(cli) {}
+local_shutdown_command::local_shutdown_command(communications_layer *comms, communications_layer *client,
+                                               shutdown_receiver *listener, shutdown_receiver *cli)
+    : comms(comms), client(client), listener(listener), cli(cli) {}
 
 int local_shutdown_command ::execute() const {
     char response[32];
 
     printf("********************** Local Shutdown Command **********************\r\n");
 
-    int ret = comms->connect();
+    int ret = client->connect();
     if (ret == -1)
         perror("local_shutdown_command::execute: connect");
 
@@ -97,7 +99,7 @@ int local_shutdown_command ::execute() const {
     printf("local_shutdown_command::execute: wait ack\r\n");
     response[0] = '\0';
     ret = comms->recv(response, sizeof(response));
-    comms->disconnect();
+    client->disconnect();
     printf("local_shutdown_command::execute: response received[%d]\r\n", ret);
     if (ret < 0)
         perror("local_shutdown_command::execute: recv");
