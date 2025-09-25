@@ -27,35 +27,38 @@ class CommunicationsLayerMock : public communications_layer {
 };
 
 template <class T>
-command *CreateShutdownCommand(communications_layer *comms, shutdown_receiver *listener, shutdown_receiver *cli);
+command *CreateShutdownCommand(communications_layer *comms, communications_layer *client, shutdown_receiver *listener,
+                               shutdown_receiver *cli);
 
 template <>
-command *CreateShutdownCommand<local_shutdown_command>(communications_layer *comms, shutdown_receiver *listener,
-                                                       shutdown_receiver *cli) {
-    return new local_shutdown_command(comms, listener, cli);
+command *CreateShutdownCommand<local_shutdown_command>(communications_layer *comms, communications_layer *client,
+                                                       shutdown_receiver *listener, shutdown_receiver *cli) {
+    return new local_shutdown_command(comms, client, listener, cli);
 }
 
 template <>
 command *CreateShutdownCommand<remote_shutdown_command>(communications_layer *comms,
+                                                        __attribute__((unused)) communications_layer *client,
                                                         __attribute__((unused)) shutdown_receiver *listener,
                                                         shutdown_receiver *cli) {
     return new remote_shutdown_command(comms, cli);
 }
 
 template <class T>
-void CreateShutdonCmdRcvExpectation(CommunicationsLayerMock *comms, ShutdownReceiverMock *listener,
-                                    ShutdownReceiverMock *cli);
+void CreateShutdonCmdRcvExpectation(CommunicationsLayerMock *comms, CommunicationsLayerMock *client,
+                                    ShutdownReceiverMock *listener, ShutdownReceiverMock *cli);
 
 template <>
 void CreateShutdonCmdRcvExpectation<local_shutdown_command>(CommunicationsLayerMock *comms,
+                                                            CommunicationsLayerMock *client,
                                                             ShutdownReceiverMock *listener, ShutdownReceiverMock *cli) {
-    EXPECT_CALL(*comms, connect()).Times(AnyNumber()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*client, connect()).Times(AnyNumber()).WillRepeatedly(Return(0));
     EXPECT_CALL(*comms, send(_, _)).Times(AnyNumber()).WillRepeatedly(Return(sizeof(command::remote_shutdown_cmd_id)));
     EXPECT_CALL(*comms, recv(_, _))
         .Times(AnyNumber())
         .WillRepeatedly(DoAll(SetArrayArgument<0>(command::ack, command::ack + sizeof(command::ack)),
                               Return(sizeof(command::ack))));
-    EXPECT_CALL(*comms, disconnect()).Times(AnyNumber()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*client, disconnect()).Times(AnyNumber()).WillRepeatedly(Return(0));
 
     EXPECT_CALL(*cli, shutdown()).Times(1).WillOnce(Return(0));
     EXPECT_CALL(*listener, shutdown()).Times(1).WillOnce(Return(0));
@@ -63,6 +66,7 @@ void CreateShutdonCmdRcvExpectation<local_shutdown_command>(CommunicationsLayerM
 
 template <>
 void CreateShutdonCmdRcvExpectation<remote_shutdown_command>(CommunicationsLayerMock *comms,
+                                                             __attribute__((unused)) CommunicationsLayerMock *client,
                                                              __attribute__((unused)) ShutdownReceiverMock *listener,
                                                              ShutdownReceiverMock *cli) {
     EXPECT_CALL(*cli, shutdown()).Times(1).WillOnce(Return(0));
@@ -73,9 +77,10 @@ template <typename T> class TestShutdownCommands : public testing::Test {
   public:
     virtual void SetUp() {
         comms_mock = new CommunicationsLayerMock();
+        client_mock = new CommunicationsLayerMock();
         cli_mock = new ShutdownReceiverMock();
         listener_mock = new ShutdownReceiverMock();
-        shutdown_command = CreateShutdownCommand<T>(comms_mock, listener_mock, cli_mock);
+        shutdown_command = CreateShutdownCommand<T>(comms_mock, client_mock, listener_mock, cli_mock);
     }
 
     virtual void TearDown() {
@@ -83,11 +88,13 @@ template <typename T> class TestShutdownCommands : public testing::Test {
         delete cli_mock;
         delete listener_mock;
         delete comms_mock;
+        delete client_mock;
     }
 
   protected:
     command *shutdown_command;
     CommunicationsLayerMock *comms_mock;
+    CommunicationsLayerMock *client_mock;
     ShutdownReceiverMock *listener_mock;
     ShutdownReceiverMock *cli_mock;
 };
@@ -95,7 +102,7 @@ template <typename T> class TestShutdownCommands : public testing::Test {
 TYPED_TEST_SUITE_P(TestShutdownCommands);
 
 TYPED_TEST_P(TestShutdownCommands, WhenExecutingShutdownCmdIfOKThenShutdownCommsAndCli) {
-    CreateShutdonCmdRcvExpectation<TypeParam>(this->comms_mock, this->listener_mock, this->cli_mock);
+    CreateShutdonCmdRcvExpectation<TypeParam>(this->comms_mock, this->client_mock, this->listener_mock, this->cli_mock);
     ASSERT_EQ(0, this->shutdown_command->execute());
 }
 
