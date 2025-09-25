@@ -5,7 +5,7 @@
 
 class local_tcp_socket_client_transport_layer : public socket_transport_layer {
   public:
-    local_tcp_socket_client_transport_layer(const char *path) : socket_transport_layer(""), socket_path(path) {}
+    local_tcp_socket_client_transport_layer(const char *path) : socket_transport_layer(), socket_path(path) {}
     int connect();
     int disconnect();
 

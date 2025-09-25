@@ -9,7 +9,7 @@
 #include <unistd.h>
 
 local_tcp_socket_listener_transport_layer::local_tcp_socket_listener_transport_layer(const char *path)
-    : socket_transport_layer(""), socket_path(path) {
+    : socket_transport_layer(), socket_path(path) {
     is_listening = false;
 
     if (pipe(wakeuppfd) == -1)
