@@ -25,8 +25,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     std::unique_ptr<local_tcp_socket_client_transport_layer> client;
     std::unique_ptr<slip_application_layer> client_comms;
 
-    socket_transport_layer *transport_layer;
-    slip_application_layer *application_layer;
     remote_slow_command *remote_slow_cmd;
     remote_fast_command *remote_fast_cmd;
     remote_shutdown_command *remote_shutdown_cmd;
@@ -54,10 +52,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     client_comms = std::make_unique<slip_application_layer>();
     client_comms->set_next_communications_layer(client.get());
 
-    transport_layer = new socket_transport_layer(argparser->get_remote_path());
-    application_layer = new slip_application_layer();
-    application_layer->set_next_communications_layer(transport_layer);
-
     remote_slow_cmd = new remote_slow_command();
     remote_fast_cmd = new remote_fast_command();
     remote_shutdown_cmd = new remote_shutdown_command(remote_listener.get(), console);
@@ -81,7 +75,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
         console->shutdown();
     t1.join();
 
-    delete transport_layer;
     delete remote_slow_cmd;
     delete remote_shutdown_cmd;
     delete remote_fast_cmd;
