@@ -12,6 +12,7 @@
 #include <command-manager/command-remote-handler.hpp>
 #include <commands/commands-implementations.hpp>
 #include <communications-layer/communications-layer.hpp>
+#include <communications-layer/local-tcp-socket-client-transport-layer.hpp>
 #include <communications-layer/local-tcp-socket-listener-transport-layer.hpp>
 #include <communications-layer/slip-application-layer.hpp>
 #include <communications-layer/socket-transport-layer.hpp>
@@ -20,6 +21,9 @@
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[]) {
     std::unique_ptr<local_tcp_socket_listener_transport_layer> remote_listener;
     std::unique_ptr<slip_application_layer> remote_comms;
+
+    std::unique_ptr<local_tcp_socket_client_transport_layer> client;
+    std::unique_ptr<slip_application_layer> client_comms;
 
     socket_transport_layer *transport_layer;
     slip_application_layer *application_layer;
@@ -46,6 +50,10 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     remote_comms = std::make_unique<slip_application_layer>();
     remote_comms->set_next_communications_layer(remote_listener.get());
 
+    client = std::make_unique<local_tcp_socket_client_transport_layer>(argparser->get_remote_path());
+    client_comms = std::make_unique<slip_application_layer>();
+    client_comms->set_next_communications_layer(client.get());
+
     transport_layer = new socket_transport_layer(argparser->get_remote_path());
     application_layer = new slip_application_layer();
     application_layer->set_next_communications_layer(transport_layer);
@@ -59,9 +67,9 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     remote_cmd_handler->subscribe_fast_cmd(remote_fast_cmd);
     remote_cmd_handler->subscribe_shutdown_cmd(remote_shutdown_cmd);
 
-    shutdown_local_cmd = new local_shutdown_command(application_layer, transport_layer, remote_listener.get(), console);
-    fast_local_cmd = new local_fast_command(application_layer, transport_layer);
-    slow_local_cmd = new local_slow_command(application_layer, transport_layer);
+    shutdown_local_cmd = new local_shutdown_command(client_comms.get(), client.get(), remote_listener.get(), console);
+    fast_local_cmd = new local_fast_command(client_comms.get(), client.get());
+    slow_local_cmd = new local_slow_command(client_comms.get(), client.get());
 
     local_cmd_handler = new command_local_handler(console);
     local_cmd_handler->subscribe_fast_cmd(fast_local_cmd);
