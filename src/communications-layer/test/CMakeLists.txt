@@ -7,3 +7,8 @@ add_executable(test-socket-transport-layer test-socket-transport-layer.cpp)
 target_link_libraries(test-socket-transport-layer communications-layer-lib gtest gmock fff)
 add_test(NAME test-socket-transport-layer COMMAND test-socket-transport-layer)
 set_target_properties(test-socket-transport-layer PROPERTIES FOLDER test)
+
+add_executable(test-local-tcp-socket-listener-transport-layer test-local-tcp-socket-listener-transport-layer.cpp)
+target_link_libraries(test-local-tcp-socket-listener-transport-layer communications-layer-lib gtest gmock fff)
+add_test(NAME test-local-tcp-socket-listener-transport-layer COMMAND test-local-tcp-socket-listener-transport-layer)
+set_target_properties(test-local-tcp-socket-listener-transport-layer PROPERTIES FOLDER test)
