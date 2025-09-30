@@ -32,6 +32,11 @@ local_tcp_socket_listener_transport_layer::local_tcp_socket_listener_transport_l
         throw std::runtime_error("Error setting wake-up[1] pipe non blocking flag");
 }
 
+local_tcp_socket_listener_transport_layer::~local_tcp_socket_listener_transport_layer() {
+    close(wakeuppfd[0]);
+    close(wakeuppfd[1]);
+}
+
 int local_tcp_socket_listener_transport_layer::listen(command_handler *cmd_handler) {
     struct ::sockaddr_un name;
 
