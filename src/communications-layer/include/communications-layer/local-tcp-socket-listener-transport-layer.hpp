@@ -7,6 +7,7 @@
 class local_tcp_socket_listener_transport_layer : public socket_transport_layer {
   public:
     local_tcp_socket_listener_transport_layer(const char *path);
+    ~local_tcp_socket_listener_transport_layer();
     int listen(command_handler *cmd_handler);
     int stop();
     int shutdown() override;
